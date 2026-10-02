@@ -67,6 +67,17 @@ async def startup_event():
     threading.Thread(target=warm_ats_cache, daemon=True).start()
 
 
+@app.get("/")
+async def root_endpoint():
+    return {
+        "status": "ONLINE",
+        "service": "DRC Consulting Job Discovery & Matching Platform",
+        "version": "2.0.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
+
 @app.get("/api/health")
 async def health_endpoint():
     return {"status": "ONLINE", "service": "DRC Job Intelligence Engine", "version": "2.0.0"}
