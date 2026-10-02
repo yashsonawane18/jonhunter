@@ -6,9 +6,12 @@
 import { DiscoveredJobItem } from './drcDiscoveryApi';
 
 const getEngineBaseUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_JOB_ENGINE_URL || '';
+  const envUrl =
+    (import.meta as any).env?.VITE_JOB_ENGINE_URL ||
+    (import.meta as any).env?.VITE_API_BASE_URL ||
+    '';
   if (envUrl) return envUrl.replace(/\/$/, '');
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
     return 'http://127.0.0.1:5055';
   }
   return '';

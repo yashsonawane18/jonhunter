@@ -5,7 +5,7 @@
  * - `VITE_LOCAL_API_BASE_URL` for a local backend at http://localhost:8090
  * In production builds, the app uses `VITE_API_BASE_URL` or same-origin.
  */
-const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_JOB_ENGINE_URL || '').replace(/\/$/, '');
 const configuredDevApiBaseUrl = (import.meta.env.VITE_DEV_API_BASE_URL || '').replace(/\/$/, '');
 const localDevApiBaseUrl = (import.meta.env.VITE_LOCAL_API_BASE_URL || 'http://localhost:8090').replace(/\/$/, '');
 const isLocalFrontend =

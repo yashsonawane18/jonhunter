@@ -4,5 +4,5 @@
  * Toggle by editing .env: VITE_FEATURE_JOB_DISCOVERY=true|false
  */
 export const FEATURES = {
-  JOB_DISCOVERY: import.meta.env.VITE_FEATURE_JOB_DISCOVERY === 'true',
+  JOB_DISCOVERY: import.meta.env.VITE_FEATURE_JOB_DISCOVERY !== 'false',
 };

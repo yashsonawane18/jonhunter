@@ -5,7 +5,9 @@
  */
 
 const ENGINE_BASE_URL = (
-  (import.meta as any).env?.VITE_JOB_ENGINE_URL || ''
+  (import.meta as any).env?.VITE_JOB_ENGINE_URL ||
+  (import.meta as any).env?.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://127.0.0.1:5055' : '')
 ).replace(/\/$/, '');
 
 export interface ConnectionRecord {
@@ -80,16 +82,19 @@ export interface CandidateSearchPayload {
 }
 
 /**
- * Checks if the local Job Engine micro-service is running.
+ * Checks if the local/hosted Job Engine micro-service is running.
  */
 export async function checkJobEngineHealth(): Promise<boolean> {
-  const endpoints = ENGINE_BASE_URL
-    ? [`${ENGINE_BASE_URL}/api/health`, '/api/health', 'http://127.0.0.1:5055/api/health']
-    : ['/api/health', 'http://127.0.0.1:5055/api/health', 'http://localhost:5055/api/health'];
+  const endpoints = [
+    ENGINE_BASE_URL ? `${ENGINE_BASE_URL}/api/health` : null,
+    ENGINE_BASE_URL ? `${ENGINE_BASE_URL}/` : null,
+    '/api/health',
+    'http://127.0.0.1:5055/api/health',
+  ].filter(Boolean) as string[];
 
   for (const ep of endpoints) {
     try {
-      const res = await fetch(ep, { method: 'GET', signal: AbortSignal.timeout(4000) });
+      const res = await fetch(ep, { method: 'GET', signal: AbortSignal.timeout(8000) });
       if (res.ok) {
         const data = await res.json();
         if (data.status === 'ONLINE') return true;
