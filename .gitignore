@@ -1,0 +1,32 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+
+# IDE & AI Agent metadata
+.antigravity/
+.agents/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+temp_uploads/
+
+# SQLite lock files
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Temporary images & logs
+*.log
+*.png
+*.mp4
