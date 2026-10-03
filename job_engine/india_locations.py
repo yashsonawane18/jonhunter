@@ -99,10 +99,40 @@ INDIA_LOCATION_REGISTRY: List[Dict[str, Any]] = [
         "region": "North",
         "tier": "Tier 2",
     },
+    # Secondary: Global / International Options
+    {
+        "id": "worldwide_remote",
+        "name": "Worldwide / Global Remote",
+        "aliases": ["worldwide", "global", "anywhere in the world", "remote worldwide", "international remote", "global remote"],
+        "region": "Global",
+        "tier": "International",
+    },
+    {
+        "id": "us_north_america",
+        "name": "US / North America (Remote / Relocation)",
+        "aliases": ["united states", "usa", "us", "san francisco", "new york", "seattle", "austin", "canada", "toronto", "vancouver"],
+        "region": "North America",
+        "tier": "International",
+    },
+    {
+        "id": "europe_uk",
+        "name": "Europe & UK (Remote / Relocation)",
+        "aliases": ["uk", "united kingdom", "london", "germany", "berlin", "amsterdam", "netherlands", "ireland", "dublin", "france", "paris"],
+        "region": "Europe",
+        "tier": "International",
+    },
+    {
+        "id": "singapore_apac",
+        "name": "Singapore & APAC (Remote / Relocation)",
+        "aliases": ["singapore", "australia", "sydney", "melbourne", "tokyo", "japan", "apac", "dubai", "uae"],
+        "region": "APAC",
+        "tier": "International",
+    },
 ]
 
-# Quick lookup dropdown list for frontend
+# Quick lookup dropdown list for frontend (India First -> Worldwide Second)
 INDIA_LOCATION_DROPDOWN_OPTIONS = [
+    # --- Top Priority: India Metro & National Corridors ---
     "All India (Remote & Nationwide)",
     "Bengaluru, Karnataka",
     "Pune, Maharashtra",
@@ -116,12 +146,27 @@ INDIA_LOCATION_DROPDOWN_OPTIONS = [
     "Jaipur, Rajasthan",
     "Indore, Madhya Pradesh",
     "Chandigarh / Mohali",
+    # --- Secondary: International & Worldwide Remote ---
+    "Worldwide / Global Remote",
+    "US / North America (Remote / Relocation)",
+    "Europe & UK (Remote / Relocation)",
+    "Singapore & APAC (Remote / Relocation)",
 ]
+
+
+def is_india_job(raw_location: str) -> bool:
+    """Returns True if the location is within India or is Pan-India/Remote."""
+    if not raw_location:
+        return True
+    text = raw_location.lower().strip()
+    if any(k in text for k in ["india", "bengaluru", "bangalore", "pune", "hyderabad", "delhi", "ncr", "gurgaon", "gurugram", "noida", "mumbai", "chennai", "kolkata", "ahmedabad", "kochi", "jaipur", "indore", "chandigarh", "mohali", "remote", "wfh"]):
+        return True
+    return False
 
 
 def normalize_location(raw_location: str) -> str:
     """
-    Normalizes arbitrary location string to standard Indian metro/region.
+    Normalizes arbitrary location string to standard Indian metro, region, or Global hub.
     """
     if not raw_location or not raw_location.strip():
         return "All India (Remote & Nationwide)"
@@ -130,7 +175,7 @@ def normalize_location(raw_location: str) -> str:
 
     # Direct match against registry aliases
     for item in INDIA_LOCATION_REGISTRY:
-        if item["id"] == "all_india":
+        if item["id"] in ("all_india", "worldwide_remote"):
             continue
         for alias in item["aliases"]:
             pattern = rf"\b{re.escape(alias)}\b"
@@ -139,6 +184,8 @@ def normalize_location(raw_location: str) -> str:
 
     # Remote checks
     if any(k in text for k in ["remote", "wfh", "anywhere", "flexible", "virtual", "distributed"]):
+        if any(k in text for k in ["global", "worldwide", "international", "anywhere in the world"]):
+            return "Worldwide / Global Remote"
         return "All India (Remote & Nationwide)"
 
     # Default to All India if India mentioned
@@ -152,8 +199,13 @@ def matches_location_filter(job_location: str, filter_location: str) -> bool:
     """
     Determines if a job's location matches the user's selected location filter.
     'All India' matches everything located in India or Remote.
+    'Worldwide' matches any job.
     """
-    if not filter_location or filter_location.startswith("All India") or filter_location.lower() == "remote":
+    if not filter_location or filter_location.startswith("All India") or filter_location.lower() in ("remote", "all"):
+        # For All India filter, prioritize India jobs and general Remote jobs
+        return True
+
+    if "worldwide" in filter_location.lower() or "global" in filter_location.lower():
         return True
 
     filter_norm = normalize_location(filter_location).lower()

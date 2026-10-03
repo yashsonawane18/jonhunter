@@ -21,7 +21,8 @@ ENV/
 .venv/
 temp_uploads/
 
-# SQLite lock files
+# SQLite files
+*.db
 *.db-shm
 *.db-wal
 *.db-journal

@@ -135,6 +135,10 @@ export async function fetchPanIndiaLocations(): Promise<string[]> {
     'Jaipur, Rajasthan',
     'Indore, Madhya Pradesh',
     'Chandigarh / Mohali',
+    'Worldwide / Global Remote',
+    'US / North America (Remote / Relocation)',
+    'Europe & UK (Remote / Relocation)',
+    'Singapore & APAC (Remote / Relocation)',
   ];
 }
 

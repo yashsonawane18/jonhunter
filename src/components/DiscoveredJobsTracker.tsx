@@ -1084,11 +1084,18 @@ export const DiscoveredJobsTracker: React.FC = () => {
                       'Jaipur, Rajasthan',
                       'Indore, Madhya Pradesh',
                       'Chandigarh / Mohali',
-                    ]).map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
-                    ))}
+                      'Worldwide / Global Remote',
+                      'US / North America (Remote / Relocation)',
+                      'Europe & UK (Remote / Relocation)',
+                      'Singapore & APAC (Remote / Relocation)',
+                    ]).map((loc) => {
+                      const isWorldwide = loc.includes('Worldwide') || loc.includes('US /') || loc.includes('Europe') || loc.includes('Singapore');
+                      return (
+                        <option key={loc} value={loc}>
+                          {isWorldwide ? `🌐 ${loc}` : `🇮🇳 ${loc}`}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>

@@ -33,114 +33,83 @@ _SESSION.headers.update({
     "Accept-Language": "en-US,en;q=0.9",
 })
 
-# Verified active tech employers with public ATS endpoints (58 verified companies, 9,600+ live jobs)
+# Verified active tech employers with public ATS endpoints (India Mass Hiring & Global Unicorns)
 TARGET_ATS_REGISTRY = [
-    {"company": "Attio", "ats": "ashby", "slug": "attio", "domain": "attio.com", "hub": "Remote / Next-Gen CRM Startup"},
-    {"company": "Baseten", "ats": "ashby", "slug": "baseten", "domain": "baseten.co", "hub": "Remote / ML Deployment Startup"},
-    {"company": "Cartesia", "ats": "ashby", "slug": "cartesia", "domain": "cartesia.ai", "hub": "Remote / Voice AI Startup"},
-    {"company": "Clerk", "ats": "ashby", "slug": "clerk", "domain": "clerk.com", "hub": "Remote / Auth Startup"},
-    {"company": "ClickHouse", "ats": "ashby", "slug": "clickhouse", "domain": "clickhouse.com", "hub": "Remote / Columnar DB"},
-    {"company": "Cognition (Devin AI)", "ats": "ashby", "slug": "cognition", "domain": "cognition-labs.com", "hub": "Remote / AI Labs"},
-    {"company": "Cohere", "ats": "ashby", "slug": "cohere", "domain": "cohere.com", "hub": "Remote / Global"},
-    {"company": "Deepgram", "ats": "ashby", "slug": "deepgram", "domain": "deepgram.com", "hub": "Remote / Voice AI Startup"},
-    {"company": "ElevenLabs", "ats": "ashby", "slug": "elevenlabs", "domain": "elevenlabs.io", "hub": "Remote / Global"},
-    {"company": "Harvey AI", "ats": "ashby", "slug": "harvey", "domain": "harvey.ai", "hub": "Remote / Global"},
-    {"company": "Inngest", "ats": "ashby", "slug": "inngest", "domain": "inngest.com", "hub": "Remote / Serverless Workflows"},
-    {"company": "Knock", "ats": "ashby", "slug": "knock", "domain": "knock.app", "hub": "Remote / Notification Infra"},
-    {"company": "LangChain", "ats": "ashby", "slug": "langchain", "domain": "langchain.com", "hub": "Remote / Global"},
-    {"company": "Linear", "ats": "ashby", "slug": "linear", "domain": "linear.app", "hub": "Remote"},
-    {"company": "LiveKit", "ats": "ashby", "slug": "livekit", "domain": "livekit.io", "hub": "Remote / WebRTC Startup"},
-    {"company": "Mintlify", "ats": "ashby", "slug": "mintlify", "domain": "mintlify.com", "hub": "Remote / AI Docs Startup"},
-    {"company": "Modal", "ats": "ashby", "slug": "modal", "domain": "modal.com", "hub": "Remote"},
-    {"company": "MotherDuck", "ats": "ashby", "slug": "motherduck", "domain": "motherduck.com", "hub": "Remote / Serverless DuckDB"},
-    {"company": "Perplexity", "ats": "ashby", "slug": "perplexity", "domain": "perplexity.ai", "hub": "Remote / Global"},
-    {"company": "Pinecone", "ats": "ashby", "slug": "pinecone", "domain": "pinecone.io", "hub": "Remote"},
-    {"company": "PostHog", "ats": "ashby", "slug": "posthog", "domain": "posthog.com", "hub": "Remote"},
-    {"company": "Railway", "ats": "ashby", "slug": "railway", "domain": "railway.app", "hub": "Remote"},
-    {"company": "Ramp", "ats": "ashby", "slug": "ramp", "domain": "ramp.com", "hub": "Remote"},
-    {"company": "Render", "ats": "ashby", "slug": "render", "domain": "render.com", "hub": "Remote"},
-    {"company": "Replit", "ats": "ashby", "slug": "replit", "domain": "replit.com", "hub": "Remote"},
-    {"company": "Resend", "ats": "ashby", "slug": "resend", "domain": "resend.com", "hub": "Remote"},
-    {"company": "RunPod", "ats": "ashby", "slug": "runpod", "domain": "runpod.io", "hub": "Remote / GPU Cloud Startup"},
-    {"company": "Sanity", "ats": "ashby", "slug": "sanity", "domain": "sanity.io", "hub": "Remote / Headless CMS"},
-    {"company": "Speakeasy", "ats": "ashby", "slug": "speakeasy", "domain": "speakeasyapi.dev", "hub": "Remote / API Infra Startup"},
-    {"company": "Supabase", "ats": "ashby", "slug": "supabase", "domain": "supabase.com", "hub": "Remote"},
-    {"company": "Svix", "ats": "ashby", "slug": "svix", "domain": "svix.com", "hub": "Remote / Webhook Startup"},
-    {"company": "Synthesia", "ats": "ashby", "slug": "synthesia", "domain": "synthesia.io", "hub": "Remote"},
-    {"company": "Temporal", "ats": "ashby", "slug": "temporal", "domain": "temporal.io", "hub": "Remote / Distributed Systems"},
-    {"company": "Weaviate", "ats": "ashby", "slug": "weaviate", "domain": "weaviate.io", "hub": "Remote"},
-    {"company": "WorkOS", "ats": "ashby", "slug": "workos", "domain": "workos.com", "hub": "Remote / Enterprise SaaS Startup"},
-    {"company": "Affirm", "ats": "greenhouse", "slug": "affirm", "domain": "affirm.com", "hub": "Remote"},
-    {"company": "Airbnb", "ats": "greenhouse", "slug": "airbnb", "domain": "airbnb.com", "hub": "Remote / Bengaluru"},
-    {"company": "Anthropic", "ats": "greenhouse", "slug": "anthropic", "domain": "anthropic.com", "hub": "Remote / Global"},
-    {"company": "Asana", "ats": "greenhouse", "slug": "asana", "domain": "asana.com", "hub": "Remote"},
-    {"company": "Axiom", "ats": "greenhouse", "slug": "axiom", "domain": "axiom.co", "hub": "Remote / Serverless Logging"},
-    {"company": "Bitwarden", "ats": "greenhouse", "slug": "bitwarden", "domain": "bitwarden.com", "hub": "Remote"},
-    {"company": "Braze", "ats": "greenhouse", "slug": "braze", "domain": "braze.com", "hub": "Remote"},
-    {"company": "Brex", "ats": "greenhouse", "slug": "brex", "domain": "brex.com", "hub": "Remote"},
-    {"company": "Calm", "ats": "greenhouse", "slug": "calm", "domain": "calm.com", "hub": "Remote"},
-    {"company": "Checkr", "ats": "greenhouse", "slug": "checkr", "domain": "checkr.com", "hub": "Remote"},
-    {"company": "Chime", "ats": "greenhouse", "slug": "chime", "domain": "chime.com", "hub": "Remote"},
-    {"company": "CircleCI", "ats": "greenhouse", "slug": "circleci", "domain": "circleci.com", "hub": "Remote"},
-    {"company": "Cloudflare", "ats": "greenhouse", "slug": "cloudflare", "domain": "cloudflare.com", "hub": "Remote / Global"},
-    {"company": "Coinbase", "ats": "greenhouse", "slug": "coinbase", "domain": "coinbase.com", "hub": "Hyderabad / Remote"},
-    {"company": "CoreWeave", "ats": "greenhouse", "slug": "coreweave", "domain": "coreweave.com", "hub": "Remote / AI Hyperscaler"},
-    {"company": "Coursera", "ats": "greenhouse", "slug": "coursera", "domain": "coursera.org", "hub": "Remote / Bengaluru"},
+    # --- Tier 1: Indian Tech Giants, Mass Hiring Scaleups & FinTechs ---
+    {"company": "Razorpay", "ats": "greenhouse", "slug": "razorpaysoftwareprivatelimited", "domain": "razorpay.com", "hub": "Bengaluru / Pune / Remote"},
+    {"company": "Groww", "ats": "greenhouse", "slug": "groww", "domain": "groww.in", "hub": "Bengaluru"},
+    {"company": "InMobi", "ats": "greenhouse", "slug": "inmobi", "domain": "inmobi.com", "hub": "Bengaluru / Remote"},
+    {"company": "Glance", "ats": "greenhouse", "slug": "glance", "domain": "glance.com", "hub": "Bengaluru"},
+    {"company": "Meesho", "ats": "lever", "slug": "meesho", "domain": "meesho.com", "hub": "Bengaluru / Remote"},
+    {"company": "CRED", "ats": "lever", "slug": "cred", "domain": "cred.club", "hub": "Bengaluru / Hybrid"},
+    {"company": "Paytm", "ats": "lever", "slug": "paytm", "domain": "paytm.com", "hub": "Noida / Bengaluru"},
+    {"company": "Zeta", "ats": "lever", "slug": "zeta", "domain": "zeta.tech", "hub": "Bengaluru / Mumbai"},
+    {"company": "Fi Money", "ats": "lever", "slug": "epifi", "domain": "fi.money", "hub": "Bengaluru"},
+    {"company": "FamPay", "ats": "lever", "slug": "fampay", "domain": "fampay.in", "hub": "Bengaluru / Remote"},
+    {"company": "Porter", "ats": "greenhouse", "slug": "porter", "domain": "porter.in", "hub": "Bengaluru"},
+    {"company": "Sigmoid Analytics", "ats": "greenhouse", "slug": "sigmoid", "domain": "sigmoid.com", "hub": "Bengaluru / Remote"},
+    {"company": "Quince", "ats": "greenhouse", "slug": "quince", "domain": "quince.com", "hub": "Bengaluru / Remote"},
+    {"company": "Mindtickle", "ats": "lever", "slug": "mindtickle", "domain": "mindtickle.com", "hub": "Pune / Bengaluru"},
+    {"company": "Druva", "ats": "greenhouse", "slug": "druva", "domain": "druva.com", "hub": "Pune / Remote"},
+    {"company": "Thoughtworks", "ats": "greenhouse", "slug": "thoughtworks", "domain": "thoughtworks.com", "hub": "Pune / Bengaluru / Hyderabad / Chennai"},
+    {"company": "HackerRank", "ats": "greenhouse", "slug": "hackerrank", "domain": "hackerrank.com", "hub": "Bengaluru / Remote"},
+
+    # --- Tier 2: Global Tech GCCs & Mass Hubs in India ---
+    {"company": "Airbnb", "ats": "greenhouse", "slug": "airbnb", "domain": "airbnb.com", "hub": "Bengaluru / Remote"},
+    {"company": "Uber Freight", "ats": "greenhouse", "slug": "uberfreight", "domain": "uber.com", "hub": "Hyderabad / Bengaluru / Remote"},
     {"company": "Databricks", "ats": "greenhouse", "slug": "databricks", "domain": "databricks.com", "hub": "Bengaluru / Remote"},
-    {"company": "Datadog", "ats": "greenhouse", "slug": "datadog", "domain": "datadoghq.com", "hub": "Remote / Global"},
+    {"company": "Rubrik", "ats": "greenhouse", "slug": "rubrik", "domain": "rubrik.com", "hub": "Bengaluru / Pune"},
+    {"company": "Coinbase", "ats": "greenhouse", "slug": "coinbase", "domain": "coinbase.com", "hub": "Hyderabad / Remote"},
+    {"company": "Zscaler", "ats": "greenhouse", "slug": "zscaler", "domain": "zscaler.com", "hub": "Bengaluru / Pune / Remote"},
+    {"company": "Stripe", "ats": "greenhouse", "slug": "stripe", "domain": "stripe.com", "hub": "Bengaluru / Remote"},
     {"company": "Deliveroo", "ats": "greenhouse", "slug": "deliveroo", "domain": "deliveroo.com", "hub": "Hyderabad / Remote"},
     {"company": "Dialpad", "ats": "greenhouse", "slug": "dialpad", "domain": "dialpad.com", "hub": "Bengaluru / Remote"},
-    {"company": "Druva", "ats": "greenhouse", "slug": "druva", "domain": "druva.com", "hub": "Pune / Remote"},
-    {"company": "Duolingo", "ats": "greenhouse", "slug": "duolingo", "domain": "duolingo.com", "hub": "Remote"},
-    {"company": "Elastic", "ats": "greenhouse", "slug": "elastic", "domain": "elastic.co", "hub": "Remote / Global"},
-    {"company": "Figma", "ats": "greenhouse", "slug": "figma", "domain": "figma.com", "hub": "Remote / Global"},
-    {"company": "Fireblocks", "ats": "greenhouse", "slug": "fireblocks", "domain": "fireblocks.com", "hub": "Remote / Crypto Security"},
-    {"company": "Flexport", "ats": "greenhouse", "slug": "flexport", "domain": "flexport.com", "hub": "Remote"},
-    {"company": "GitLab", "ats": "greenhouse", "slug": "gitlab", "domain": "gitlab.com", "hub": "Remote / Global"},
-    {"company": "Groww", "ats": "greenhouse", "slug": "groww", "domain": "groww.in", "hub": "Bengaluru"},
-    {"company": "Gusto", "ats": "greenhouse", "slug": "gusto", "domain": "gusto.com", "hub": "Remote"},
-    {"company": "HackerRank", "ats": "greenhouse", "slug": "hackerrank", "domain": "hackerrank.com", "hub": "Bengaluru / Remote"},
-    {"company": "Handshake", "ats": "greenhouse", "slug": "handshake", "domain": "joinhandshake.com", "hub": "Remote"},
-    {"company": "InMobi", "ats": "greenhouse", "slug": "inmobi", "domain": "inmobi.com", "hub": "Bengaluru / Remote"},
-    {"company": "Instacart", "ats": "greenhouse", "slug": "instacart", "domain": "instacart.com", "hub": "Remote"},
-    {"company": "Intercom", "ats": "greenhouse", "slug": "intercom", "domain": "intercom.com", "hub": "Remote"},
-    {"company": "Klaviyo", "ats": "greenhouse", "slug": "klaviyo", "domain": "klaviyo.com", "hub": "Remote"},
-    {"company": "LaunchDarkly", "ats": "greenhouse", "slug": "launchdarkly", "domain": "launchdarkly.com", "hub": "Remote"},
-    {"company": "Lyft", "ats": "greenhouse", "slug": "lyft", "domain": "lyft.com", "hub": "Remote"},
-    {"company": "Mixpanel", "ats": "greenhouse", "slug": "mixpanel", "domain": "mixpanel.com", "hub": "Remote"},
-    {"company": "MongoDB", "ats": "greenhouse", "slug": "mongodb", "domain": "mongodb.com", "hub": "Gurugram / Bengaluru / Remote"},
-    {"company": "Netlify", "ats": "greenhouse", "slug": "netlify", "domain": "netlify.com", "hub": "Remote"},
     {"company": "New Relic", "ats": "greenhouse", "slug": "newrelic", "domain": "newrelic.com", "hub": "Hyderabad / Bengaluru"},
     {"company": "Okta", "ats": "greenhouse", "slug": "okta", "domain": "okta.com", "hub": "Bengaluru / Remote"},
-    {"company": "PagerDuty", "ats": "greenhouse", "slug": "pagerduty", "domain": "pagerduty.com", "hub": "Remote"},
-    {"company": "Pinterest", "ats": "greenhouse", "slug": "pinterest", "domain": "pinterest.com", "hub": "Remote"},
-    {"company": "PlanetScale", "ats": "greenhouse", "slug": "planetscale", "domain": "planetscale.com", "hub": "Remote / MySQL Serverless"},
-    {"company": "Proton", "ats": "greenhouse", "slug": "proton", "domain": "proton.me", "hub": "Remote"},
-    {"company": "Qualtrics", "ats": "greenhouse", "slug": "qualtrics", "domain": "qualtrics.com", "hub": "Remote"},
-    {"company": "Reddit", "ats": "greenhouse", "slug": "reddit", "domain": "reddit.com", "hub": "Remote"},
-    {"company": "Robinhood", "ats": "greenhouse", "slug": "robinhood", "domain": "robinhood.com", "hub": "Remote"},
-    {"company": "Rubrik", "ats": "greenhouse", "slug": "rubrik", "domain": "rubrik.com", "hub": "Bengaluru / Pune"},
-    {"company": "Salesloft", "ats": "greenhouse", "slug": "salesloft", "domain": "salesloft.com", "hub": "Remote"},
     {"company": "Samsara", "ats": "greenhouse", "slug": "samsara", "domain": "samsara.com", "hub": "Bengaluru / Remote"},
-    {"company": "Scale AI", "ats": "greenhouse", "slug": "scaleai", "domain": "scale.com", "hub": "Remote"},
-    {"company": "SoFi", "ats": "greenhouse", "slug": "sofi", "domain": "sofi.com", "hub": "Remote"},
-    {"company": "Sprout Social", "ats": "greenhouse", "slug": "sproutsocial", "domain": "sproutsocial.com", "hub": "Remote"},
-    {"company": "Stripe", "ats": "greenhouse", "slug": "stripe", "domain": "stripe.com", "hub": "Bengaluru / Remote"},
-    {"company": "Thoughtworks", "ats": "greenhouse", "slug": "thoughtworks", "domain": "thoughtworks.com", "hub": "Pune / Bengaluru"},
     {"company": "Toast", "ats": "greenhouse", "slug": "toast", "domain": "toasttab.com", "hub": "Bengaluru / Remote"},
     {"company": "Twilio", "ats": "greenhouse", "slug": "twilio", "domain": "twilio.com", "hub": "Bengaluru / Remote"},
-    {"company": "Udemy", "ats": "greenhouse", "slug": "udemy", "domain": "udemy.com", "hub": "Remote / Gurgaon"},
-    {"company": "Verkada", "ats": "greenhouse", "slug": "verkada", "domain": "verkada.com", "hub": "Remote"},
-    {"company": "Webflow", "ats": "greenhouse", "slug": "webflow", "domain": "webflow.com", "hub": "Remote"},
-    {"company": "Wise", "ats": "greenhouse", "slug": "wise", "domain": "wise.com", "hub": "Remote"},
-    {"company": "Zscaler", "ats": "greenhouse", "slug": "zscaler", "domain": "zscaler.com", "hub": "Bengaluru / Pune / Remote"},
-    {"company": "CRED", "ats": "lever", "slug": "cred", "domain": "cred.club", "hub": "Bengaluru / Hybrid"},
-    {"company": "Fi Money", "ats": "lever", "slug": "epifi", "domain": "fi.money", "hub": "Bengaluru"},
-    {"company": "Meesho", "ats": "lever", "slug": "meesho", "domain": "meesho.com", "hub": "Bengaluru / Remote"},
-    {"company": "Mindtickle", "ats": "lever", "slug": "mindtickle", "domain": "mindtickle.com", "hub": "Pune / Bengaluru"},
-    {"company": "Paytm", "ats": "lever", "slug": "paytm", "domain": "paytm.com", "hub": "Noida / Bengaluru"},
+    {"company": "Udemy", "ats": "greenhouse", "slug": "udemy", "domain": "udemy.com", "hub": "Gurgaon / Remote"},
+    {"company": "MongoDB", "ats": "greenhouse", "slug": "mongodb", "domain": "mongodb.com", "hub": "Gurugram / Bengaluru / Remote"},
     {"company": "Spotify", "ats": "lever", "slug": "spotify", "domain": "spotify.com", "hub": "Mumbai / Remote"},
-    {"company": "Zeta", "ats": "lever", "slug": "zeta", "domain": "zeta.tech", "hub": "Bengaluru / Mumbai"},
+    {"company": "Publicis Sapient", "ats": "smartrecruiters", "slug": "publicissapient", "domain": "publicissapient.com", "hub": "Gurgaon / Bengaluru / Noida / Pune"},
+    {"company": "Visa", "ats": "smartrecruiters", "slug": "visa", "domain": "visa.com", "hub": "Bengaluru / Mumbai"},
+    {"company": "Bosch", "ats": "smartrecruiters", "slug": "bosch", "domain": "bosch.in", "hub": "Bengaluru / Pune / Coimbatore"},
+
+    # --- Tier 3: High-Growth AI Innovators, Next-Gen Cloud & Global Remote ---
+    {"company": "Cursor AI (Anysphere)", "ats": "ashby", "slug": "cursor", "domain": "cursor.com", "hub": "Remote / AI IDE"},
+    {"company": "Perplexity", "ats": "ashby", "slug": "perplexity", "domain": "perplexity.ai", "hub": "Remote / AI Search"},
+    {"company": "Cohere", "ats": "ashby", "slug": "cohere", "domain": "cohere.com", "hub": "Remote / LLMs"},
+    {"company": "ElevenLabs", "ats": "ashby", "slug": "elevenlabs", "domain": "elevenlabs.io", "hub": "Remote / Voice AI"},
+    {"company": "Baseten", "ats": "ashby", "slug": "baseten", "domain": "baseten.co", "hub": "Remote / ML Infra"},
+    {"company": "Cartesia", "ats": "ashby", "slug": "cartesia", "domain": "cartesia.ai", "hub": "Remote / Voice AI"},
+    {"company": "Sentry", "ats": "ashby", "slug": "sentry", "domain": "sentry.io", "hub": "Remote / Developer Tooling"},
+    {"company": "Supabase", "ats": "ashby", "slug": "supabase", "domain": "supabase.com", "hub": "Remote / Open Source Firebase"},
+    {"company": "Render", "ats": "ashby", "slug": "render", "domain": "render.com", "hub": "Remote / Cloud Platform"},
+    {"company": "PostHog", "ats": "ashby", "slug": "posthog", "domain": "posthog.com", "hub": "Remote / Product Analytics"},
+    {"company": "Resend", "ats": "ashby", "slug": "resend", "domain": "resend.com", "hub": "Remote / Email Infra"},
+    {"company": "Attio", "ats": "ashby", "slug": "attio", "domain": "attio.com", "hub": "Remote / Next-Gen CRM"},
+    {"company": "Clerk", "ats": "ashby", "slug": "clerk", "domain": "clerk.com", "hub": "Remote / Auth"},
+    {"company": "ClickHouse", "ats": "ashby", "slug": "clickhouse", "domain": "clickhouse.com", "hub": "Remote / Columnar DB"},
+    {"company": "Cognition (Devin AI)", "ats": "ashby", "slug": "cognition", "domain": "cognition-labs.com", "hub": "Remote / AI Labs"},
+    {"company": "Harvey AI", "ats": "ashby", "slug": "harvey", "domain": "harvey.ai", "hub": "Remote / Legal AI"},
+    {"company": "Inngest", "ats": "ashby", "slug": "inngest", "domain": "inngest.com", "hub": "Remote / Workflows"},
+    {"company": "Knock", "ats": "ashby", "slug": "knock", "domain": "knock.app", "hub": "Remote / Notifications"},
+    {"company": "LangChain", "ats": "ashby", "slug": "langchain", "domain": "langchain.com", "hub": "Remote / LLM Framework"},
+    {"company": "Linear", "ats": "ashby", "slug": "linear", "domain": "linear.app", "hub": "Remote / Issue Tracking"},
+    {"company": "Modal", "ats": "ashby", "slug": "modal", "domain": "modal.com", "hub": "Remote / Serverless Python"},
+    {"company": "Pinecone", "ats": "ashby", "slug": "pinecone", "domain": "pinecone.io", "hub": "Remote / Vector DB"},
+    {"company": "Railway", "ats": "ashby", "slug": "railway", "domain": "railway.app", "hub": "Remote / Cloud PaaS"},
+    {"company": "RunPod", "ats": "ashby", "slug": "runpod", "domain": "runpod.io", "hub": "Remote / GPU Cloud"},
+    {"company": "Temporal", "ats": "ashby", "slug": "temporal", "domain": "temporal.io", "hub": "Remote / Microservices"},
+    {"company": "Weaviate", "ats": "ashby", "slug": "weaviate", "domain": "weaviate.io", "hub": "Remote / Vector Search"},
+    {"company": "WorkOS", "ats": "ashby", "slug": "workos", "domain": "workos.com", "hub": "Remote / Enterprise SSO"},
+    {"company": "Anthropic", "ats": "greenhouse", "slug": "anthropic", "domain": "anthropic.com", "hub": "Remote / Global"},
+    {"company": "Cloudflare", "ats": "greenhouse", "slug": "cloudflare", "domain": "cloudflare.com", "hub": "Remote / Global"},
+    {"company": "Datadog", "ats": "greenhouse", "slug": "datadog", "domain": "datadoghq.com", "hub": "Remote / Global"},
+    {"company": "Elastic", "ats": "greenhouse", "slug": "elastic", "domain": "elastic.co", "hub": "Remote / Global"},
+    {"company": "Figma", "ats": "greenhouse", "slug": "figma", "domain": "figma.com", "hub": "Remote / Global"},
+    {"company": "GitLab", "ats": "greenhouse", "slug": "gitlab", "domain": "gitlab.com", "hub": "Remote / Global"},
 ]
 
 def clean_html_text(raw_html: str) -> str:
@@ -355,6 +324,47 @@ def fetch_ashby_jobs(company_info: Dict[str, str], query: str) -> List[Dict[str,
         print(f"[CareerEngine] Ashby {company_name}: {e}")
     return results
 
+def fetch_smartrecruiters_jobs(company_info: Dict[str, str], query: str) -> List[Dict[str, Any]]:
+    """Fetches real-time jobs from SmartRecruiters public API."""
+    slug = company_info["slug"]
+    company_name = company_info["company"]
+    url = f"https://api.smartrecruiters.com/v1/companies/{slug}/postings"
+    
+    results = []
+    try:
+        resp = _SESSION.get(url, timeout=3.5)
+        if resp.status_code == 200:
+            data = resp.json()
+            postings = data.get("content", [])
+            for p in postings:
+                title = p.get("name", "").strip()
+                if not role_matches_query(title, query):
+                    continue
+                loc_obj = p.get("location", {})
+                city = loc_obj.get("city", "") if isinstance(loc_obj, dict) else ""
+                country = loc_obj.get("country", "") if isinstance(loc_obj, dict) else ""
+                loc = f"{city}, {country}".strip(", ") if (city or country) else company_info.get("hub", "Remote / India")
+                
+                job_id = str(p.get("id", ""))
+                portal_url = f"https://jobs.smartrecruiters.com/{slug}/{job_id}"
+                apply_url = f"https://jobs.smartrecruiters.com/{slug}/{job_id}/apply"
+                
+                desc = f"{title}\nCompany: {company_name}\nLocation: {loc}\n\nApply directly on {company_name} SmartRecruiters portal: {portal_url}"
+                
+                results.append({
+                    "id": f"ATS-SR-{job_id[:12]}",
+                    "title": title,
+                    "company": company_name,
+                    "location": loc,
+                    "apply_url": apply_url,
+                    "portal_url": portal_url,
+                    "description": desc,
+                    "ats_provider": "SmartRecruiters",
+                })
+    except Exception as e:
+        print(f"[CareerEngine] SmartRecruiters {company_name}: {e}")
+    return results
+
 _CAREER_CACHE: Dict[str, Tuple[float, List[JobPosting]]] = {}
 _ATS_EXECUTOR = ThreadPoolExecutor(max_workers=35)
 
@@ -366,7 +376,7 @@ def fetch_career_page_jobs(
 ) -> List[JobPosting]:
     """
     Primary Public Method:
-    Fetches real-time postings from verified corporate ATS portals (Greenhouse, Lever, Ashby).
+    Fetches real-time postings from verified corporate ATS portals (Greenhouse, Lever, Ashby, SmartRecruiters).
     Guarantees:
     1. Every returned URL is a REAL link from a live ATS API (never fabricated).
     2. Deep verbatim JD descriptions and skills extraction.
@@ -393,6 +403,8 @@ def fetch_career_page_jobs(
             futures.append(executor.submit(fetch_lever_jobs, info, clean_query))
         elif ats_type == "ashby":
             futures.append(executor.submit(fetch_ashby_jobs, info, clean_query))
+        elif ats_type == "smartrecruiters":
+            futures.append(executor.submit(fetch_smartrecruiters_jobs, info, clean_query))
             
     for fut in as_completed(futures):
         try:

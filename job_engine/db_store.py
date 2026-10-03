@@ -8,6 +8,7 @@ import os
 import re
 import json
 import sqlite3
+import threading
 import urllib.parse
 from pathlib import Path
 from datetime import datetime
@@ -17,21 +18,34 @@ from config import PROJECT_ROOT
 from models import JobPosting, ConnectionRecord
 
 DB_FILE = PROJECT_ROOT / "drc_job_discovery.db"
+_DB_INITIALIZED = False
+_INIT_LOCK = threading.Lock()
 
 
 def get_db_connection() -> sqlite3.Connection:
-    """Returns a SQLite connection with Row factory enabled."""
+    """Returns a SQLite connection with Row factory and high-performance PRAGMAs enabled."""
     conn = sqlite3.connect(str(DB_FILE), timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode = WAL;")
     conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA cache_size = -64000;")
+    conn.execute("PRAGMA temp_store = MEMORY;")
+    conn.execute("PRAGMA mmap_size = 268435456;")
     return conn
 
 
-def init_db():
-    """Initializes SQLite schema for discovered jobs, batches, normalized skills, candidates, and applications."""
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
+def init_db(force: bool = False):
+    """Initializes SQLite schema once at server startup (guarded against redundant DDL executions)."""
+    global _DB_INITIALIZED
+    if _DB_INITIALIZED and not force:
+        return
+
+    with _INIT_LOCK:
+        if _DB_INITIALIZED and not force:
+            return
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
 
         # 1. companies
         cursor.execute("""
@@ -213,12 +227,14 @@ def init_db():
             email TEXT,
             location TEXT,
             verification_evidence TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(company_slug, name)
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """)
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_rec_company ON verified_recruiters(company_slug);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_disc_cand_disc_at ON discovered_jobs(candidate_email, discovered_at DESC);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_disc_cand_status ON discovered_jobs(candidate_email, status);")
         conn.commit()
+    _DB_INITIALIZED = True
 
 
 # ============================================================================
@@ -374,7 +390,7 @@ def db_record_discovered_jobs(
     jobs: Optional[List[Any]] = None,
     **kwargs,
 ) -> int:
-    """Saves a batch of discovered jobs, incrementing candidate's batch number and populating relational tables."""
+    # Saves a batch of discovered jobs, incrementing candidate batch number and populating relational tables
     # Handle flexible argument orders: (email, jobs) or (email, name, jobs) or (email, jobs, cand_name=...)
     if isinstance(candidate_name, list) and jobs is None:
         jobs = candidate_name
@@ -491,14 +507,14 @@ def db_get_candidate_discovered_jobs(candidate_email: str) -> List[Dict[str, Any
     """Returns all discovered jobs for a candidate across all batches."""
     if not candidate_email:
         return []
-    init_db()
+    c_email = candidate_email.lower().strip()
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
         SELECT * FROM discovered_jobs 
-        WHERE candidate_email = ? COLLATE NOCASE
+        WHERE candidate_email = ?
         ORDER BY batch_number ASC, ats_score DESC;
-        """, (candidate_email.strip(),))
+        """, (c_email,))
         rows = cursor.fetchall()
         jobs = []
         for r in rows:
