@@ -79,6 +79,10 @@ export interface CandidateSearchPayload {
   target_roles?: string[];
   top_skills: string[];
   raw_resume_text?: string;
+  work_mode?: 'remote_included' | 'remote_only' | 'hybrid' | 'onsite' | string;
+  open_to_relocation?: boolean;
+  notice_period?: string;
+  skills?: string[];
 }
 
 /**
@@ -155,7 +159,11 @@ export async function searchInstantJobs(
   source: string = 'all',
   excludeJobIds: string[] = [],
   offset: number = 0,
-  experienceLevel: string = 'all'
+  experienceLevel: string = 'all',
+  workMode: string = 'remote_included',
+  openToRelocation: boolean = true,
+  noticePeriod: string = 'Immediate',
+  skills: string[] = []
 ): Promise<{ success: boolean; total: number; jobs: DiscoveredJobItem[] }> {
   const response = await fetch(`${ENGINE_BASE_URL}/api/jobs/search`, {
     method: 'POST',
@@ -175,6 +183,9 @@ export async function searchInstantJobs(
             target_roles: candidate.target_roles || [],
             top_skills: candidate.top_skills || [],
             raw_resume_text: candidate.raw_resume_text || '',
+            work_mode: candidate.work_mode || workMode,
+            open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
+            notice_period: candidate.notice_period || noticePeriod,
           }
         : null,
       limit,
@@ -182,6 +193,10 @@ export async function searchInstantJobs(
       exclude_job_ids: excludeJobIds,
       offset,
       experience_level: experienceLevel || 'all',
+      work_mode: workMode || 'remote_included',
+      open_to_relocation: openToRelocation,
+      notice_period: noticePeriod || 'Immediate',
+      skills: skills || [],
     }),
   });
 
@@ -204,7 +219,11 @@ export async function findMatchingJobs(
   source: string = 'all',
   excludeJobIds: string[] = [],
   offset: number = 0,
-  experienceLevel: string = 'all'
+  experienceLevel: string = 'all',
+  workMode: string = 'remote_included',
+  openToRelocation: boolean = true,
+  noticePeriod: string = 'Immediate',
+  skills: string[] = []
 ): Promise<DiscoveredJobItem[]> {
   const response = await fetch(`${ENGINE_BASE_URL}/api/find-jobs`, {
     method: 'POST',
@@ -220,6 +239,9 @@ export async function findMatchingJobs(
         target_roles: candidate.target_roles || [],
         top_skills: candidate.top_skills || [],
         raw_resume_text: candidate.raw_resume_text || '',
+        work_mode: candidate.work_mode || workMode,
+        open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
+        notice_period: candidate.notice_period || noticePeriod,
       },
       max_jobs: maxJobs,
       reference_role: referenceRole,
@@ -228,6 +250,10 @@ export async function findMatchingJobs(
       exclude_job_ids: excludeJobIds,
       offset,
       experience_level: experienceLevel || 'all',
+      work_mode: workMode || 'remote_included',
+      open_to_relocation: openToRelocation,
+      notice_period: noticePeriod || 'Immediate',
+      skills: skills || [],
     }),
   });
 

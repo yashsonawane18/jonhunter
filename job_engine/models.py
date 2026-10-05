@@ -80,6 +80,9 @@ class CandidateProfile(BaseModel):
     reference_role: Optional[str] = Field(default="", description="Reference target role")
     suggested_seniority: Optional[str] = Field(default="all", description="Inferred Seniority Level: entry, intermediate, senior, lead, manager")
     recommended_search_role: Optional[str] = Field(default="", description="Primary clean role keyword for instant search")
+    work_mode: Optional[str] = Field(default="remote_included", description="Preference: remote_included, remote_only, hybrid, onsite")
+    open_to_relocation: Optional[bool] = Field(default=True, description="Open to relocating to top metro hubs")
+    notice_period: Optional[str] = Field(default="Immediate", description="Notice period: Immediate, 15_days, 30_days, 60_90_days")
 
 
 class CandidateApplication(BaseModel):

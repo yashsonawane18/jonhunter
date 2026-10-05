@@ -915,9 +915,13 @@ def fetch_live_linkedin_jobs_for_role(
     exclude_ids: Optional[Any] = None,
     offset: int = 0,
     experience_level: str = "all",
+    work_mode: str = "remote_included",
+    open_to_relocation: bool = True,
+    skills: Optional[List[str]] = None,
 ) -> List[Tuple[str, str, str, str, str, str, str, str]]:
     """
-    High-Precision 3-Tier Recency Multi-Query Concurrent Job Discovery Engine with Experience Level Filtering.
+    High-Precision 3-Tier Recency Multi-Query Concurrent Job Discovery Engine with Experience Level,
+    Work Mode (Remote/Hybrid/Onsite), and Skill-Targeted Expansion.
     """
     tier_24h_results: List[Tuple[str, str, str, str, str, str, str, str]] = []
     tier_48h_results: List[Tuple[str, str, str, str, str, str, str, str]] = []
@@ -975,8 +979,29 @@ def fetch_live_linkedin_jobs_for_role(
             c_loc = re.sub(r"<[^>]+>", "", loc).strip() or "Remote"
             c_url = f"https://www.linkedin.com/jobs/view/{job_id}"
 
-            if not is_valid_target_location(c_loc, target_location):
+            is_remote_loc = (
+                "remote" in c_loc.lower()
+                or "wfh" in c_loc.lower()
+                or "work from home" in c_loc.lower()
+                or "anywhere" in c_loc.lower()
+            )
+
+            # Work Mode check
+            if work_mode == "remote_only" and not is_remote_loc:
                 continue
+            elif work_mode == "onsite" and is_remote_loc and not any(k in c_loc.lower() for k in ["bengaluru", "pune", "mumbai", "delhi", "hyderabad", "chennai", "jaipur", "indore", "ahmedabad"]):
+                continue
+
+            # Location validation with cascading fallback
+            if not is_valid_target_location(c_loc, target_location):
+                # If remote included or open to relocation, accept valid India remote or hub jobs
+                if (open_to_relocation or work_mode == "remote_included") and is_remote_loc:
+                    pass
+                elif (open_to_relocation or work_mode == "remote_included") and is_valid_target_location(c_loc, "") and (len(tier_24h_results) + len(tier_48h_results) + len(tier_7d_results) < limit):
+                    pass
+                else:
+                    continue
+
             if is_candidate_duplicate(job_id, c_url, c_company, c_title):
                 continue
             if not is_strict_domain_match(c_title, target_roles):
@@ -1003,7 +1028,9 @@ def fetch_live_linkedin_jobs_for_role(
     # Resolve target locations to query:
     target_loc_clean = (target_location or "").strip()
     primary_locations = []
-    if target_loc_clean and target_loc_clean.lower() not in ["all india", "all india (remote & nationwide)", "india"]:
+    if work_mode == "remote_only":
+        primary_locations.append("Remote")
+    elif target_loc_clean and target_loc_clean.lower() not in ["all india", "all india (remote & nationwide)", "india"]:
         primary_locations.append(target_loc_clean)
 
     # Standard cluster covering Pan-India tech hubs & Remote
@@ -1021,20 +1048,20 @@ def fetch_live_linkedin_jobs_for_role(
         if loc not in primary_locations:
             primary_locations.append(loc)
 
-    search_queries = generate_advanced_search_matrix(candidate, reference_role=role_keyword, location="Remote")
-    top_queries = search_queries[:6]
-
-    # =========================================================================
-    # HIGH-SPEED SMART DISCOVERY (<1.0s)
-    # Queries 24h then 7d, early-exiting as soon as limit is met, with instant DB fallback
-    # =========================================================================
-    console.print(f"[cyan][JobMatcher] Querying Fresh LinkedIn jobs for '{role_keyword}' in {target_location}...[/cyan]")
+    console.print(f"[cyan][JobMatcher] Querying Fresh LinkedIn jobs for '{role_keyword}' [{work_mode}] in {target_location}...[/cyan]")
     
     primary_loc = primary_locations[0] if primary_locations else "India"
     
     # 1. Primary Live Search Query (24h window)
     matches_24h = _fetch_single_linkedin_query(role_keyword, primary_loc, "r86400", 0, False)
     _process_matches(matches_24h, tier_24h_results, "⚡ Posted < 24h", "On-Site Apply")
+
+    # If skills are provided, query role + primary skill to fetch targeted postings
+    if skills and len(tier_24h_results) < limit:
+        primary_sk = skills[0].strip()
+        sk_query = f"{role_keyword} {primary_sk}"
+        matches_sk = _fetch_single_linkedin_query(sk_query, primary_loc, "r86400", 0, False)
+        _process_matches(matches_sk, tier_24h_results, "⚡ Posted < 24h", "On-Site Apply")
     
     # Early exit if we already have sufficient fresh postings
     if len(tier_24h_results) < limit:
@@ -1057,6 +1084,9 @@ def fetch_live_linkedin_jobs_for_role(
             experience_level=experience_level,
             limit=limit - total_found + 2,
             exclude_ids=seen_ids,
+            skills=skills,
+            work_mode=work_mode,
+            open_to_relocation=open_to_relocation,
         )
         for fb in db_jobs:
             jid = str(fb.get("id", "")).replace("LN-", "").strip()
@@ -1088,9 +1118,12 @@ def find_matching_jobs(
     exclude_ids: Optional[Any] = None,
     offset: int = 0,
     experience_level: str = "all",
+    work_mode: str = "remote_included",
+    open_to_relocation: bool = True,
+    skills: Optional[List[str]] = None,
 ) -> List[JobPosting]:
     """
-    High-Performance Multi-Stage Pipeline with Experience Level Filtering.
+    High-Performance Multi-Stage Pipeline with Experience Level, Work Mode, and Skills Filtering.
     """
     search_role = (
         reference_role
@@ -1129,6 +1162,9 @@ def find_matching_jobs(
         exclude_ids=exclude_ids,
         offset=offset,
         experience_level=experience_level,
+        work_mode=work_mode,
+        open_to_relocation=open_to_relocation,
+        skills=skills,
     )
 
     final_jobs: List[JobPosting] = []
@@ -1292,6 +1328,9 @@ def find_matching_jobs(
             experience_level=experience_level,
             limit=needed + 5,
             exclude_ids=current_ids,
+            skills=skills,
+            work_mode=work_mode,
+            open_to_relocation=open_to_relocation,
         )
         for fb in db_fallbacks:
             if len(final_jobs) >= max_jobs:

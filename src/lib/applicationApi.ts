@@ -34,6 +34,10 @@ export interface CandidateParsedProfile {
   reference_role?: string;
   suggested_seniority?: 'all' | 'entry' | 'intermediate' | 'senior' | 'lead' | 'manager' | string;
   recommended_search_role?: string;
+  work_mode?: 'remote_included' | 'remote_only' | 'hybrid' | 'onsite' | string;
+  open_to_relocation?: boolean;
+  notice_period?: string;
+  skills?: string[];
 }
 
 export interface AtsScoreResult {

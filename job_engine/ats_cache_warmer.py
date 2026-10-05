@@ -361,10 +361,14 @@ def search_instant_jobs(
     limit: int = 25,
     exclude_ids: Optional[Any] = None,
     experience_level: str = "all",
+    work_mode: str = "remote_included",
+    open_to_relocation: bool = True,
+    skills: Optional[List[str]] = None,
 ) -> List[JobPosting]:
     """
     Sub-15ms Instant Job Search against In-Memory Index.
-    Applies Semantic Query Expansion, Experience Level (Entry/Mid/Senior/Lead), Priority Location Ranking,
+    Applies Semantic Query Expansion, Skills Boosting, Work Mode (Remote/Hybrid/Onsite),
+    Experience Level (Entry/Mid/Senior/Lead), Priority Location Ranking,
     4-Tier Consulting ATS Scoring, and Strict Exclusion of previously seen / discovered job IDs.
     """
     global _INDEXED_JOBS, _LAST_SYNC_TIME
@@ -377,6 +381,12 @@ def search_instant_jobs(
     target_str = (effective_query or effective_domain).lower()
     expanded_kws = expand_query_keywords(target_str) if target_str else []
     valid_kws = [kw for kw in expanded_kws if len(kw) >= 3]
+
+    active_skills = [
+        s.strip().lower()
+        for s in (skills or (candidate.top_skills if candidate else []))
+        if s and len(s.strip()) >= 2
+    ]
 
     exclude_set: Set[str] = set()
     if exclude_ids:
@@ -409,29 +419,58 @@ def search_instant_jobs(
             if not matches_experience_level(item.get("job_title", ""), item.get("job_description", ""), experience_level):
                 continue
 
+        # Work Mode Gate
+        loc_text = item.get("_loc_lower") or item["location"].lower()
+        title_text = item["_title_lower"]
+        desc_snippet = item.get("_search_text", "")
+        is_remote_job = (
+            "remote" in loc_text
+            or "wfh" in loc_text
+            or "work from home" in loc_text
+            or "anywhere" in loc_text
+            or "remote" in title_text
+        )
+
+        if work_mode == "remote_only" and not is_remote_job:
+            continue
+        elif work_mode == "onsite" and is_remote_job and not any(k in loc_text for k in ["bengaluru", "pune", "mumbai", "delhi", "hyderabad", "chennai", "jaipur", "indore", "ahmedabad"]):
+            continue
+
         # 1. Ultra-Fast In-Memory Semantic Query & Domain Matching (<2ms)
+        relevance_score = 50
         if target_str:
-            t_lower = item["_title_lower"]
-            if target_str in t_lower:
+            if target_str in title_text:
                 relevance_score = 100
             else:
                 matched_kw = False
                 for kw in valid_kws:
-                    if kw in t_lower:
+                    if kw in title_text:
                         relevance_score = 60
                         matched_kw = True
                         break
                 if not matched_kw:
-                    s_text = item["_search_text"]
                     for kw in valid_kws:
-                        if kw in s_text:
-                            relevance_score = 25
+                        if kw in desc_snippet:
+                            relevance_score = 30
                             matched_kw = True
                             break
-                if not matched_kw:
+                if not matched_kw and not active_skills:
                     continue
-        else:
-            relevance_score = 50
+
+        # Boost by Selected Skills
+        matched_user_skills = []
+        if active_skills:
+            for sk in active_skills:
+                if sk in title_text:
+                    relevance_score += 25
+                    matched_user_skills.append(sk)
+                elif sk in desc_snippet:
+                    relevance_score += 15
+                    matched_user_skills.append(sk)
+
+            # If user provided skills but no query, filter out jobs with 0 skill matches
+            if not target_str and not matched_user_skills:
+                continue
 
         is_job_in_india = item["_is_india"]
         if is_all_india and is_job_in_india:
@@ -440,25 +479,28 @@ def search_instant_jobs(
         match_tuple = (item, relevance_score, is_job_in_india)
 
         # 2. Location Filtering with Priority Classification
-        if is_all_india:
+        if is_all_india or work_mode == "remote_only":
+            if is_remote_job:
+                relevance_score += 20
             city_exact_matches.append(match_tuple)
         else:
-            job_norm = item.get("_loc_lower") or item["location"].lower()
-            if loc_norm_filter in job_norm or (location.lower() in job_norm):
+            if loc_norm_filter in loc_text or (location.lower() in loc_text):
+                relevance_score += 30
                 city_exact_matches.append(match_tuple)
-            elif "remote" in job_norm or "all india" in job_norm:
-                remote_matches.append(match_tuple)
+            elif is_remote_job:
+                if work_mode in ("remote_included", "hybrid"):
+                    relevance_score += 15
+                    remote_matches.append(match_tuple)
             else:
                 general_matches.append(match_tuple)
 
-    # Prioritize: Direct City Matches -> Remote / Nationwide -> General
-    if is_all_india:
+    # Prioritize: Direct City Matches -> Remote / Nationwide -> Metro Hubs
+    if is_all_india or work_mode == "remote_only":
         final_tuples = city_exact_matches
-        # Rank India jobs first, then by keyword relevance
         final_tuples.sort(key=lambda x: (1 if x[2] else 0, x[1]), reverse=True)
     else:
         final_tuples = city_exact_matches + remote_matches
-        if len(final_tuples) < 5:
+        if len(final_tuples) < limit and (open_to_relocation or work_mode == "remote_included"):
             final_tuples += general_matches
         final_tuples.sort(key=lambda x: x[1], reverse=True)
 
@@ -496,6 +538,15 @@ def search_instant_jobs(
         matched_skills = []
         missing_skills = []
         exp_match_text = "Standard Match"
+
+        if active_skills:
+            for ak in active_skills:
+                ak_cap = ak.title()
+                if ak in title.lower() or ak in desc.lower():
+                    if ak_cap not in job_skills:
+                        job_skills.insert(0, ak_cap)
+                    if ak_cap not in matched_skills:
+                        matched_skills.append(ak_cap)
 
         # Calculate ATS Match ONLY if candidate has uploaded their resume
         if has_real_resume and candidate:

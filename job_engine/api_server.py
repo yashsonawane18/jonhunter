@@ -97,6 +97,10 @@ class JobSearchRequest(BaseModel):
     exclude_job_ids: Optional[List[str]] = []
     offset: Optional[int] = 0
     experience_level: Optional[str] = "all"
+    work_mode: Optional[str] = "remote_included"
+    open_to_relocation: Optional[bool] = True
+    notice_period: Optional[str] = "Immediate"
+    skills: Optional[List[str]] = []
 
 
 class InstantJobSearchRequest(BaseModel):
@@ -109,6 +113,10 @@ class InstantJobSearchRequest(BaseModel):
     exclude_job_ids: Optional[List[str]] = []
     offset: Optional[int] = 0
     experience_level: Optional[str] = "all"
+    work_mode: Optional[str] = "remote_included"
+    open_to_relocation: Optional[bool] = True
+    notice_period: Optional[str] = "Immediate"
+    skills: Optional[List[str]] = []
 
 
 class AtsScoreRequest(BaseModel):
@@ -156,6 +164,10 @@ async def execute_fresh_batch_discovery(
     offset: int = 0,
     target_count: int = 5,
     experience_level: str = "all",
+    work_mode: str = "remote_included",
+    open_to_relocation: bool = True,
+    notice_period: str = "Immediate",
+    skills: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:
     """
     Guarantees 5 fresh un-seen jobs per click:
@@ -163,10 +175,13 @@ async def execute_fresh_batch_discovery(
     - If source == 'career_page': 5 Career Page
     - If source == 'linkedin': 5 LinkedIn
     - Filters by Experience / Seniority Level ('entry', 'intermediate', 'senior', 'lead', 'manager', 'all').
+    - Filters by Work Mode ('remote_included', 'remote_only', 'hybrid', 'onsite').
+    - Boosts & cascades based on Skills and Relocation preference.
     - Strictly filters out all previously discovered / seen jobs.
     """
     target_domain = domain or query or "Software Engineering"
-    default_skills = infer_key_skills(target_domain, "")
+    merged_skills = list(dict.fromkeys((skills or []) + (candidate.top_skills if candidate and candidate.top_skills else [])))
+    default_skills = merged_skills or infer_key_skills(target_domain, "")
     cand = candidate or CandidateProfile(
         name="Candidate",
         email="candidate@drc.com",
@@ -174,6 +189,9 @@ async def execute_fresh_batch_discovery(
         location=location or "All India (Remote & Nationwide)",
         target_roles=[query] if query else ["Software Engineer"],
         top_skills=default_skills,
+        work_mode=work_mode,
+        open_to_relocation=open_to_relocation,
+        notice_period=notice_period,
     )
 
     source_mode = (source or "all").lower()
@@ -190,6 +208,9 @@ async def execute_fresh_batch_discovery(
             limit=target_count,
             exclude_ids=all_exclude,
             experience_level=experience_level,
+            work_mode=work_mode,
+            open_to_relocation=open_to_relocation,
+            skills=merged_skills,
         )
         final_jobs = career_jobs[:target_count]
 
@@ -205,6 +226,9 @@ async def execute_fresh_batch_discovery(
                     exclude_ids=all_exclude,
                     offset=offset,
                     experience_level=experience_level,
+                    work_mode=work_mode,
+                    open_to_relocation=open_to_relocation,
+                    skills=merged_skills,
                 ),
                 timeout=8.0
             )
@@ -228,6 +252,9 @@ async def execute_fresh_batch_discovery(
                 limit=target_career + 3,
                 exclude_ids=all_exclude,
                 experience_level=experience_level,
+                work_mode=work_mode,
+                open_to_relocation=open_to_relocation,
+                skills=merged_skills,
             ),
             timeout=4.0
         )
@@ -241,6 +268,9 @@ async def execute_fresh_batch_discovery(
                 exclude_ids=all_exclude,
                 offset=offset,
                 experience_level=experience_level,
+                work_mode=work_mode,
+                open_to_relocation=open_to_relocation,
+                skills=merged_skills,
             ),
             timeout=5.0
         )
@@ -289,12 +319,17 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
             offset=req.offset or 0,
             target_count=req.limit or 5,
             experience_level=req.experience_level or "all",
+            work_mode=req.work_mode or "remote_included",
+            open_to_relocation=req.open_to_relocation if req.open_to_relocation is not None else True,
+            notice_period=req.notice_period or "Immediate",
+            skills=req.skills or [],
         )
         return {
             "success": True,
             "total": len(job_dicts),
             "query": req.query,
             "location": req.location,
+            "work_mode": req.work_mode,
             "jobs": job_dicts,
         }
     except Exception as e:
@@ -501,6 +536,10 @@ async def find_jobs_endpoint(req: JobSearchRequest):
             offset=req.offset or 0,
             target_count=req.max_jobs or 5,
             experience_level=req.experience_level or "all",
+            work_mode=req.work_mode or "remote_included",
+            open_to_relocation=req.open_to_relocation if req.open_to_relocation is not None else True,
+            notice_period=req.notice_period or "Immediate",
+            skills=req.skills or [],
         )
         return job_dicts
     except Exception as e:

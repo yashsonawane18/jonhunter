@@ -36,6 +36,10 @@ import {
   FolderDown,
   Archive,
   CheckSquare,
+  Plane,
+  Home,
+  Plus,
+  Code2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -146,6 +150,33 @@ export const INSTANT_ROLE_FILTERS: InstantRoleFilter[] = [
   { id: 'iac_terraform', name: 'Infrastructure as Code (Terraform)', category: 'Security, QA & Cloud', keyword: 'Terraform Infrastructure' },
 ];
 
+const POPULAR_SKILLS_BY_DOMAIN: Record<string, string[]> = {
+  frontend: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Redux', 'Vue.js', 'HTML5/CSS3', 'GraphQL', 'JavaScript'],
+  backend: ['Python', 'FastAPI', 'Node.js', 'Java', 'Spring Boot', 'PostgreSQL', 'Docker', 'AWS', 'Microservices', 'SQL'],
+  fullstack: ['React', 'Node.js', 'TypeScript', 'Python', 'AWS', 'Docker', 'PostgreSQL', 'Next.js', 'MongoDB', 'REST API'],
+  data: ['Python', 'SQL', 'PySpark', 'Snowflake', 'Power BI', 'Pandas', 'Databricks', 'ETL', 'Tableau', 'BigQuery'],
+  devops: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD', 'Linux', 'Azure', 'GitHub Actions', 'Jenkins', 'Ansible'],
+  ai: ['Python', 'PyTorch', 'TensorFlow', 'LLM', 'LangChain', 'RAG', 'GenAI', 'OpenAI', 'Computer Vision', 'NLP', 'FastAPI'],
+  cloud: ['AWS', 'Azure', 'GCP', 'Terraform', 'Docker', 'Kubernetes', 'Cloud Security', 'DevOps', 'Microservices'],
+  qa: ['Selenium', 'Playwright', 'Cypress', 'Python', 'Java', 'Manual Testing', 'API Testing', 'Postman', 'JIRA'],
+  product: ['Product Strategy', 'Agile', 'Scrum', 'JIRA', 'User Stories', 'Roadmapping', 'Data Analytics', 'A/B Testing'],
+  default: ['Python', 'React', 'AWS', 'SQL', 'Docker', 'Node.js', 'FastAPI', 'TypeScript', 'Kubernetes', 'Spring Boot', 'PySpark', 'GenAI'],
+};
+
+const getSuggestedSkillsForRole = (roleQuery: string): string[] => {
+  const q = (roleQuery || '').toLowerCase();
+  if (q.includes('front') || q.includes('ui') || q.includes('react') || q.includes('angular') || q.includes('design')) return POPULAR_SKILLS_BY_DOMAIN['frontend'];
+  if (q.includes('back') || q.includes('java') || q.includes('api') || q.includes('node') || q.includes('django')) return POPULAR_SKILLS_BY_DOMAIN['backend'];
+  if (q.includes('full') || q.includes('mern') || q.includes('web') || q.includes('software')) return POPULAR_SKILLS_BY_DOMAIN['fullstack'];
+  if (q.includes('data') || q.includes('etl') || q.includes('analytics') || q.includes('bi')) return POPULAR_SKILLS_BY_DOMAIN['data'];
+  if (q.includes('devops') || q.includes('sre') || q.includes('infra') || q.includes('platform')) return POPULAR_SKILLS_BY_DOMAIN['devops'];
+  if (q.includes('ai') || q.includes('ml') || q.includes('genai') || q.includes('llm') || q.includes('intelligence')) return POPULAR_SKILLS_BY_DOMAIN['ai'];
+  if (q.includes('cloud') || q.includes('aws') || q.includes('azure')) return POPULAR_SKILLS_BY_DOMAIN['cloud'];
+  if (q.includes('qa') || q.includes('test') || q.includes('automation')) return POPULAR_SKILLS_BY_DOMAIN['qa'];
+  if (q.includes('product') || q.includes('pm') || q.includes('owner')) return POPULAR_SKILLS_BY_DOMAIN['product'];
+  return POPULAR_SKILLS_BY_DOMAIN['default'];
+};
+
 export const DiscoveredJobsTracker: React.FC = () => {
   const { user } = useUser();
 
@@ -168,6 +199,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
   const [roleFilterSearch, setRoleFilterSearch] = useState<string>('');
   const [selectedChannel, setSelectedChannel] = useState<'all' | 'career_page' | 'linkedin'>('all');
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+
+  // Enhanced Candidate Search Preferences
+  const [selectedWorkMode, setSelectedWorkMode] = useState<'remote_included' | 'remote_only' | 'hybrid' | 'onsite'>('remote_included');
+  const [isOpenToRelocation, setIsOpenToRelocation] = useState<boolean>(true);
+  const [selectedNoticePeriod, setSelectedNoticePeriod] = useState<string>('Immediate');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [customSkillInput, setCustomSkillInput] = useState<string>('');
 
   // Discovered Jobs Data & Duplicate-Guard State
   const [jobsList, setJobsList] = useState<DiscoveredJobItem[]>([]);
@@ -258,7 +296,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
     }
   }, [candidateEmail]);
 
-  // 2. Fresh Search Requisitions (5 Jobs per Batch with Strict Channel Allocation, Seniority & Deduplication)
+  // 2. Fresh Search Requisitions (5 Jobs per Batch with Strict Channel Allocation, Seniority, Work Mode, Skills & Deduplication)
   const executeFreshSearch = useCallback(
     async (
       query: string = searchQuery,
@@ -267,7 +305,11 @@ export const DiscoveredJobsTracker: React.FC = () => {
       channel: 'all' | 'career_page' | 'linkedin' = selectedChannel,
       isAppend: boolean = false,
       profile: CandidateParsedProfile | null = resumeProfile,
-      customSeen?: Set<string>
+      customSeen?: Set<string>,
+      workMode: 'remote_included' | 'remote_only' | 'hybrid' | 'onsite' = selectedWorkMode,
+      relocation: boolean = isOpenToRelocation,
+      noticePeriod: string = selectedNoticePeriod,
+      skills: string[] = selectedSkills
     ) => {
       if (isAppend) {
         setIsAppending(true);
@@ -295,13 +337,21 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 target_roles: profile.target_roles,
                 top_skills: profile.top_skills,
                 raw_resume_text: profile.raw_resume_text,
+                work_mode: workMode,
+                open_to_relocation: relocation,
+                notice_period: noticePeriod,
+                skills: skills,
               }
             : null,
           limit,
           channel,
           currentSeenArray,
           isAppend ? batchOffset : 0,
-          seniority
+          seniority,
+          workMode,
+          relocation,
+          noticePeriod,
+          skills
         );
 
         let retrieved = result.jobs || [];
@@ -382,8 +432,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
         setIsAppending(false);
       }
     },
-    [searchQuery, selectedLocation, selectedSeniority, selectedChannel, resumeProfile, seenJobIds, batchOffset, jobsList.length]
+    [searchQuery, selectedLocation, selectedSeniority, selectedChannel, resumeProfile, seenJobIds, batchOffset, jobsList.length, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, selectedSkills]
   );
+
+  const suggestedSkills = useMemo(() => {
+    const roleText = searchQuery || selectedActiveRole || resumeProfile?.primary_domain || '';
+    return getSuggestedSkillsForRole(roleText);
+  }, [searchQuery, selectedActiveRole, resumeProfile?.primary_domain]);
 
   // Initial load
   useEffect(() => {
@@ -428,6 +483,48 @@ export const DiscoveredJobsTracker: React.FC = () => {
     executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false);
   };
 
+  const handleWorkModeChange = (mode: 'remote_included' | 'remote_only' | 'hybrid' | 'onsite') => {
+    setSelectedWorkMode(mode);
+    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, mode, isOpenToRelocation, selectedNoticePeriod, selectedSkills);
+  };
+
+  const handleToggleRelocation = () => {
+    const nextVal = !isOpenToRelocation;
+    setIsOpenToRelocation(nextVal);
+    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, nextVal, selectedNoticePeriod, selectedSkills);
+  };
+
+  const handleNoticePeriodChange = (np: string) => {
+    setSelectedNoticePeriod(np);
+    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, np, selectedSkills);
+  };
+
+  const handleToggleSkill = (skill: string) => {
+    const isSelected = selectedSkills.includes(skill);
+    const updated = isSelected ? selectedSkills.filter((s) => s !== skill) : [...selectedSkills, skill];
+    setSelectedSkills(updated);
+    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, updated);
+  };
+
+  const handleAddCustomSkill = () => {
+    const trimmed = customSkillInput.trim();
+    if (!trimmed) return;
+    if (!selectedSkills.includes(trimmed)) {
+      const updated = [...selectedSkills, trimmed];
+      setSelectedSkills(updated);
+      setCustomSkillInput('');
+      executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, updated);
+    } else {
+      setCustomSkillInput('');
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    const updated = selectedSkills.filter((s) => s !== skillToRemove);
+    setSelectedSkills(updated);
+    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, updated);
+  };
+
   const handleResetSeenHistory = () => {
     const emptySet = new Set<string>();
     setSeenJobIds(emptySet);
@@ -441,10 +538,15 @@ export const DiscoveredJobsTracker: React.FC = () => {
     setSelectedActiveRole(null);
     setSelectedLocation('All India (Remote & Nationwide)');
     setSelectedSeniority('all');
-    setSelectedRoleCategory('All Roles');
+    setSelectedRoleCategory('🔥 Trending Roles');
     setSelectedChannel('all');
+    setSelectedWorkMode('remote_included');
+    setIsOpenToRelocation(true);
+    setSelectedNoticePeriod('Immediate');
+    setSelectedSkills([]);
+    setCustomSkillInput('');
     setRoleFilterSearch('');
-    executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false);
+    executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false, resumeProfile, undefined, 'remote_included', true, 'Immediate', []);
   };
 
   // 3. Resume Upload & Two-Tier Job Matching Workflow (Tier 1: Saved History Check -> Tier 2: Fresh Market Discovery)
@@ -1034,8 +1136,9 @@ export const DiscoveredJobsTracker: React.FC = () => {
             </div>
           </div>
 
-          {/* SECTION 3: Keyword Search, Pan-India Location & Discovery Bar */}
+          {/* SECTION 3: Keyword Search, Pan-India Location, Work Mode & Core Skills Bar */}
           <div className="p-5 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 backdrop-blur shadow-2xl space-y-4">
+            {/* Row 1: Search, Location & Main Trigger */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               {/* Keyword Search Input */}
               <div className="md:col-span-5">
@@ -1119,6 +1222,190 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+
+            {/* Row 2: Work Mode & Relocation Preferences (Solves City Drop-Offs & Droughts) */}
+            <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+              {/* Work Mode Toggle Pills */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mr-1 flex items-center gap-1">
+                  <Briefcase className="w-3 h-3 text-[#00C896]" />
+                  Work Mode:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleWorkModeChange('remote_included')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    selectedWorkMode === 'remote_included'
+                      ? 'bg-[#00C896] text-black border border-[#00E5AA] shadow-md shadow-[#00C896]/20'
+                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                  }`}
+                  title="Includes selected city + Remote jobs nationwide so you never miss high-yield opportunities"
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>Remote Included (Best)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleWorkModeChange('remote_only')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    selectedWorkMode === 'remote_only'
+                      ? 'bg-sky-500 text-black border border-sky-400 shadow-md shadow-sky-500/20'
+                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                  }`}
+                >
+                  <Home className="w-3 h-3" />
+                  <span>Remote Only (WFH)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleWorkModeChange('hybrid')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    selectedWorkMode === 'hybrid'
+                      ? 'bg-amber-400 text-black border border-amber-300 shadow-md shadow-amber-400/20'
+                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                  }`}
+                >
+                  <Building2 className="w-3 h-3" />
+                  <span>Hybrid</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleWorkModeChange('onsite')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    selectedWorkMode === 'onsite'
+                      ? 'bg-purple-400 text-black border border-purple-300 shadow-md shadow-purple-400/20'
+                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                  }`}
+                >
+                  <MapPin className="w-3 h-3" />
+                  <span>On-Site Only</span>
+                </button>
+              </div>
+
+              {/* Relocation & Notice Period Quick Options */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Relocation Toggle */}
+                <button
+                  type="button"
+                  onClick={handleToggleRelocation}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    isOpenToRelocation
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
+                      : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                  }`}
+                  title="If local city openings are sparse, automatically cascades to top Metro Hubs (Bengaluru, Pune, Hyderabad, Gurgaon, Mumbai)"
+                >
+                  <Plane className={`w-3 h-3 ${isOpenToRelocation ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                  <span>✈️ Open to Relocation</span>
+                  {isOpenToRelocation && <Check className="w-3 h-3 text-emerald-400" />}
+                </button>
+
+                {/* Notice Period Quick Select */}
+                <div className="flex items-center gap-1 bg-zinc-900 px-2 py-0.5 rounded-lg border border-zinc-800">
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Notice:</span>
+                  <select
+                    value={selectedNoticePeriod}
+                    onChange={(e) => handleNoticePeriodChange(e.target.value)}
+                    className="bg-transparent text-xs text-zinc-200 font-semibold focus:outline-none cursor-pointer"
+                  >
+                    <option value="Immediate" className="bg-zinc-900 text-white">⚡ Immediate (&lt;15d)</option>
+                    <option value="30_days" className="bg-zinc-900 text-white">🕒 30 Days</option>
+                    <option value="60_90_days" className="bg-zinc-900 text-white">⏳ 60-90 Days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 3: Core Tech Stack & Skills Targeting */}
+            <div className="pt-2 border-t border-zinc-800/80 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
+                  <Code2 className="w-3 h-3 text-[#00C896]" />
+                  <span>Target by Core Skills & Tech Stack:</span>
+                </span>
+
+                {/* Active Selected Skills Count or Reset */}
+                {selectedSkills.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedSkills([]);
+                      executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, []);
+                    }}
+                    className="text-[11px] text-zinc-400 hover:text-rose-400 underline font-semibold transition-colors"
+                  >
+                    Clear {selectedSkills.length} selected skills
+                  </button>
+                )}
+              </div>
+
+              {/* Skills Pills Bar */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Active Selected Skills (Emerald with X) */}
+                {selectedSkills.map((sk) => (
+                  <span
+                    key={sk}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#00C896] text-black border border-[#00E5AA] shadow-sm animate-in fade-in zoom-in duration-150"
+                  >
+                    <span>{sk}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(sk)}
+                      className="hover:bg-black/20 rounded p-0.5 transition-colors"
+                      title="Remove skill"
+                    >
+                      <X className="w-3 h-3 text-black" />
+                    </button>
+                  </span>
+                ))}
+
+                {/* Suggested Popular Skills for the active role (click to toggle) */}
+                {suggestedSkills.map((sk) => {
+                  const isSelected = selectedSkills.includes(sk);
+                  if (isSelected) return null;
+                  return (
+                    <button
+                      key={sk}
+                      type="button"
+                      onClick={() => handleToggleSkill(sk)}
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-[#00C896]/60 transition-all flex items-center gap-1"
+                    >
+                      <Plus className="w-2.5 h-2.5 text-[#00C896]" />
+                      <span>{sk}</span>
+                    </button>
+                  );
+                })}
+
+                {/* Inline custom skill input */}
+                <div className="inline-flex items-center bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-0.5 focus-within:border-[#00C896]">
+                  <input
+                    type="text"
+                    value={customSkillInput}
+                    onChange={(e) => setCustomSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomSkill();
+                      }
+                    }}
+                    placeholder="+ Add custom skill"
+                    className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-28 sm:w-36 py-0.5"
+                  />
+                  {customSkillInput.trim() && (
+                    <button
+                      type="button"
+                      onClick={handleAddCustomSkill}
+                      className="text-[10px] font-bold text-[#00C896] hover:text-[#00E5AA] ml-1 uppercase"
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -898,12 +898,15 @@ def db_get_verified_linkedin_jobs(
     experience_level: str = "all",
     limit: int = 5,
     exclude_ids: Optional[Any] = None,
+    skills: Optional[List[str]] = None,
+    work_mode: str = "remote_included",
+    open_to_relocation: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     High-Reliability Fallback & Fast Cache Retriever for Authentic LinkedIn Jobs.
     Queries the 508+ verified authentic LinkedIn jobs stored in discovered_jobs.
     Guarantees valid LinkedIn URLs (linkedin.com/jobs/view/...), LN- IDs,
-    role relevance, experience level matching, and company deduplication.
+    role relevance, skills matching, experience level matching, and company deduplication.
     """
     init_db()
     with get_db_connection() as conn:
@@ -940,6 +943,8 @@ def db_get_verified_linkedin_jobs(
         if not keywords and role_clean:
             keywords = [w.lower() for w in re.findall(r'[a-zA-Z0-9\+#\.]+', role_clean) if len(w) > 2]
 
+        active_skills = [s.strip().lower() for s in (skills or []) if s and len(s.strip()) >= 2]
+
         matched_primary = []
         matched_secondary = []
         seen_companies = set()
@@ -957,6 +962,15 @@ def db_get_verified_linkedin_jobs(
 
             title = (r["job_title"] or "").strip()
             t_low = title.lower()
+            loc = (r["location"] or "").strip()
+            loc_low = loc.lower()
+            is_remote_loc = "remote" in loc_low or "wfh" in loc_low or "work from home" in loc_low or "anywhere" in loc_low
+
+            # Work Mode gating
+            if work_mode == "remote_only" and not is_remote_loc:
+                continue
+            elif work_mode == "onsite" and is_remote_loc and not any(k in loc_low for k in ["bengaluru", "pune", "mumbai", "delhi", "hyderabad", "chennai", "jaipur", "indore", "ahmedabad"]):
+                continue
 
             # Experience level gating
             if experience_level and experience_level != "all":
@@ -991,9 +1005,17 @@ def db_get_verified_linkedin_jobs(
                         if kw in skills_text:
                             score += 2
 
+            # User Skills Boost
+            if active_skills:
+                skills_haystack = (r["matched_skills"] or "").lower() + " " + t_low + " " + (r["job_description"] or "")[:300].lower()
+                for sk in active_skills:
+                    if sk in skills_haystack:
+                        score += 4
+
             # Location score
-            loc = (r["location"] or "").strip()
             has_target_loc = 1 if (target_location and target_location.lower() not in ["all india", "remote", "india"] and target_location.lower() in loc.lower()) else 0
+            if is_remote_loc and work_mode in ("remote_included", "hybrid"):
+                has_target_loc = 1
 
             d = dict(r)
             # Parse connections safely
