@@ -3,14 +3,15 @@ import { Menu, X, ChevronDown, ArrowLeft } from 'lucide-react';
 import { Button } from './Button';
 
 interface NavbarProps {
-  onNavigate?: (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit') => void;
+  onNavigate?: (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover') => void;
   onNavigateToQAtoBA?: () => void;
   onNavigateToPricing?: () => void;
   onNavigateToLogin?: () => void;
   onNavigateToHome?: () => void;
   onNavigateToAICourse?: () => void;
   onNavigateToCareerAudit?: () => void;
-  currentView?: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit';
+  onNavigateToDiscover?: () => void;
+  currentView?: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover';
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigateToHome,
   onNavigateToAICourse,
   onNavigateToCareerAudit,
+  onNavigateToDiscover,
   currentView,
 }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -43,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.open(`${window.location.origin}/career-audit`, '_blank');
   };
 
-  const navigateTo = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit') => {
+  const navigateTo = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover') => {
     if (onNavigate) {
       onNavigate(view);
     } else {
@@ -65,6 +67,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           break;
         case 'career-audit':
           onNavigateToCareerAudit?.();
+          break;
+        case 'discover':
+          if (onNavigateToDiscover) {
+            onNavigateToDiscover();
+          } else {
+            window.location.href = '/discover';
+          }
           break;
         default:
           break;
@@ -88,6 +97,11 @@ export const Navbar: React.FC<NavbarProps> = ({
     navigateTo('login');
   };
 
+  const handleDiscoverClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigateTo('discover');
+  };
+
   const getProgramUrl = (screen: 'bapo' | 'ai-course') => {
     const pathByScreen = {
       bapo: '/qa-to-ba',
@@ -109,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const showBackButton = currentView === 'bapo' || currentView === 'ai-course' || currentView === 'career-audit';
 
-  const linkClass = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit') =>
+  const linkClass = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover') =>
     `text-sm font-normal uppercase tracking-widest transition-all duration-300 ${
       currentView === view ? 'text-neon-green' : 'text-gray-400 hover:text-white'
     }`;
@@ -265,11 +279,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               
               <a
                 href="/discover"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.href = '/discover';
-                }}
-                className="relative flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/90 border-2 border-[#00C896]/70 text-xs font-black uppercase tracking-widest text-[#00C896] hover:text-white hover:border-[#00E5AA] hover:bg-black shadow-lg shadow-[#00C896]/25 transition-all duration-300"
+                onClick={handleDiscoverClick}
+                className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/90 border-2 ${
+                  currentView === 'discover'
+                    ? 'border-[#00E5AA] text-white shadow-[#00C896]/50'
+                    : 'border-[#00C896]/70 text-[#00C896] hover:text-white hover:border-[#00E5AA]'
+                } text-xs font-black uppercase tracking-widest hover:bg-black shadow-lg shadow-[#00C896]/25 transition-all duration-300`}
               >
                 {/* Pulsing Live Beacon */}
                 <span className="relative flex h-2 w-2">
@@ -360,12 +375,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="px-2 py-1">
             <a
               href="/discover"
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileMenuOpen(false);
-                window.location.href = '/discover';
-              }}
-              className="flex items-center justify-between px-4 py-3 rounded-xl bg-black border-2 border-[#00C896] text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-[#00C896]/20 transition-all active:scale-95"
+              onClick={handleDiscoverClick}
+              className={`flex items-center justify-between px-4 py-3 rounded-xl bg-black border-2 ${
+                currentView === 'discover' ? 'border-[#00E5AA] shadow-[#00C896]/40' : 'border-[#00C896]'
+              } text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-[#00C896]/20 transition-all active:scale-95`}
             >
               <div className="flex items-center gap-2.5">
                 <span className="relative flex h-2.5 w-2.5">

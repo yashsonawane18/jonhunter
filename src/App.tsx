@@ -59,7 +59,7 @@ const screenToPath = (screen: AppState, dashboardView?: 'jobs' | 'job-tracker' |
   if (screen === 'job-dashboard') {
     if (dashboardView === 'job-tracker') return '/jobs/tracker';
     if (dashboardView === 'jobs') return '/jobs';
-    if (dashboardView === 'job-discovery') return '/discover';
+    if (dashboardView === 'job-discovery') return '/jobs/discovery';
     if (dashboardView === 'profile') return '/profile';
     if (dashboardView === 'referral-jobs') return '/referral-jobs';
     return '/dashboard';
@@ -81,6 +81,7 @@ const pathToScreen = (path: string): { screen: AppState; dashboardView?: 'jobs' 
   if (path === '/signup') return { screen: 'signup' };
   if (path === '/discover' || path === '/find-jobs') return { screen: 'discover' };
   if (path === '/jobs') return { screen: 'discover' };
+  if (path === '/jobs/discovery') return { screen: 'job-dashboard', dashboardView: 'job-discovery' };
   if (path === '/jobs/tracker') return { screen: 'job-dashboard', dashboardView: 'job-tracker' };
   if (path === '/profile') return { screen: 'job-dashboard', dashboardView: 'profile' };
   if (path === '/referral-jobs') return { screen: 'job-dashboard', dashboardView: 'referral-jobs' };
@@ -197,6 +198,11 @@ const getInitialRoute = () => {
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<AppState>(() => {
+    const initial = getInitialRoute();
+    // If the user accessed a specific route directly (e.g. /discover, /pricing, /qa-to-ba, /signin), ALWAYS prioritize it
+    if (initial.screen !== 'home') {
+      return initial.screen;
+    }
     const storedUserId = localStorage.getItem('user_id');
     if (storedUserId) {
       const savedScreen = localStorage.getItem('user_session_screen') as AppState | null;
@@ -205,9 +211,13 @@ export default function App() {
       }
       return 'job-dashboard';
     }
-    return getInitialRoute().screen;
+    return 'home';
   });
   const [dashboardView, setDashboardView] = useState<'jobs' | 'job-tracker' | 'profile' | 'weekly-progress' | 'job-discovery' | 'referral-jobs'>(() => {
+    const initial = getInitialRoute();
+    if (initial.dashboardView) {
+      return initial.dashboardView;
+    }
     const savedDashboardView = localStorage.getItem('user_dashboard_view') as 'jobs' | 'job-tracker' | 'profile' | 'weekly-progress' | 'job-discovery' | 'referral-jobs' | null;
     return savedDashboardView || 'job-tracker';
   });
@@ -239,7 +249,6 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
     if (hasHandledSessionError) return;
 
     setHasHandledSessionError(true);
-    setCurrentScreen('signin');
     setUserJobPreferences(null);
     setUserSkills([]);
     setDashboardView('jobs');
@@ -247,12 +256,19 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
     setHasRestoredSession(false);
     clearUser();
     localStorage.removeItem('user_dashboard_view');
+
+    // Only redirect to signin if the user is on an authenticated-only screen
+    if (currentScreen === 'job-dashboard' || AUTHENTICATED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
   };
 
   // Update URL when screen or dashboard view changes
   useEffect(() => {
     const path = screenToPath(currentScreen, dashboardView);
-    window.history.pushState({ screen: currentScreen, dashboardView }, '', path);
+    if (window.location.pathname !== path) {
+      window.history.pushState({ screen: currentScreen, dashboardView }, '', path);
+    }
     window.gtag?.('config', 'G-7VFQ334X5H', {
       page_path: path,
       page_location: window.location.href,
@@ -283,12 +299,17 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
   // Handle session-expired event globally
   useEffect(() => {
     const handleSessionExpired = () => {
-      sessionStorage.setItem('session_expired_msg', 'Your session has expired. Please log in again.');
-      handleLogout();
+      // Only redirect to signin if user was on a protected authenticated screen
+      if (currentScreen === 'job-dashboard' || AUTHENTICATED_SCREENS.includes(currentScreen)) {
+        sessionStorage.setItem('session_expired_msg', 'Your session has expired. Please log in again.');
+        handleLogout();
+      } else {
+        clearUser();
+      }
     };
     window.addEventListener('session-expired', handleSessionExpired);
     return () => window.removeEventListener('session-expired', handleSessionExpired);
-  }, []);
+  }, [currentScreen]);
 
   // Restore session and also respect external new-tab program links on mount
   useEffect(() => {
@@ -621,13 +642,16 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
   // Navigate to Pricing
   const handleNavigateToPricing = () => setCurrentScreen('pricing');
 
-  // Unified navbar navigation handler (shared by home & qa-to-ba screens)
-  const handleNav = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit') => {
+  // Unified navbar navigation handler (shared across public screens)
+  const handleNav = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover') => {
     if (view === 'home') {
       setCurrentScreen('home');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (view === 'pricing') {
       setCurrentScreen('pricing');
+    } else if (view === 'discover') {
+      setCurrentScreen('discover');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (view === 'login') {
       setCurrentScreen('signin');
     } else if (view === 'bapo') {
@@ -699,7 +723,7 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
       case 'discover':
         return (
           <>
-            <Navbar onNavigate={handleNav} />
+            <Navbar onNavigate={handleNav} currentView="discover" />
             <div className="min-h-screen bg-black pt-20 pb-10 px-4">
               <DiscoveredJobsTrackerComponent />
             </div>
