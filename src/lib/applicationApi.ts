@@ -3,18 +3,11 @@
  * Connects frontend multi-step application flow to the Job Engine on Port 5055.
  */
 
-import { DiscoveredJobItem } from './drcDiscoveryApi';
+import { DiscoveredJobItem, getJobEngineCandidates } from './drcDiscoveryApi';
 
 const getEngineBaseUrl = (): string => {
-  const envUrl =
-    (import.meta as any).env?.VITE_JOB_ENGINE_URL ||
-    (import.meta as any).env?.VITE_API_BASE_URL ||
-    '';
-  if (envUrl) return envUrl.replace(/\/$/, '');
-  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-    return 'http://127.0.0.1:5055';
-  }
-  return '';
+  const candidates = getJobEngineCandidates();
+  return candidates[0] || 'http://127.0.0.1:5055';
 };
 
 export interface CandidateParsedProfile {
@@ -87,21 +80,29 @@ export async function parseCandidateResume(file: File): Promise<{
   filename: string;
   profile: CandidateParsedProfile;
 }> {
-  const baseUrl = getEngineBaseUrl();
-  const formData = new FormData();
-  formData.append('file', file);
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/parse-resume`);
+  let lastError: Error | null = null;
 
-  const res = await fetch(`${baseUrl}/api/parse-resume`, {
-    method: 'POST',
-    body: formData,
-  });
+  for (const url of endpoints) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to parse resume.' }));
-    throw new Error(err.detail || 'Resume parsing failed.');
+      if (res.ok) {
+        return await res.json();
+      }
+      const err = await res.json().catch(() => ({ detail: 'Failed to parse resume.' }));
+      lastError = new Error(err.detail || 'Resume parsing failed.');
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return await res.json();
+  throw lastError || new Error('Resume parsing failed: Unable to reach Job Discovery Engine.');
 }
 
 /**
@@ -113,29 +114,29 @@ export async function fetchJobRecommendations(
   excludeJobId: string = '',
   limit: number = 4
 ): Promise<DiscoveredJobItem[]> {
-  const baseUrl = getEngineBaseUrl();
-  try {
-    const res = await fetch(`${baseUrl}/api/recommendations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        skills,
-        role,
-        exclude_job_id: excludeJobId,
-        limit,
-      }),
-    });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/recommendations`);
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skills,
+          role,
+          exclude_job_id: excludeJobId,
+          limit,
+        }),
+      });
 
-    if (!res.ok) {
-      return [];
+      if (res.ok) {
+        const data = await res.json();
+        return data.recommended_jobs || [];
+      }
+    } catch {
+      continue;
     }
-
-    const data = await res.json();
-    return data.recommended_jobs || [];
-  } catch (error) {
-    console.warn('[applicationApi] Error fetching recommendations:', error);
-    return [];
   }
+  return [];
 }
 
 /**
@@ -144,36 +145,47 @@ export async function fetchJobRecommendations(
 export async function submitCandidateApplication(
   payload: CandidateApplicationPayload
 ): Promise<{ success: boolean; application_id: string; message: string }> {
-  const baseUrl = getEngineBaseUrl();
-  const res = await fetch(`${baseUrl}/api/applications`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/applications`);
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Application submission failed.' }));
-    throw new Error(err.detail || 'Failed to submit application.');
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+      const err = await res.json().catch(() => ({ detail: 'Application submission failed.' }));
+      lastError = new Error(err.detail || 'Failed to submit application.');
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return await res.json();
+  throw lastError || new Error('Failed to submit application: Unable to reach Job Discovery Engine.');
 }
 
 /**
  * Lists candidate applications for recruiter review
  */
 export async function fetchCandidateApplications(limit = 50): Promise<CandidateApplicationPayload[]> {
-  const baseUrl = getEngineBaseUrl();
-  try {
-    const res = await fetch(`${baseUrl}/api/applications?limit=${limit}`, {
-      method: 'GET',
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.applications || [];
-  } catch {
-    return [];
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/applications?limit=${limit}`);
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        return data.applications || [];
+      }
+    } catch {
+      continue;
+    }
   }
+  return [];
 }
 
 /**
@@ -186,28 +198,38 @@ export async function calculateAtsScore(
   jobExperienceRequired: string = '',
   jobKeySkills: string[] = []
 ): Promise<AtsScoreResult> {
-  const baseUrl = getEngineBaseUrl();
-  const res = await fetch(`${baseUrl}/api/ats-score`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      candidate_skills: profile.top_skills || [],
-      candidate_experience_years: profile.total_experience_years || 3.0,
-      candidate_domain: profile.primary_domain || '',
-      candidate_target_roles: profile.target_roles || [],
-      candidate_resume_text: profile.raw_resume_text || '',
-      job_title: jobTitle,
-      job_description: jobDescription,
-      job_experience_required: jobExperienceRequired,
-      job_key_skills: jobKeySkills,
-    }),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/ats-score`);
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    throw new Error('Failed to calculate ATS score');
+  const payload = {
+    candidate_skills: profile.top_skills || [],
+    candidate_experience_years: profile.total_experience_years || 3.0,
+    candidate_domain: profile.primary_domain || '',
+    candidate_target_roles: profile.target_roles || [],
+    candidate_resume_text: profile.raw_resume_text || '',
+    job_title: jobTitle,
+    job_description: jobDescription,
+    job_experience_required: jobExperienceRequired,
+    job_key_skills: jobKeySkills,
+  };
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return await res.json();
+  throw lastError || new Error('Failed to calculate ATS score');
 }
 
 /**
@@ -217,26 +239,29 @@ export async function scoreDiscoveredJobsWithResume(
   profile: CandidateParsedProfile,
   jobs: DiscoveredJobItem[]
 ): Promise<DiscoveredJobItem[]> {
-  const baseUrl = getEngineBaseUrl();
-  try {
-    const res = await fetch(`${baseUrl}/api/score-jobs`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        candidate_skills: profile.top_skills || [],
-        candidate_experience_years: profile.total_experience_years || 3.0,
-        candidate_domain: profile.primary_domain || '',
-        candidate_target_roles: profile.target_roles || [],
-        candidate_resume_text: profile.raw_resume_text || '',
-        jobs: jobs,
-      }),
-    });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/score-jobs`);
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidate_skills: profile.top_skills || [],
+          candidate_experience_years: profile.total_experience_years || 3.0,
+          candidate_domain: profile.primary_domain || '',
+          candidate_target_roles: profile.target_roles || [],
+          candidate_resume_text: profile.raw_resume_text || '',
+          jobs: jobs,
+        }),
+      });
 
-    if (!res.ok) return jobs;
-    const data = await res.json();
-    return data.scored_jobs || jobs;
-  } catch (err) {
-    console.warn('[applicationApi] Batch ATS scoring failed, returning original jobs:', err);
-    return jobs;
+      if (res.ok) {
+        const data = await res.json();
+        return data.scored_jobs || jobs;
+      }
+    } catch {
+      continue;
+    }
   }
+  return jobs;
 }

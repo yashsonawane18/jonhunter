@@ -4,11 +4,37 @@
  * Enhanced for Instant Sub-20ms Search, Pan-India Geo-Routing & Consulting ATS Scoring.
  */
 
-const ENGINE_BASE_URL = (
-  (import.meta as any).env?.VITE_JOB_ENGINE_URL ||
-  (import.meta as any).env?.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://127.0.0.1:5055' : '')
-).replace(/\/$/, '');
+export function getJobEngineCandidates(): string[] {
+  const explicit = (import.meta as any).env?.VITE_JOB_ENGINE_URL;
+  const isLocal =
+    typeof window !== 'undefined' &&
+    ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const candidates: string[] = [];
+
+  if (explicit) {
+    candidates.push(explicit.replace(/\/$/, ''));
+  }
+  if (isLocal) {
+    candidates.push('http://127.0.0.1:5055');
+    candidates.push('http://localhost:5055');
+  }
+  const apiBase = (import.meta as any).env?.VITE_API_BASE_URL;
+  if (apiBase) {
+    candidates.push(apiBase.replace(/\/$/, ''));
+  }
+  if (!isLocal) {
+    candidates.push('');
+    candidates.push('http://127.0.0.1:5055');
+  }
+  return Array.from(new Set(candidates));
+}
+
+export const getEngineBaseUrl = (): string => {
+  const candidates = getJobEngineCandidates();
+  return candidates[0] || 'http://127.0.0.1:5055';
+};
+
+const ENGINE_BASE_URL = getEngineBaseUrl();
 
 export interface ConnectionRecord {
   name: string;
@@ -114,16 +140,19 @@ export async function checkJobEngineHealth(): Promise<boolean> {
  * Fetches canonical Pan-India location dropdown list from backend.
  */
 export async function fetchPanIndiaLocations(): Promise<string[]> {
-  try {
-    const res = await fetch(`${ENGINE_BASE_URL}/api/locations`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.locations && Array.isArray(data.locations)) {
-        return data.locations;
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/locations`);
+  for (const ep of endpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.locations && Array.isArray(data.locations)) {
+          return data.locations;
+        }
       }
+    } catch {
+      continue;
     }
-  } catch (err) {
-    console.log('Location fetch notice:', err);
   }
   return [
     'All India (Remote & Nationwide)',
@@ -165,47 +194,59 @@ export async function searchInstantJobs(
   noticePeriod: string = 'Immediate',
   skills: string[] = []
 ): Promise<{ success: boolean; total: number; jobs: DiscoveredJobItem[] }> {
-  const response = await fetch(`${ENGINE_BASE_URL}/api/jobs/search`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: query || '',
-      location: location || 'All India (Remote & Nationwide)',
-      domain: domain || '',
-      candidate: candidate
-        ? {
-            name: candidate.name || 'Candidate',
-            email: candidate.email || 'candidate@example.com',
-            phone: candidate.phone || '',
-            location: candidate.location || location,
-            total_experience_years: candidate.total_experience_years ?? 3.0,
-            primary_domain: candidate.primary_domain || 'Software Engineering',
-            target_roles: candidate.target_roles || [],
-            top_skills: candidate.top_skills || [],
-            raw_resume_text: candidate.raw_resume_text || '',
-            work_mode: candidate.work_mode || workMode,
-            open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
-            notice_period: candidate.notice_period || noticePeriod,
-          }
-        : null,
-      limit,
-      source,
-      exclude_job_ids: excludeJobIds,
-      offset,
-      experience_level: experienceLevel || 'all',
-      work_mode: workMode || 'remote_included',
-      open_to_relocation: openToRelocation,
-      notice_period: noticePeriod || 'Immediate',
-      skills: skills || [],
-    }),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/jobs/search`);
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Instant search failed: ${errorText || response.statusText}`);
+  const payload = {
+    query: query || '',
+    location: location || 'All India (Remote & Nationwide)',
+    domain: domain || '',
+    candidate: candidate
+      ? {
+          name: candidate.name || 'Candidate',
+          email: candidate.email || 'candidate@example.com',
+          phone: candidate.phone || '',
+          location: candidate.location || location,
+          total_experience_years: candidate.total_experience_years ?? 3.0,
+          primary_domain: candidate.primary_domain || 'Software Engineering',
+          target_roles: candidate.target_roles || [],
+          top_skills: candidate.top_skills || [],
+          raw_resume_text: candidate.raw_resume_text || '',
+          work_mode: candidate.work_mode || workMode,
+          open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
+          notice_period: candidate.notice_period || noticePeriod,
+        }
+      : null,
+    limit,
+    source,
+    exclude_job_ids: excludeJobIds,
+    offset,
+    experience_level: experienceLevel || 'all',
+    work_mode: workMode || 'remote_included',
+    open_to_relocation: openToRelocation,
+    notice_period: noticePeriod || 'Immediate',
+    skills: skills || [],
+  };
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+      const errorText = await response.text();
+      lastError = new Error(`Instant search failed: ${errorText || response.statusText}`);
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return response.json();
+  throw lastError || new Error('Instant search failed: Unable to reach Job Discovery Engine.');
 }
 
 /**
@@ -225,44 +266,56 @@ export async function findMatchingJobs(
   noticePeriod: string = 'Immediate',
   skills: string[] = []
 ): Promise<DiscoveredJobItem[]> {
-  const response = await fetch(`${ENGINE_BASE_URL}/api/find-jobs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      candidate: {
-        name: candidate.name || 'Candidate',
-        email: candidate.email,
-        phone: candidate.phone || '',
-        location: candidate.location || 'All India (Remote & Nationwide)',
-        total_experience_years: candidate.total_experience_years ?? 3.0,
-        primary_domain: candidate.primary_domain || 'Software Engineering',
-        target_roles: candidate.target_roles || [],
-        top_skills: candidate.top_skills || [],
-        raw_resume_text: candidate.raw_resume_text || '',
-        work_mode: candidate.work_mode || workMode,
-        open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
-        notice_period: candidate.notice_period || noticePeriod,
-      },
-      max_jobs: maxJobs,
-      reference_role: referenceRole,
-      location_override: locationOverride,
-      source: source || 'all',
-      exclude_job_ids: excludeJobIds,
-      offset,
-      experience_level: experienceLevel || 'all',
-      work_mode: workMode || 'remote_included',
-      open_to_relocation: openToRelocation,
-      notice_period: noticePeriod || 'Immediate',
-      skills: skills || [],
-    }),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/find-jobs`);
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Job discovery failed: ${errorText || response.statusText}`);
+  const payload = {
+    candidate: {
+      name: candidate.name || 'Candidate',
+      email: candidate.email,
+      phone: candidate.phone || '',
+      location: candidate.location || 'All India (Remote & Nationwide)',
+      total_experience_years: candidate.total_experience_years ?? 3.0,
+      primary_domain: candidate.primary_domain || 'Software Engineering',
+      target_roles: candidate.target_roles || [],
+      top_skills: candidate.top_skills || [],
+      raw_resume_text: candidate.raw_resume_text || '',
+      work_mode: candidate.work_mode || workMode,
+      open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
+      notice_period: candidate.notice_period || noticePeriod,
+    },
+    max_jobs: maxJobs,
+    reference_role: referenceRole,
+    location_override: locationOverride,
+    source: source || 'all',
+    exclude_job_ids: excludeJobIds,
+    offset,
+    experience_level: experienceLevel || 'all',
+    work_mode: workMode || 'remote_included',
+    open_to_relocation: openToRelocation,
+    notice_period: noticePeriod || 'Immediate',
+    skills: skills || [],
+  };
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+      const errorText = await response.text();
+      lastError = new Error(`Job discovery failed: ${errorText || response.statusText}`);
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return response.json();
+  throw lastError || new Error('Job discovery failed: Unable to reach Job Discovery Engine.');
 }
 
 /**
@@ -279,48 +332,68 @@ export async function findTwoSourceJobs(
   career_page_jobs: DiscoveredJobItem[];
   counts: { total: number; linkedin: number; career_pages: number };
 }> {
-  const response = await fetch(`${ENGINE_BASE_URL}/api/find-two-source-jobs`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      candidate: {
-        name: candidate.name || 'Candidate',
-        email: candidate.email,
-        phone: candidate.phone || '',
-        location: candidate.location || 'All India (Remote & Nationwide)',
-        total_experience_years: candidate.total_experience_years ?? 3.0,
-        primary_domain: candidate.primary_domain || 'Software Engineering',
-        target_roles: candidate.target_roles || [],
-        top_skills: candidate.top_skills || [],
-        raw_resume_text: candidate.raw_resume_text || '',
-      },
-      max_jobs: maxJobs,
-      reference_role: referenceRole,
-      location_override: locationOverride,
-    }),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/find-two-source-jobs`);
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Two-source job discovery failed: ${errorText || response.statusText}`);
+  const payload = {
+    candidate: {
+      name: candidate.name || 'Candidate',
+      email: candidate.email,
+      phone: candidate.phone || '',
+      location: candidate.location || 'All India (Remote & Nationwide)',
+      total_experience_years: candidate.total_experience_years ?? 3.0,
+      primary_domain: candidate.primary_domain || 'Software Engineering',
+      target_roles: candidate.target_roles || [],
+      top_skills: candidate.top_skills || [],
+      raw_resume_text: candidate.raw_resume_text || '',
+    },
+    max_jobs: maxJobs,
+    reference_role: referenceRole,
+    location_override: locationOverride,
+  };
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+      const errorText = await response.text();
+      lastError = new Error(`Two-source job discovery failed: ${errorText || response.statusText}`);
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return response.json();
+  throw lastError || new Error('Two-source job discovery failed: Unable to reach Job Discovery Engine.');
 }
 
 /**
  * Retrieves all historically discovered batches and jobs for a candidate.
  */
 export async function getDiscoveredJobsHistory(candidateEmail: string): Promise<DiscoveredJobsResponse> {
-  const response = await fetch(
-    `${ENGINE_BASE_URL}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
+  const endpoints = getJobEngineCandidates().map(
+    (base) => `${base}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
   );
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`Failed to load discovered jobs history for ${candidateEmail}`);
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return response.json();
+  throw lastError || new Error(`Failed to load discovered jobs history for ${candidateEmail}`);
 }
 
 /**
@@ -332,20 +405,31 @@ export async function updateJobStatus(
   status: 'Applied' | 'Not Applied',
   remarks = ''
 ): Promise<{ status: string; new_status: string; remarks: string }> {
-  const response = await fetch(`${ENGINE_BASE_URL}/api/update-job-status`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      candidate_email: candidateEmail,
-      job_id: jobId,
-      status,
-      remarks,
-    }),
-  });
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/update-job-status`);
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`Failed to update job status`);
+  const payload = {
+    candidate_email: candidateEmail,
+    job_id: jobId,
+    status,
+    remarks,
+  };
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  return response.json();
+  throw lastError || new Error('Failed to update job status');
 }
