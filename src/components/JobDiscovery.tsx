@@ -54,13 +54,22 @@ interface JobDiscoveryProps {
 
 const getToken = (): string =>
   localStorage.getItem('session_token') ||
+  sessionStorage.getItem('session_token') ||
   localStorage.getItem('token') ||
+  sessionStorage.getItem('token') ||
   '';
 
-const getHeaders = (): Record<string, string> => ({
-  'Content-Type': 'application/json',
-  'X-SESSION-TOKEN': getToken(),
-});
+const getHeaders = (): Record<string, string> => {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['X-SESSION-TOKEN'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 function timeAgo(dateString: string): string {
   try {
@@ -354,23 +363,30 @@ const JobDiscovery: React.FC<JobDiscoveryProps> = ({ onLogout, onNavigate }) => 
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const token = getToken();
+      if (!token && !user_id) {
+        setProfileLoaded(true);
+        return;
+      }
       try {
-        // Fetch from progress profile (has isAdmin + interests)
-        const profileRes = await fetch(API_ENDPOINTS.PROGRESS_PROFILE(), {
-          headers: getHeaders(),
-        });
-        if (profileRes.ok) {
-          const data = await profileRes.json();
-          setProfile({
-            aspirations: data.aspirations || '',
-            interests: data.interests || [],
-            isAdmin: !!data.isAdmin,
-            experience: data.experience || '',
+        if (token) {
+          // Fetch from progress profile (has isAdmin + interests)
+          const profileRes = await fetch(API_ENDPOINTS.PROGRESS_PROFILE(), {
+            headers: getHeaders(),
           });
+          if (profileRes.ok) {
+            const data = await profileRes.json();
+            setProfile({
+              aspirations: data.aspirations || '',
+              interests: data.interests || [],
+              isAdmin: !!data.isAdmin,
+              experience: data.experience || '',
+            });
+          }
         }
 
         // Also fetch user skills from user details
-        if (user_id) {
+        if (token && user_id) {
           const userRes = await fetch(API_ENDPOINTS.USER_DETAILS(user_id), {
             headers: getHeaders(),
           });
@@ -388,12 +404,14 @@ const JobDiscovery: React.FC<JobDiscoveryProps> = ({ onLogout, onNavigate }) => 
         }
 
         // Fetch saved jobs to initialize savedJobIds
-        try {
-          const savedJobs = await fetchSavedDiscoveredJobs();
-          const ids = new Set(savedJobs.map((j) => j.external_job_id));
-          setSavedJobIds(ids);
-        } catch (err) {
-          console.error('[JobDiscovery] Saved jobs fetch error:', err);
+        if (token) {
+          try {
+            const savedJobs = await fetchSavedDiscoveredJobs();
+            const ids = new Set(savedJobs.map((j) => j.external_job_id));
+            setSavedJobIds(ids);
+          } catch (err) {
+            console.error('[JobDiscovery] Saved jobs fetch error:', err);
+          }
         }
       } catch (err) {
         console.error('[JobDiscovery] Profile fetch error:', err);

@@ -80,10 +80,17 @@ const getToken = (): string =>
   sessionStorage.getItem('token') ||
   '';
 
-const getHeaders = (): Record<string, string> => ({
-  'Content-Type': 'application/json',
-  'X-SESSION-TOKEN': getToken(),
-});
+const getHeaders = (): Record<string, string> => {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['X-SESSION-TOKEN'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 function normalizeJob(item: any): DiscoveredJobListing {
   const rawMatchScore = item.matchScore ?? item.match_score ?? item.score;
@@ -177,22 +184,34 @@ export async function saveDiscoveredJob(
 }
 
 export async function fetchPendingRequests(): Promise<PendingRequest[]> {
-  const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_ADMIN_PENDING, {
-    headers: getHeaders(),
-  });
+  const token = getToken();
+  if (!token) return [];
+  try {
+    const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_ADMIN_PENDING, {
+      headers: getHeaders(),
+    });
 
-  if (!response.ok) return [];
-  return response.json();
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchPendingCount(): Promise<number> {
-  const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_ADMIN_PENDING_COUNT, {
-    headers: getHeaders(),
-  });
+  const token = getToken();
+  if (!token) return 0;
+  try {
+    const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_ADMIN_PENDING_COUNT, {
+      headers: getHeaders(),
+    });
 
-  if (!response.ok) return 0;
-  const data = await response.json();
-  return data.count || 0;
+    if (!response.ok) return 0;
+    const data = await response.json();
+    return data.count || 0;
+  } catch {
+    return 0;
+  }
 }
 
 export async function applyOnBehalf(discoveredJobId: string): Promise<SavedDiscoveredJob> {
@@ -209,10 +228,16 @@ export async function applyOnBehalf(discoveredJobId: string): Promise<SavedDisco
 }
 
 export async function fetchSavedDiscoveredJobs(): Promise<SavedDiscoveredJob[]> {
-  const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_LIST, {
-    headers: getHeaders(),
-  });
+  const token = getToken();
+  if (!token) return [];
+  try {
+    const response = await fetch(API_ENDPOINTS.DISCOVERED_JOBS_LIST, {
+      headers: getHeaders(),
+    });
 
-  if (!response.ok) return [];
-  return response.json();
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
 }
