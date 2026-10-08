@@ -189,6 +189,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
   const [resumeProfile, setResumeProfile] = useState<CandidateParsedProfile | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string>('');
   const [parsingResume, setParsingResume] = useState<boolean>(false);
+  const [minAtsScoreFilter, setMinAtsScoreFilter] = useState<'all' | '70' | '80' | '85'>('all');
 
   // Search, Seniority & Filter state
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -549,7 +550,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
     executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false, resumeProfile, undefined, 'remote_included', true, 'Immediate', []);
   };
 
-  // 3. Resume Upload & Two-Tier Job Matching Workflow (Tier 1: Saved History Check -> Tier 2: Fresh Market Discovery)
+  // 3. Resume Upload & 70-100% ATS Matching Workflow
   const handleResumeUpload = async (file: File) => {
     setParsingResume(true);
     try {
@@ -559,6 +560,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
 
       setResumeProfile(parsedProf);
       setResumeFileName(file.name);
+      setMinAtsScoreFilter('70'); // Set default ATS filter to 70%+ for precision matching
       toast.success(`Resume parsed for ${parsedProf.name}! Domain: ${parsedProf.primary_domain}`);
 
       // Extract recommended target role and seniority
@@ -573,48 +575,43 @@ export const DiscoveredJobsTracker: React.FC = () => {
         else autoSeniority = 'lead';
       }
 
-      // Auto-populate search bar and seniority filters
+      // Auto-populate search bar, seniority, and skill filters
       if (targetRole) {
         setSearchQuery(targetRole);
       }
       setSelectedSeniority(autoSeniority);
+      const extractedSkills = (parsedProf.top_skills || []).slice(0, 8);
+      setSelectedSkills(extractedSkills);
 
-      // TIER 1: Check existing saved history (allDiscoveredJobs) and batch-score them
+      // Direct Live Market Discovery for 70-100% ATS Matching Requisitions
+      toast.info(`Discovering verified live requisitions matching ${parsedProf.name}'s profile (70-100% ATS Target)...`);
+      await executeFreshSearch(
+        targetRole || searchQuery,
+        selectedLocation,
+        autoSeniority,
+        selectedChannel,
+        false,
+        parsedProf,
+        undefined,
+        selectedWorkMode,
+        isOpenToRelocation,
+        selectedNoticePeriod,
+        extractedSkills
+      );
+
+      // Asynchronously evaluate existing saved history with updated scores
       if (allDiscoveredJobs.length > 0) {
-        toast.info(`Evaluating ${allDiscoveredJobs.length} saved jobs in history against ${parsedProf.name}'s resume...`);
-        const scoredSavedJobs = await scoreDiscoveredJobsWithResume(parsedProf, allDiscoveredJobs);
-
-        // Update allDiscoveredJobs with scored metrics so they persist
-        setAllDiscoveredJobs(scoredSavedJobs);
-        try {
-          localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(scoredSavedJobs.slice(0, 1000)));
-        } catch (e) {
-          console.warn('LocalStorage save notice:', e);
-        }
-
-        // Filter matching saved jobs: ATS Score >= 60% and keyword / domain compatibility
-        const qTerms = targetRole.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
-        const matchingSavedJobs = scoredSavedJobs.filter((j) => {
-          const score = j.ats_score || 0;
-          if (score < 60) return false;
-          if (qTerms.length === 0) return score >= 65;
-          const text = `${j.job_title} ${j.key_skills?.join(' ') || ''} ${j.job_description || ''}`.toLowerCase();
-          return qTerms.some((term) => text.includes(term)) || score >= 70;
-        });
-
-        if (matchingSavedJobs.length > 0) {
-          // Sort by ATS Score descending
-          const sortedMatches = [...matchingSavedJobs].sort((a, b) => (b.ats_score || 0) - (a.ats_score || 0));
-          setJobsList(sortedMatches.slice(0, 10));
-          setActiveView('current_batch');
-          toast.success(`🎯 Found ${sortedMatches.length} high-match saved opportunities (ATS ≥ 60%) in your history! You can also click "Find 5 Fresh Jobs" to search live.`);
-          return;
-        }
+        scoreDiscoveredJobsWithResume(parsedProf, allDiscoveredJobs)
+          .then((scoredSavedJobs) => {
+            setAllDiscoveredJobs(scoredSavedJobs);
+            try {
+              localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(scoredSavedJobs.slice(0, 1000)));
+            } catch (e) {
+              console.warn('LocalStorage save notice:', e);
+            }
+          })
+          .catch((err) => console.log('Background history score notice:', err));
       }
-
-      // TIER 2: If no high-matching saved jobs found, automatically discover 5 fresh jobs from live market
-      toast.info(`No saved jobs matched "${targetRole || parsedProf.primary_domain}" with high ATS score. Discovering 5 fresh live jobs...`);
-      executeFreshSearch(targetRole || searchQuery, selectedLocation, autoSeniority, selectedChannel, false, parsedProf);
     } catch (err: any) {
       toast.error(`Resume parsing failed: ${err.message}`);
     } finally {
@@ -625,6 +622,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
   const handleClearResume = () => {
     setResumeProfile(null);
     setResumeFileName('');
+    setMinAtsScoreFilter('all');
     toast.info('Resume cleared. Showing standard verified jobs view.');
     executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, null);
   };
@@ -806,6 +804,14 @@ export const DiscoveredJobsTracker: React.FC = () => {
     return allDiscoveredJobs.filter((j) => j.status !== 'Applied').length;
   }, [allDiscoveredJobs]);
 
+  const displayedJobsList = useMemo(() => {
+    if (!resumeProfile || minAtsScoreFilter === 'all') {
+      return jobsList;
+    }
+    const minThreshold = parseInt(minAtsScoreFilter, 10);
+    return jobsList.filter((j) => ((j.ats_score ?? (j as any).match_score ?? 0) >= minThreshold));
+  }, [jobsList, resumeProfile, minAtsScoreFilter]);
+
   const isFiltersActive =
     searchQuery ||
     selectedActiveRole ||
@@ -856,43 +862,103 @@ export const DiscoveredJobsTracker: React.FC = () => {
       {/* Deterministic Zero-LLM Resume Scanner Banner */}
       <div className="p-4 sm:p-5 rounded-2xl border border-zinc-800 bg-zinc-950/90 shadow-xl">
         {resumeProfile ? (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                    Consulting ATS Scoring Active
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">
-                    {resumeFileName || 'Resume Evaluated'}
-                  </span>
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-6 h-6 text-emerald-400" />
                 </div>
-                <h4 className="text-sm font-bold text-white">
-                  {resumeProfile.name} • {resumeProfile.primary_domain} ({resumeProfile.total_experience_years} yrs exp)
-                </h4>
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {resumeProfile.top_skills.slice(0, 8).map((s) => (
-                    <span key={s} className="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700">
-                      {s}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      Consulting ATS Scoring Active
                     </span>
-                  ))}
-                  {resumeProfile.top_skills.length > 8 && (
-                    <span className="text-[10px] text-zinc-500">+{resumeProfile.top_skills.length - 8} more</span>
-                  )}
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">
+                      {resumeFileName || 'Resume Evaluated'}
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-bold text-white">
+                    {resumeProfile.name} • {resumeProfile.primary_domain} ({resumeProfile.total_experience_years} yrs exp)
+                  </h4>
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {resumeProfile.top_skills.slice(0, 8).map((s) => (
+                      <span key={s} className="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700">
+                        {s}
+                      </span>
+                    ))}
+                    {resumeProfile.top_skills.length > 8 && (
+                      <span className="text-[10px] text-zinc-500">+{resumeProfile.top_skills.length - 8} more</span>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleClearResume}
+                className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-xs font-bold text-white transition-all self-start sm:self-center shadow-sm"
+              >
+                Clear / Change Resume
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={handleClearResume}
-              className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-xs font-bold text-white transition-all self-start sm:self-center shadow-sm"
-            >
-              Clear / Change Resume
-            </button>
+            {/* Quick 1-Click ATS Score Fit Filter Bar */}
+            <div className="pt-2.5 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mr-1 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#00C896]" />
+                  ATS Match Filter:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMinAtsScoreFilter('70')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    minAtsScoreFilter === '70'
+                      ? 'bg-emerald-500 text-black border border-emerald-400 shadow-md shadow-emerald-500/20 scale-105'
+                      : 'bg-zinc-900 text-emerald-400 hover:bg-zinc-800 border border-emerald-500/30'
+                  }`}
+                >
+                  <span>🟢 70%+ High ATS Match</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinAtsScoreFilter('80')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    minAtsScoreFilter === '80'
+                      ? 'bg-purple-400 text-black border border-purple-300 shadow-md shadow-purple-400/20 scale-105'
+                      : 'bg-zinc-900 text-purple-300 hover:bg-zinc-800 border border-purple-500/30'
+                  }`}
+                >
+                  <span>🟣 80%+ Strong Fit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinAtsScoreFilter('85')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    minAtsScoreFilter === '85'
+                      ? 'bg-amber-400 text-black border border-amber-300 shadow-md shadow-amber-400/20 scale-105'
+                      : 'bg-zinc-900 text-amber-300 hover:bg-zinc-800 border border-amber-500/30'
+                  }`}
+                >
+                  <span>👑 85%+ Top Tier</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMinAtsScoreFilter('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    minAtsScoreFilter === 'all'
+                      ? 'bg-zinc-700 text-white border border-zinc-500'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                  }`}
+                >
+                  <span>All Matches</span>
+                </button>
+              </div>
+
+              <span className="text-[11px] text-zinc-400 font-medium">
+                Active Matches: <strong className="text-[#00C896] font-bold font-mono">{displayedJobsList.length}</strong> / {jobsList.length}
+              </span>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1475,7 +1541,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   </button>
                 )}
                 <span className="bg-zinc-800/80 px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300 font-mono text-[11px]">
-                  Showing <span className="text-[#00C896] font-bold">{jobsList.length}</span> fresh jobs
+                  Showing <span className="text-[#00C896] font-bold">{displayedJobsList.length}</span> of {jobsList.length} fresh jobs
                 </span>
               </div>
             </div>
@@ -1513,9 +1579,24 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   </button>
                 </div>
               </div>
+            ) : displayedJobsList.length === 0 ? (
+              <div className="p-12 text-center text-zinc-500 space-y-3">
+                <Sparkles className="w-10 h-10 mx-auto text-amber-400" />
+                <p className="text-base text-zinc-200 font-bold">No jobs meet the {minAtsScoreFilter}% ATS filter threshold</p>
+                <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                  There are {jobsList.length} total fresh jobs available for this search. Click below to view all matches or broaden your skills.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setMinAtsScoreFilter('all')}
+                  className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all"
+                >
+                  Show All {jobsList.length} Requisitions
+                </button>
+              </div>
             ) : (
               <div className="divide-y divide-zinc-800/80">
-                {jobsList.map((job) => {
+                {displayedJobsList.map((job) => {
                   const isCareer =
                     job.source_type?.toLowerCase().includes('career') ||
                     (!job.application_url?.includes('linkedin.com') && !job.source_type?.toLowerCase().includes('linkedin'));
@@ -1657,6 +1738,50 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           </div>
                         )}
 
+                        {/* Resume ATS Matched & Missing Skills Breakdown */}
+                        {resumeProfile && (
+                          <div className="pt-1.5 space-y-1">
+                            {Array.isArray((job as any).matched_skills) && (job as any).matched_skills.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-0.5">
+                                  <Check className="w-3 h-3 text-emerald-400" />
+                                  Matched:
+                                </span>
+                                {(job as any).matched_skills.map((skill: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="px-2 py-0.5 rounded-md text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold"
+                                  >
+                                    ✓ {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {Array.isArray((job as any).missing_skills) && (job as any).missing_skills.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                                  ⚡ Highlight:
+                                </span>
+                                {(job as any).missing_skills.slice(0, 4).map((skill: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="px-2 py-0.5 rounded-md text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 font-medium"
+                                  >
+                                    + {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {(job as any).experience_fit_text && (
+                              <p className="text-[11px] text-zinc-400 italic">
+                                🎯 {(job as any).experience_fit_text}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
                         {/* Status Toggle & Remarks Notes Input */}
                         <div className="pt-1 flex flex-wrap items-center gap-2 max-w-xl">
                           <button
@@ -1745,8 +1870,8 @@ export const DiscoveredJobsTracker: React.FC = () => {
                                 description: job.job_description || '',
                                 skills: Array.isArray(job.key_skills) ? job.key_skills : [],
                                 applicationUrl: job.application_url || '',
-                                matchScore: job.ats_score || 90,
-                                ats_score: job.ats_score || 90,
+                                matchScore: resumeProfile ? job.ats_score : undefined,
+                                ats_score: resumeProfile ? job.ats_score : undefined,
                                 matched_skills: Array.isArray((job as any).matched_skills) ? (job as any).matched_skills : [],
                                 missing_skills: Array.isArray((job as any).missing_skills) ? (job as any).missing_skills : [],
                                 experience_fit_text: (job as any).experience_fit_text || '',

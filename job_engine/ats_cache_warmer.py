@@ -504,11 +504,21 @@ def search_instant_jobs(
             final_tuples += general_matches
         final_tuples.sort(key=lambda x: x[1], reverse=True)
 
-    # 3. Transform & Rank with Conditional ATS Matching
-    postings: List[JobPosting] = []
-    has_real_resume = bool(candidate and candidate.raw_resume_text and len(candidate.raw_resume_text.strip()) > 30)
+    # 3. Transform & Rank with Global ATS Matching
+    has_candidate_profile = bool(
+        candidate and (
+            (candidate.raw_resume_text and len(candidate.raw_resume_text.strip()) > 20)
+            or (candidate.top_skills and len(candidate.top_skills) > 0)
+            or candidate.primary_domain
+        )
+    )
 
-    for idx, (item, rel_score, _) in enumerate(final_tuples[:limit]):
+    all_evaluated_postings: List[Tuple[JobPosting, float]] = []
+
+    # If candidate profile is active, evaluate top candidate pool (up to 150 matching jobs)
+    eval_pool = final_tuples[:150] if has_candidate_profile else final_tuples[:limit]
+
+    for idx, (item, rel_score, _) in enumerate(eval_pool):
         title = item["job_title"]
         comp = item["company"]
         loc = item["location"]
@@ -548,16 +558,17 @@ def search_instant_jobs(
                     if ak_cap not in matched_skills:
                         matched_skills.append(ak_cap)
 
-        # Calculate ATS Match ONLY if candidate has uploaded their resume
-        if has_real_resume and candidate:
+        # Calculate ATS Match if candidate profile is present
+        if has_candidate_profile and candidate:
             match_res = calculate_consulting_match(
-                candidate_skills=candidate.top_skills,
-                candidate_experience_years=candidate.total_experience_years,
-                candidate_domain=candidate.primary_domain,
-                candidate_target_roles=candidate.target_roles,
+                candidate_skills=candidate.top_skills or [],
+                candidate_experience_years=candidate.total_experience_years or 3.0,
+                candidate_domain=candidate.primary_domain or "",
+                candidate_target_roles=candidate.target_roles or [],
                 candidate_resume_text=candidate.raw_resume_text or "",
                 job_title=title,
                 job_description=desc,
+                job_key_skills=job_skills,
             )
             ats_score = match_res.get("ats_score")
             match_score = ats_score
@@ -565,33 +576,38 @@ def search_instant_jobs(
             missing_skills = match_res.get("missing_skills", [])
             exp_match_text = match_res.get("experience_fit_text", "Compatible")
 
-        postings.append(
-            JobPosting(
-                id=item["id"],
-                job_title=title,
-                company=comp,
-                location=loc,
-                job_type="Full-time",
-                salary=sal_range,
-                experience_required=exp_range,
-                key_skills=job_skills,
-                application_url=item["application_url"],
-                status="Not Applied",
-                total_call_received=False,
-                job_description=desc[:600],
-                source_type=item["source_type"],
-                apply_type="Career Portal Apply (No Redirect)",
-                ats_score=ats_score,
-                match_score=match_score,
-                matched_skills=matched_skills,
-                missing_skills=missing_skills,
-                experience_match=exp_match_text,
-                connections=connections,
-                posted_time=recency,
-            )
+        posting = JobPosting(
+            id=item["id"],
+            job_title=title,
+            company=comp,
+            location=loc,
+            job_type="Full-time",
+            salary=sal_range,
+            experience_required=exp_range,
+            key_skills=job_skills,
+            application_url=item["application_url"],
+            status="Not Applied",
+            total_call_received=False,
+            job_description=desc[:600],
+            source_type=item["source_type"],
+            apply_type="Career Portal Apply (No Redirect)",
+            ats_score=ats_score,
+            match_score=match_score,
+            matched_skills=matched_skills,
+            missing_skills=missing_skills,
+            experience_match=exp_match_text,
+            connections=connections,
+            posted_time=recency,
         )
 
-    return postings
+        sort_priority = (ats_score if ats_score is not None else rel_score)
+        all_evaluated_postings.append((posting, sort_priority))
+
+    if has_candidate_profile:
+        # Sort by ATS score descending
+        all_evaluated_postings.sort(key=lambda x: (x[1] or 0), reverse=True)
+
+    return [p[0] for p in all_evaluated_postings[:limit]]
 
 def infer_salary_range(title: str, experience_level: str = "all") -> str:
     t = (title or "").lower()

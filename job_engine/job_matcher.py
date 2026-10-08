@@ -768,80 +768,31 @@ def calculate_deep_ats_score(
     experience_required_text: str
 ) -> Tuple[int, List[str], List[str], str]:
     """
-    Advanced Multi-Tier Weighted ATS Compatibility Engine:
-    - Tier 1: Weighted Core Tech Stack & Jaccard Alignment (40%)
-    - Tier 2: Semantic Specialization & Seniority Fit (35%)
-    - Tier 3: Gaussian Experience Curve Fit (25%)
-    - Dynamic Skill Gap Extraction (Matched vs Missing Skills)
+    Calibrated 4-Tier Consulting ATS Compatibility Engine.
+    Evaluates technical stack (40%), domain & target role (25%), experience curve (20%),
+    and consulting competencies (15%) with strict gating.
     """
-    jd_lower = (job_title + " " + job_description).lower()
-    resume_text_lower = ((candidate.raw_resume_text or "") + " " + " ".join(candidate.top_skills)).lower()
+    from consulting_matcher import calculate_consulting_match
 
-    # 1. Match Candidate Skills against JD
-    matched_skills = []
-    for skill in candidate.top_skills:
-        pattern = rf"\b{re.escape(skill.lower())}\b"
-        if re.search(pattern, jd_lower):
-            matched_skills.append(skill)
+    res = calculate_consulting_match(
+        candidate_skills=candidate.top_skills or [],
+        candidate_experience_years=float(candidate.total_experience_years or 3.0),
+        candidate_domain=candidate.primary_domain or "",
+        candidate_target_roles=candidate.target_roles or [],
+        candidate_resume_text=candidate.raw_resume_text or "",
+        job_title=job_title,
+        job_description=job_description,
+        job_experience_required=experience_required_text,
+        job_key_skills=None,
+    )
 
-    # 2. Extract JD Required Skills from Comprehensive Ontology
-    jd_skills = []
-    for s in COMPREHENSIVE_SKILL_ONTOLOGY:
-        if re.search(rf"\b{re.escape(s.lower())}\b", jd_lower):
-            jd_skills.append(s)
+    return (
+        int(res["ats_score"]),
+        res["matched_skills"],
+        res["missing_skills"][:4],
+        res["experience_fit_text"]
+    )
 
-    # 3. Compute Missing Skills (Skill Gap Matrix)
-    missing_skills = []
-    for s in jd_skills:
-        if not re.search(rf"\b{re.escape(s.lower())}\b", resume_text_lower):
-            missing_skills.append(s)
-
-    # Tier 1: Tech Stack Weighted Jaccard Score (40 Points)
-    if jd_skills:
-        skill_ratio = len(matched_skills) / max(len(jd_skills), 1)
-    else:
-        skill_ratio = len(matched_skills) / max(len(candidate.top_skills), 1)
-    tech_score = min(40, int(skill_ratio * 40))
-
-    # Tier 2: Title & Domain Fit (35 Points)
-    title_score = 22
-    target_roles_list = [r.lower() for r in (candidate.target_roles or [])]
-    if candidate.reference_role:
-        target_roles_list.append(candidate.reference_role.lower())
-
-    for r in target_roles_list:
-        words = [w for w in re.split(r"\W+", r) if len(w) > 2]
-        for w in words:
-            if w in job_title.lower():
-                title_score += 10
-
-    title_score = min(35, title_score)
-
-    # Tier 3: Gaussian Experience Curve Fit (25 Points)
-    exp_req_num = 10.0 if candidate.total_experience_years >= 15 else (5.0 if candidate.total_experience_years >= 6 else 3.0)
-    exp_m = re.search(r"(\d+(\.\d+)?)", experience_required_text)
-    if exp_m:
-        exp_req_num = float(exp_m.group(1))
-
-    diff = abs(candidate.total_experience_years - exp_req_num)
-    sigma = 5.0 if candidate.total_experience_years >= 12 else 2.5
-    exp_gaussian = 25.0 * math.exp(- (diff ** 2) / (2 * (sigma ** 2)))
-    exp_score = max(18, min(25, int(exp_gaussian)))
-
-    if diff <= 2.0 or (candidate.total_experience_years >= 15 and exp_req_num >= 10):
-        exp_match_text = f"Strong Senior Alignment (Candidate: {candidate.total_experience_years} yrs | Required: {experience_required_text})"
-    elif diff <= 4.0:
-        exp_match_text = f"Compatible (Candidate: {candidate.total_experience_years} yrs | Required: {experience_required_text})"
-    else:
-        exp_match_text = f"Executive Fit (Candidate: {candidate.total_experience_years} yrs | Required: {experience_required_text})"
-
-    # Overall ATS Score (Clamped between 78% and 98%)
-    total_ats = min(98, max(78, tech_score + title_score + exp_score))
-
-    if not matched_skills and candidate.top_skills:
-        matched_skills = candidate.top_skills[:4]
-
-    return total_ats, matched_skills, missing_skills[:4], exp_match_text
 
 
 def compute_role_salary(candidate: CandidateProfile, job_title: str) -> str:

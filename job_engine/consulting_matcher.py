@@ -130,45 +130,140 @@ def calculate_consulting_match(
     job_key_skills: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
-    Calculates 4-Tier Consulting ATS Compatibility Score:
-    1. Technical Stack & Core Skills (35% Weight)
-    2. Consulting & Leadership Competencies (25% Weight)
+    Calculates 4-Tier Consulting ATS Compatibility Score (0 - 100%):
+    1. Technical Stack & Core Skills (40% Weight)
+    2. Industry & Domain / Role Alignment (25% Weight)
     3. Experience & Seniority Curve (20% Weight)
-    4. Industry & Domain Alignment (20% Weight)
+    4. Consulting & Leadership Competencies (15% Weight)
+    Enforces strict gating so unrelated roles (e.g. Sales/Support for Developers) score <40%,
+    while high-match roles accurately score 75% - 98%.
     """
-    jd_full = f"{job_title} {job_description}".lower()
-    resume_full = f"{candidate_resume_text} {' '.join(candidate_skills)} {candidate_domain}".lower()
+    title_lower = (job_title or "").lower()
+    desc_lower = (job_description or "").lower()
+    jd_full = f"{title_lower} {desc_lower}"
+    resume_full = f"{candidate_resume_text or ''} {' '.join(candidate_skills or [])} {candidate_domain or ''}".lower()
 
-    # --- 1. Technical Stack Match (0 - 35 points) ---
+    # Detect negative non-tech role mismatch if candidate is in technical domain
+    is_cand_tech = any(
+        kw in (candidate_domain or "").lower() or kw in " ".join(candidate_skills or []).lower() or kw in " ".join(candidate_target_roles or []).lower()
+        for kw in ["developer", "engineer", "software", "react", "python", "java", "frontend", "backend", "full stack", "data", "cloud", "devops", "qa", "architect", "tech", "node", "ai"]
+    )
+    is_job_unrelated_non_tech = any(
+        kw in title_lower for kw in [
+            "sales manager", "account manager", "business development", "inside sales",
+            "telecaller", "customer support", "art director", "graphic designer", "content reviewer",
+            "compliance officer", "facilities manager", "recruiter", "talent acquisition partner"
+        ]
+    ) and not any(kw in title_lower for kw in ["software", "developer", "engineer", "architect", "technical", "engineering"])
+
+    # --- 1. Technical Stack Match (0 - 40 points) ---
     req_skills = list(job_key_skills) if job_key_skills else []
     if not req_skills:
-        # Heuristic skill extraction
-        for kw in ["python", "java", "react", "fastapi", "aws", "docker", "sql", "pyspark", "node", "typescript", "kubernetes"]:
-            if kw in jd_full:
-                req_skills.append(kw.capitalize())
+        # Heuristic skill extraction from title and JD
+        KNOWN_TECH_VOCAB = [
+            "Python", "Java", "React", "Next.js", "Node.js", "TypeScript", "JavaScript",
+            "FastAPI", "Django", "Flask", "Spring Boot", "AWS", "Docker", "Kubernetes",
+            "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "PySpark", "Spark",
+            "Databricks", "Kafka", "GraphQL", "Tailwind CSS", "Angular", "Vue",
+            "C#", ".NET", "Golang", "Go", "Terraform", "CI/CD", "Azure", "GCP",
+            "GenAI", "LLM", "LangChain", "Selenium", "Cypress", "Automation", "SDET",
+            "Business Analysis", "Product Management", "Scrum", "Agile"
+        ]
+        for kw in KNOWN_TECH_VOCAB:
+            kw_low = kw.lower()
+            if kw_low in title_lower or re.search(r'\b' + re.escape(kw_low) + r'\b', desc_lower):
+                req_skills.append(kw)
 
     matched_tech = []
     missing_tech = []
 
     for s in (candidate_skills or []):
         s_lower = s.lower()
-        if s_lower in jd_full:
+        if s_lower in title_lower or re.search(r'\b' + re.escape(s_lower) + r'\b', jd_full):
             if s not in matched_tech:
                 matched_tech.append(s)
 
     for s in req_skills:
         s_lower = s.lower()
-        if s_lower in resume_full:
+        if s_lower in resume_full or re.search(r'\b' + re.escape(s_lower) + r'\b', resume_full):
             if s not in matched_tech:
                 matched_tech.append(s)
         else:
             if s not in missing_tech:
                 missing_tech.append(s)
 
-    tech_ratio = len(matched_tech) / max(len(req_skills), 1) if req_skills else 0.75
-    tech_score = min(35, max(12, int(tech_ratio * 35)))
+    num_matched = len(matched_tech)
+    total_req = max(len(req_skills), 1)
 
-    # --- 2. Consulting & Leadership Competencies (0 - 25 points) ---
+    if num_matched == 0:
+        tech_score = 0
+    elif num_matched >= 5:
+        tech_score = 40
+    elif num_matched >= 3:
+        tech_score = 32 + min(8, int((num_matched / total_req) * 8))
+    elif num_matched >= 2:
+        tech_score = 24 + min(8, int((num_matched / total_req) * 8))
+    elif num_matched == 1:
+        tech_score = 14
+    else:
+        tech_score = int((num_matched / total_req) * 40)
+
+    # --- 2. Industry & Domain / Role Alignment (0 - 25 points) ---
+    domain_score = 0
+    cand_domain_lower = (candidate_domain or "").lower()
+
+    # Title keyword match against candidate domain or target roles
+    domain_words = [w for w in re.split(r'[\s/&,]+', cand_domain_lower) if len(w) >= 3 and w not in ("and", "the", "for", "with")]
+    if domain_words and any(w in title_lower for w in domain_words):
+        domain_score += 15
+
+    for role in (candidate_target_roles or []):
+        role_words = [w for w in re.split(r'[\s/&,]+', role.lower()) if len(w) >= 3 and w not in ("and", "the", "for", "with")]
+        if role_words and any(w in title_lower for w in role_words):
+            domain_score = max(domain_score, 18)
+            break
+
+    # Domain vertical alignment
+    for vert_name, vert_kws in DOMAIN_VERTICALS.items():
+        if any(vk in resume_full for vk in vert_kws) and any(vk in jd_full for vk in vert_kws):
+            domain_score += 5
+            break
+
+    if is_cand_tech and is_job_unrelated_non_tech:
+        domain_score = 0
+
+    domain_score = min(25, domain_score)
+
+    # --- 3. Experience & Seniority Curve (0 - 20 points) ---
+    min_exp, max_exp = 2.0, 5.0
+    range_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*(?:yrs|years|yr)?", job_experience_required.lower())
+    if range_match:
+        min_exp, max_exp = float(range_match.group(1)), float(range_match.group(2))
+    elif any(w in title_lower for w in ["lead", "principal", "architect", "staff", "director"]):
+        min_exp, max_exp = 6.0, 12.0
+    elif "senior" in title_lower or "sr" in title_lower:
+        min_exp, max_exp = 4.0, 8.0
+    elif any(w in title_lower for w in ["junior", "fresher", "intern", "associate", "entry"]):
+        min_exp, max_exp = 0.0, 2.0
+
+    cand_exp = float(candidate_experience_years or 3.0)
+
+    if min_exp <= cand_exp <= max_exp + 2.0:
+        exp_score = 20
+        exp_fit_text = f"Optimal Consulting Fit ({cand_exp:.1f} yrs matches {min_exp:.0f}-{max_exp:.0f} yrs target)"
+    elif cand_exp < min_exp:
+        diff = min_exp - cand_exp
+        if diff <= 1.5:
+            exp_score = 14
+            exp_fit_text = f"Growth Candidate ({cand_exp:.1f} yrs vs {min_exp:.0f}+ yrs required)"
+        else:
+            exp_score = 6
+            exp_fit_text = f"Experience Gap ({cand_exp:.1f} yrs vs {min_exp:.0f}+ yrs required)"
+    else:
+        exp_score = 16
+        exp_fit_text = f"Experienced Advisory Fit ({cand_exp:.1f} yrs exceeds {max_exp:.0f} yrs required)"
+
+    # --- 4. Consulting & Leadership Competencies (0 - 15 points) ---
     cand_competencies = extract_consulting_competencies(resume_full)
     jd_competencies = extract_consulting_competencies(jd_full)
 
@@ -180,65 +275,33 @@ def calculate_consulting_match(
                 break
 
     if len(matched_comp_categories) >= 3:
-        consulting_score = 25
-    elif len(matched_comp_categories) >= 2:
-        consulting_score = 20
-    elif len(matched_comp_categories) >= 1:
         consulting_score = 15
-    elif cand_competencies:
+    elif len(matched_comp_categories) >= 2:
         consulting_score = 12
-    else:
+    elif len(matched_comp_categories) >= 1:
         consulting_score = 8
-
-    # --- 3. Experience & Seniority Curve (0 - 20 points) ---
-    # Parse experience requirement
-    min_exp, max_exp = 2.0, 5.0
-    range_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*(?:yrs|years|yr)?", job_experience_required.lower())
-    if range_match:
-        min_exp, max_exp = float(range_match.group(1)), float(range_match.group(2))
-    elif "senior" in job_title.lower() or "lead" in job_title.lower() or "architect" in job_title.lower():
-        min_exp, max_exp = 4.0, 8.0
-
-    cand_exp = candidate_experience_years or 3.0
-
-    if min_exp <= cand_exp <= max_exp + 2.0:
-        exp_score = 20
-        exp_fit_text = f"Optimal Consulting Fit ({cand_exp:.1f} yrs matches {min_exp:.0f}-{max_exp:.0f} yrs target)"
-    elif cand_exp < min_exp:
-        diff = min_exp - cand_exp
-        if diff <= 1.5:
-            exp_score = 15
-            exp_fit_text = f"Growth Consulting Candidate ({cand_exp:.1f} yrs vs {min_exp:.0f}+ yrs required)"
-        else:
-            exp_score = 9
-            exp_fit_text = f"Experience Gap ({cand_exp:.1f} yrs vs {min_exp:.0f}+ yrs required)"
+    elif cand_competencies:
+        consulting_score = 5
     else:
-        exp_score = 18
-        exp_fit_text = f"Senior / Principal Advisory Fit ({cand_exp:.1f} yrs exceeds {max_exp:.0f} yrs required)"
+        consulting_score = 0
 
-    # --- 4. Industry & Domain Alignment (0 - 20 points) ---
-    domain_score = 10
-    cand_domain_lower = (candidate_domain or "").lower()
-    title_lower = job_title.lower()
+    # --- Strict Relevance Gating ---
+    # If the job has 0 matched tech skills AND 0 domain overlap, cap total ATS score to max 30%
+    if num_matched == 0 and domain_score <= 5:
+        total_ats = min(32, tech_score + domain_score + exp_score // 3 + consulting_score // 3)
+    elif is_cand_tech and is_job_unrelated_non_tech:
+        total_ats = min(28, tech_score + domain_score)
+    else:
+        raw_total = tech_score + domain_score + exp_score + consulting_score
+        # High match boost if multiple core skills + title match
+        if num_matched >= 3 and domain_score >= 15:
+            raw_total = max(raw_total, 85 + min(12, num_matched * 2))
+        elif num_matched >= 2 and domain_score >= 12:
+            raw_total = max(raw_total, 76 + min(10, num_matched * 3))
+        elif num_matched >= 1 and domain_score >= 12:
+            raw_total = max(raw_total, 68)
 
-    if cand_domain_lower and any(w in title_lower for w in cand_domain_lower.split() if len(w) > 3):
-        domain_score += 8
-
-    for role in (candidate_target_roles or []):
-        if any(w in title_lower for w in role.lower().split() if len(w) > 3):
-            domain_score += 5
-            break
-
-    # Domain vertical bonus
-    for vert_name, vert_kws in DOMAIN_VERTICALS.items():
-        if any(vk in resume_full for vk in vert_kws) and any(vk in jd_full for vk in vert_kws):
-            domain_score += 4
-            break
-
-    domain_score = min(20, max(8, domain_score))
-
-    # --- Total Score ---
-    total_ats = min(98, max(42, tech_score + consulting_score + exp_score + domain_score))
+        total_ats = min(98, max(15, raw_total))
 
     if total_ats >= 85:
         match_tier = "Top Consulting Tier (85%+)"
@@ -253,13 +316,12 @@ def calculate_consulting_match(
         match_tier = "Skill Gap Present (<58%)"
         match_badge = "Needs Review"
 
-    # Actionable Consulting Recommendations
     recommendations = []
     if missing_tech:
         recommendations.append(f"Highlight proficiency in client tech stack: {', '.join(missing_tech[:3])}")
     if len(matched_comp_categories) < 2:
         recommendations.append("Emphasize client-facing deliverables, architecture decisions & stakeholder leadership in project descriptions.")
-    if "senior" in job_title.lower() and cand_exp < 4.0:
+    if "senior" in title_lower and cand_exp < 4.0:
         recommendations.append("Demonstrate end-to-end ownership and mentoring of junior engineers to bridge seniority requirements.")
     if not recommendations:
         recommendations.append("Exceptional consulting profile. Highly recommended for direct recruiter and client presentation.")
@@ -274,13 +336,13 @@ def calculate_consulting_match(
         "experience_fit_text": exp_fit_text,
         "breakdown": {
             "tech_stack_score": tech_score,
-            "tech_stack_max": 35,
-            "consulting_leadership_score": consulting_score,
-            "consulting_leadership_max": 25,
+            "tech_stack_max": 40,
+            "domain_score": domain_score,
+            "domain_max": 25,
             "experience_score": exp_score,
             "experience_max": 20,
-            "domain_score": domain_score,
-            "domain_max": 20,
+            "consulting_leadership_score": consulting_score,
+            "consulting_leadership_max": 15,
         },
         "recommendations": recommendations,
     }
