@@ -58,6 +58,12 @@ TECH_SYNONYMS_MAP = {
     
     "ui/ux": ["ui/ux", "ux designer", "ui designer", "product designer", "user experience", "visual designer", "interaction designer"],
     "mobile": ["android", "ios", "mobile engineer", "mobile developer", "react native", "flutter", "swift", "kotlin"],
+
+    "blockchain": ["blockchain", "web3", "smart contracts", "solidity", "ethereum", "defi", "nft", "crypto"],
+    "web3": ["web3", "blockchain", "smart contracts", "solidity", "ethereum", "defi", "nft", "crypto"],
+    "iot": ["iot", "internet of things", "embedded systems", "raspberry pi", "arduino", "sensor networks", "edge computing"],
+    "robotics": ["robotics", "automation", "robotic process automation", "rpa", "industrial automation", "mechatronics", "control systems"],
+    "game": ["game development", "unity", "unreal engine", "game designer", "game programmer", "game artist", "game developer"],
 }
 
 
