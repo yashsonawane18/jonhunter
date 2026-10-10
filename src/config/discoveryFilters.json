@@ -1,0 +1,5 @@
+{
+  "showSeniorityFilter": false,
+  "showRoleFiltersMatrix": false,
+  "_comment": "Set showSeniorityFilter or showRoleFiltersMatrix to true to make them visible, or false to make them invisible."
+}

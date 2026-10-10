@@ -59,6 +59,7 @@ import {
   parseCandidateResume,
   scoreDiscoveredJobsWithResume,
 } from '../lib/applicationApi';
+import discoveryFiltersConfig from '../config/discoveryFilters.json';
 
 // Experience / Seniority Levels
 export interface SeniorityLevelOption {
@@ -179,6 +180,31 @@ const getSuggestedSkillsForRole = (roleQuery: string): string[] => {
 
 export const DiscoveredJobsTracker: React.FC = () => {
   const { user } = useUser();
+
+  // Feature Visibility Flags (Configured via src/config/discoveryFilters.json)
+  const showSeniorityFilter = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const urlParam = new URLSearchParams(window.location.search).get('seniorityFilter');
+      if (urlParam === 'true') return true;
+      if (urlParam === 'false') return false;
+      const local = localStorage.getItem('drc_show_seniority_filter');
+      if (local === 'true') return true;
+      if (local === 'false') return false;
+    }
+    return Boolean(discoveryFiltersConfig.showSeniorityFilter);
+  }, []);
+
+  const showRoleFiltersMatrix = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const urlParam = new URLSearchParams(window.location.search).get('roleFilters');
+      if (urlParam === 'true') return true;
+      if (urlParam === 'false') return false;
+      const local = localStorage.getItem('drc_show_role_filters_matrix');
+      if (local === 'true') return true;
+      if (local === 'false') return false;
+    }
+    return Boolean(discoveryFiltersConfig.showRoleFiltersMatrix);
+  }, []);
 
   // Engine state
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
@@ -814,8 +840,8 @@ export const DiscoveredJobsTracker: React.FC = () => {
 
   const isFiltersActive =
     searchQuery ||
-    selectedActiveRole ||
-    selectedSeniority !== 'all' ||
+    (showRoleFiltersMatrix && selectedActiveRole) ||
+    (showSeniorityFilter && selectedSeniority !== 'all') ||
     selectedLocation !== 'All India (Remote & Nationwide)' ||
     selectedChannel !== 'all';
 
@@ -1066,141 +1092,145 @@ export const DiscoveredJobsTracker: React.FC = () => {
       {activeView === 'current_batch' && (
         <div className="space-y-6">
           {/* SECTION 1: Seniority / Experience Level Instant 1-Click Bar */}
-          <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-black uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-[#00C896]" />
-                <span>Experience &amp; Seniority Level (Instant 1-Click Filter)</span>
-              </label>
-              <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">
-                Active: <span className="text-[#00C896] font-bold">{SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.label}</span>
-              </span>
-            </div>
+          {showSeniorityFilter && (
+            <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black uppercase tracking-wider text-zinc-200 flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-[#00C896]" />
+                  <span>Experience &amp; Seniority Level (Instant 1-Click Filter)</span>
+                </label>
+                <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">
+                  Active: <span className="text-[#00C896] font-bold">{SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.label}</span>
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-              {SENIORITY_LEVELS.map((level) => {
-                const isActive = selectedSeniority === level.id;
-                return (
-                  <button
-                    key={level.id}
-                    type="button"
-                    onClick={() => handleSenioritySelect(level.id)}
-                    className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
-                      isActive
-                        ? 'bg-zinc-800 border-[#00C896] shadow-lg shadow-[#00C896]/20 scale-[1.03] ring-1 ring-[#00C896]'
-                        : 'bg-zinc-900/90 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700 text-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-black ${isActive ? 'text-white' : level.iconColor}`}>
-                        {level.badge}
-                      </span>
-                      {isActive && <Check className="w-3.5 h-3.5 text-[#00C896]" />}
-                    </div>
-                    <div className="text-[11px] font-bold text-white line-clamp-1">
-                      {level.label.split('(')[0].trim()}
-                    </div>
-                    <div className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">
-                      {level.description}
-                    </div>
-                  </button>
-                );
-              })}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                {SENIORITY_LEVELS.map((level) => {
+                  const isActive = selectedSeniority === level.id;
+                  return (
+                    <button
+                      key={level.id}
+                      type="button"
+                      onClick={() => handleSenioritySelect(level.id)}
+                      className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                        isActive
+                          ? 'bg-zinc-800 border-[#00C896] shadow-lg shadow-[#00C896]/20 scale-[1.03] ring-1 ring-[#00C896]'
+                          : 'bg-zinc-900/90 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-black ${isActive ? 'text-white' : level.iconColor}`}>
+                          {level.badge}
+                        </span>
+                        {isActive && <Check className="w-3.5 h-3.5 text-[#00C896]" />}
+                      </div>
+                      <div className="text-[11px] font-bold text-white line-clamp-1">
+                        {level.label.split('(')[0].trim()}
+                      </div>
+                      <div className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">
+                        {level.description}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* SECTION 2: 36+ Instant 1-Click Tech Role Pills Matrix */}
-          <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Compass className="w-4 h-4 text-[#00C896]" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-200">
-                  Instant 1-Click Role Filters ({INSTANT_ROLE_FILTERS.length} Requisitions Matrix)
-                </h3>
-                {selectedActiveRole && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00C896]/20 text-[#00C896] border border-[#00C896]/40 flex items-center gap-1">
-                    <span>Filtered</span>
-                    <X
-                      className="w-3 h-3 cursor-pointer hover:text-white"
-                      onClick={() => {
-                        setSelectedActiveRole(null);
-                        setSearchQuery('');
-                        executeFreshSearch('', selectedLocation, selectedSeniority, selectedChannel, false);
-                      }}
-                    />
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Quick search input to find any of the 36 pills */}
-                <div className="relative w-full sm:w-48">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-zinc-500" />
-                  <input
-                    type="text"
-                    value={roleFilterSearch}
-                    onChange={(e) => setRoleFilterSearch(e.target.value)}
-                    placeholder="Filter 36+ roles..."
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg pl-8 pr-2 py-1 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
-                  />
+          {showRoleFiltersMatrix && (
+            <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-[#00C896]" />
+                  <h3 className="text-xs font-black uppercase tracking-wider text-zinc-200">
+                    Instant 1-Click Role Filters ({INSTANT_ROLE_FILTERS.length} Requisitions Matrix)
+                  </h3>
+                  {selectedActiveRole && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00C896]/20 text-[#00C896] border border-[#00C896]/40 flex items-center gap-1">
+                      <span>Filtered</span>
+                      <X
+                        className="w-3 h-3 cursor-pointer hover:text-white"
+                        onClick={() => {
+                          setSelectedActiveRole(null);
+                          setSearchQuery('');
+                          executeFreshSearch('', selectedLocation, selectedSeniority, selectedChannel, false);
+                        }}
+                      />
+                    </span>
+                  )}
                 </div>
 
-                {isFiltersActive && (
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="text-[11px] font-bold text-zinc-400 hover:text-[#00C896] underline whitespace-nowrap"
-                  >
-                    Reset All
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {/* Quick search input to find any of the 36 pills */}
+                  <div className="relative w-full sm:w-48">
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-zinc-500" />
+                    <input
+                      type="text"
+                      value={roleFilterSearch}
+                      onChange={(e) => setRoleFilterSearch(e.target.value)}
+                      placeholder="Filter 36+ roles..."
+                      className="w-full bg-zinc-900 border border-zinc-700 rounded-lg pl-8 pr-2 py-1 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
+                    />
+                  </div>
+
+                  {isFiltersActive && (
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="text-[11px] font-bold text-zinc-400 hover:text-[#00C896] underline whitespace-nowrap"
+                    >
+                      Reset All
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category Pills Navigation Tabs */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                {ROLE_CATEGORIES.map((cat) => {
+                  const isActive = selectedRoleCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedRoleCategory(cat)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                        isActive
+                          ? 'bg-[#00C896] text-black shadow-md font-black'
+                          : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* The 36+ Instant Role Filter Buttons Grid */}
+              <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                {displayedRoleFilters.map((role) => {
+                  const isActive = selectedActiveRole === role.id;
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => handleInstantRoleClick(role)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-[#00C896] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 scale-105'
+                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 hover:border-[#00C896] hover:text-white shadow-sm'
+                      }`}
+                    >
+                      {role.popular && <Sparkles className={`w-3 h-3 ${isActive ? 'text-black' : 'text-amber-400'}`} />}
+                      <span>{role.name}</span>
+                      {isActive && <Check className="w-3.5 h-3.5 text-black" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-
-            {/* Category Pills Navigation Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-              {ROLE_CATEGORIES.map((cat) => {
-                const isActive = selectedRoleCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setSelectedRoleCategory(cat)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
-                      isActive
-                        ? 'bg-[#00C896] text-black shadow-md font-black'
-                        : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* The 36+ Instant Role Filter Buttons Grid */}
-            <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
-              {displayedRoleFilters.map((role) => {
-                const isActive = selectedActiveRole === role.id;
-                return (
-                  <button
-                    key={role.id}
-                    type="button"
-                    onClick={() => handleInstantRoleClick(role)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      isActive
-                        ? 'bg-[#00C896] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 scale-105'
-                        : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 hover:border-[#00C896] hover:text-white shadow-sm'
-                    }`}
-                  >
-                    {role.popular && <Sparkles className={`w-3 h-3 ${isActive ? 'text-black' : 'text-amber-400'}`} />}
-                    <span>{role.name}</span>
-                    {isActive && <Check className="w-3.5 h-3.5 text-black" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          )}
 
           {/* SECTION 3: Keyword Search, Pan-India Location, Work Mode & Core Skills Bar */}
           <div className="p-5 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 backdrop-blur shadow-2xl space-y-4">
