@@ -1,5 +1,9 @@
 {
+  "backgroundTheme": "green",
+  "bypassApplicationModal": true,
+  "showLeadershipContacts": false,
+  "showRecommendationsSection": false,
   "showSeniorityFilter": false,
   "showRoleFiltersMatrix": false,
-  "_comment": "Set showSeniorityFilter or showRoleFiltersMatrix to true to make them visible, or false to make them invisible."
+  "_comment": "backgroundTheme options: 'black' (Current pure black), 'green' (Given DRC dark green combination), 'midnight_emerald' (Cyber slate & emerald glow). bypassApplicationModal: true opens direct job URL when clicking Apply Now. showLeadershipContacts: false removes recruiter connections. showRecommendationsSection: false hides 'Jobs We Think You'll Love'."
 }

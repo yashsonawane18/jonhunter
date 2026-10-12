@@ -722,13 +722,17 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
         );
       case 'discover':
         return (
-          <>
+          <div className="min-h-screen bg-black text-white flex flex-col">
             <Navbar onNavigate={handleNav} currentView="discover" />
-            <div className="min-h-screen bg-black pt-20 pb-10 px-4">
-              <DiscoveredJobsTrackerComponent />
+            <div className="flex-1 bg-black">
+              <DiscoveredJobsTrackerComponent
+                onNavigateHome={() => handleNav('home')}
+                onNavigateSignIn={() => setCurrentScreen('signin')}
+                onNavigateTracker={() => handleDashboardNavigation('job-tracker')}
+              />
             </div>
             <Footer />
-          </>
+          </div>
         );
       case 'signup':
         return (
