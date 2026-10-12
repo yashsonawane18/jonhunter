@@ -32,6 +32,7 @@ export interface FiltersSidebarProps {
   savedCount?: number;
   appliedCount?: number;
   showOnlySaved?: boolean;
+  hasResume?: boolean;
   onToggleShowSaved?: () => void;
   onShowAllJobs?: () => void;
   onNavigateTracker?: () => void;
@@ -64,6 +65,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   savedCount = 0,
   appliedCount = 0,
   showOnlySaved = false,
+  hasResume = false,
   onToggleShowSaved,
   onShowAllJobs,
   onNavigateTracker,
@@ -271,37 +273,39 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         </div>
       </div>
 
-      {/* 4. Minimum Live ATS Score */}
-      <div>
-        <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider block mb-2.5 flex items-center gap-1.5">
-          <Target className="w-3.5 h-3.5 text-[#00C896]" />
-          <span>Resume ATS Match</span>
-        </label>
-        <div className="grid grid-cols-4 gap-1.5">
-          {[
-            { id: 'all', label: 'All' },
-            { id: '70', label: '70%+' },
-            { id: '80', label: '80%+' },
-            { id: '85', label: '85%+' },
-          ].map((score) => {
-            const isSelected = minAtsScoreFilter === score.id;
-            return (
-              <button
-                key={score.id}
-                type="button"
-                onClick={() => onMinAtsScoreChange(score.id as any)}
-                className={`py-2 rounded-xl text-xs font-bold border text-center transition-colors cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#00C896] text-[#0A0A0A] border-transparent shadow-sm'
-                    : `${theme.innerBoxClass} hover:opacity-90 border ${theme.innerBoxBorderClass} text-zinc-200 hover:text-white`
-                }`}
-              >
-                {score.label}
-              </button>
-            );
-          })}
+      {/* 4. Minimum Live ATS Score (ONLY shown when resume is uploaded) */}
+      {hasResume && (
+        <div>
+          <label className="text-xs font-bold text-zinc-200 uppercase tracking-wider block mb-2.5 flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5 text-[#00C896]" />
+            <span>Resume ATS Match</span>
+          </label>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[
+              { id: 'all', label: 'All' },
+              { id: '70', label: '70%+' },
+              { id: '80', label: '80%+' },
+              { id: '85', label: '85%+' },
+            ].map((score) => {
+              const isSelected = minAtsScoreFilter === score.id;
+              return (
+                <button
+                  key={score.id}
+                  type="button"
+                  onClick={() => onMinAtsScoreChange(score.id as any)}
+                  className={`py-2 rounded-xl text-xs font-bold border text-center transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#00C896] text-[#0A0A0A] border-transparent shadow-sm'
+                      : `${theme.innerBoxClass} hover:opacity-90 border ${theme.innerBoxBorderClass} text-zinc-200 hover:text-white`
+                  }`}
+                >
+                  {score.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 5. Recommended Skills Tag Cloud */}
       {suggestedSkills.length > 0 && (

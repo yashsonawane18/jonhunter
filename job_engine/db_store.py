@@ -558,6 +558,58 @@ def db_get_candidate_discovered_jobs(candidate_email: str) -> List[Dict[str, Any
         return jobs
 
 
+def db_get_all_discovered_jobs(limit: int = 1500) -> List[Dict[str, Any]]:
+    """Returns all discovered jobs across the entire database ordered latest to oldest."""
+    init_db()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT * FROM discovered_jobs 
+        ORDER BY discovered_at DESC, id DESC
+        LIMIT ?;
+        """, (limit,))
+        rows = cursor.fetchall()
+        jobs = []
+        for r in rows:
+            matched_s = json.loads(r["matched_skills"] or "[]")
+            missing_s = json.loads(r["missing_skills"] or "[]")
+            combined_skills = list(dict.fromkeys(matched_s + missing_s))
+            conns = []
+            try:
+                conns = json.loads(r["connections"] or "[]")
+            except Exception:
+                conns = []
+
+            jobs.append({
+                "id": r["id"],
+                "candidate_email": r["candidate_email"],
+                "candidate_name": r["candidate_name"] or "Candidate",
+                "batch_number": r["batch_number"],
+                "job_title": r["job_title"],
+                "company": r["company"],
+                "location": r["location"],
+                "job_type": r["job_type"],
+                "salary": r["salary"],
+                "experience_required": r["experience_required"],
+                "key_skills": combined_skills,
+                "application_url": r["application_url"],
+                "status": r["status"] or "Not Applied",
+                "remarks": r["remarks"] or "",
+                "apply_type": r["apply_type"] or "Easy Apply",
+                "total_call_received": bool(r["total_call_received"]),
+                "job_description": r["job_description"],
+                "source_type": r["source_type"],
+                "ats_score": r["ats_score"],
+                "match_score": r["match_score"],
+                "matched_skills": matched_s,
+                "missing_skills": missing_s,
+                "experience_match": r["experience_match"],
+                "connections": conns,
+                "discovered_at": r["discovered_at"],
+            })
+        return jobs
+
+
 def db_get_candidate_batches(candidate_email: str) -> List[Dict[str, Any]]:
     """Returns all jobs grouped by batch."""
     jobs = db_get_candidate_discovered_jobs(candidate_email)

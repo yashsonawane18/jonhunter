@@ -4,6 +4,7 @@ import {
   RotateCcw,
   RefreshCw,
   Bookmark,
+  Archive,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -30,6 +31,7 @@ import { JobCardNaukri } from './JobCardNaukri';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ResumeAtsBanner } from './ResumeAtsBanner';
 import { SavedJobsView } from './SavedJobsView';
+import { DiscoveredArchiveView } from './DiscoveredArchiveView';
 import { ApplicationTrackerView } from './ApplicationTrackerView';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
@@ -142,33 +144,23 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     return online;
   }, []);
 
-  // Sync with Backend SQLite Discovered History on Mount
+  // Sync with Backend SQLite Discovered History on Mount (Loads all 1000+ jobs latest to oldest)
   useEffect(() => {
-    if (candidateEmail && !candidateEmail.startsWith('preview')) {
-      getDiscoveredJobsHistory(candidateEmail)
-        .then((res) => {
-          if (res && res.all_jobs && res.all_jobs.length > 0) {
-            setAllDiscoveredJobs((prev) => {
-              const existingMap = new Map(prev.map((j) => [j.id || j.application_url, j]));
-              res.all_jobs.forEach((j) => {
-                const key = j.id || j.application_url;
-                if (!existingMap.has(key)) {
-                  existingMap.set(key, j);
-                }
-              });
-              const merged = Array.from(existingMap.values());
-              try {
-                localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(merged.slice(0, 1000)));
-              } catch (e) {
-                console.warn('LocalStorage save notice:', e);
-              }
-              return merged;
-            });
+    getDiscoveredJobsHistory('all')
+      .then((res) => {
+        if (res && res.all_jobs && res.all_jobs.length > 0) {
+          setAllDiscoveredJobs(res.all_jobs);
+          try {
+            localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(res.all_jobs.slice(0, 1500)));
+          } catch (e) {
+            console.warn('LocalStorage save notice:', e);
           }
-        })
-        .catch((err) => console.log('SQLite history fetch notice:', err));
-    }
-  }, [candidateEmail]);
+          // Seed the initial feed with the top 20 latest verified jobs so user immediately sees opportunities
+          setJobsList((prev) => (prev.length === 0 ? res.all_jobs.slice(0, 20) : prev));
+        }
+      })
+      .catch((err) => console.log('SQLite history fetch notice:', err));
+  }, []);
 
   // 2. Fresh Search Requisitions
   const executeFreshSearch = useCallback(
@@ -294,43 +286,59 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     return getSuggestedSkillsForRole(searchQuery);
   }, [searchQuery]);
 
-  // Handlers for Filters
+  // Handlers for Filters - in-memory client-side filtering without network wipes
   const handleLocationChange = (loc: string) => {
     setSelectedLocation(loc);
-    executeFreshSearch(searchQuery, loc, selectedSeniority, selectedChannel, false);
   };
 
   const handleSenioritySelect = (seniority: 'all' | 'entry' | 'intermediate' | 'senior' | 'lead' | 'manager') => {
     setSelectedSeniority(seniority);
-    executeFreshSearch(searchQuery, selectedLocation, seniority, selectedChannel, false);
   };
 
   const handleChannelChange = (channel: 'all' | 'career_page' | 'linkedin') => {
     setSelectedChannel(channel);
-    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, channel, false);
   };
 
   const handleWorkModeChange = (wm: 'all' | 'remote' | 'hybrid' | 'onsite') => {
     setSelectedWorkMode(wm);
-    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, wm);
   };
 
   const handleToggleSkill = (skill: string) => {
-    const updated = selectedSkills.includes(skill)
-      ? selectedSkills.filter((s) => s !== skill)
-      : [...selectedSkills, skill];
-    setSelectedSkills(updated);
-    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, updated);
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
   };
 
+  // Explicit user input: Clicking "Search Jobs" in Hero executes fresh engine search
   const handleManualSearch = () => {
     setSeenJobIds(new Set());
     setBatchOffset(0);
-    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, new Set());
+    executeFreshSearch(
+      searchQuery,
+      selectedLocation,
+      selectedSeniority,
+      selectedChannel,
+      false,
+      resumeProfile,
+      new Set(),
+      selectedWorkMode,
+      selectedSkills
+    );
   };
 
+  // Explicit user input: Clicking "Load 5 More" appends fresh jobs
   const handleLoadMore = () => {
-    executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, true);
+    executeFreshSearch(
+      searchQuery,
+      selectedLocation,
+      selectedSeniority,
+      selectedChannel,
+      true,
+      resumeProfile,
+      seenJobIds,
+      selectedWorkMode,
+      selectedSkills
+    );
   };
 
   // Resume Upload Handler
@@ -553,7 +561,10 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   ]);
 
   const displayedJobsList = useMemo(() => {
-    let list = jobsList;
+    // If jobsList is empty, fall back to top 20 latest discovered jobs from database
+    let list = jobsList.length > 0 ? jobsList : allDiscoveredJobs.slice(0, 20);
+
+    // 1. Saved Filter
     if (showOnlySaved) {
       const savedSet = new Set(savedJobIds);
       const combined = [...jobsList, ...allDiscoveredJobs];
@@ -565,12 +576,55 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       });
       list = Array.from(map.values());
     }
+
+    // 2. Channel Filter
+    if (selectedChannel === 'career_page') {
+      list = list.filter((j) => {
+        const src = (j.source_type || j.apply_type || '').toLowerCase();
+        return src.includes('career') || src.includes('company');
+      });
+    } else if (selectedChannel === 'linkedin') {
+      list = list.filter((j) => {
+        const src = (j.source_type || j.apply_type || '').toLowerCase();
+        return src.includes('linkedin');
+      });
+    }
+
+    // 3. Work Mode Filter
+    if (selectedWorkMode === 'remote') {
+      list = list.filter((j) => (j.location || '').toLowerCase().includes('remote') || (j.job_type || '').toLowerCase().includes('remote'));
+    } else if (selectedWorkMode === 'hybrid') {
+      list = list.filter((j) => (j.location || '').toLowerCase().includes('hybrid') || (j.job_type || '').toLowerCase().includes('hybrid'));
+    } else if (selectedWorkMode === 'onsite') {
+      list = list.filter((j) => !(j.location || '').toLowerCase().includes('remote'));
+    }
+
+    // 4. Skills Filter
+    if (selectedSkills.length > 0) {
+      list = list.filter((j) => {
+        const jobSkills = Array.isArray(j.key_skills) ? j.key_skills.map((s) => s.toLowerCase()) : [];
+        const fullDesc = (j.job_description || j.job_title || '').toLowerCase();
+        return selectedSkills.some((s) => jobSkills.includes(s.toLowerCase()) || fullDesc.includes(s.toLowerCase()));
+      });
+    }
+
+    // 5. ATS Score Filter (ONLY applied if candidate uploaded a resume)
     if (!resumeProfile || minAtsScoreFilter === 'all') {
       return list;
     }
     const minThreshold = parseInt(minAtsScoreFilter, 10);
     return list.filter((j) => ((j.ats_score ?? (j as any).match_score ?? 0) >= minThreshold));
-  }, [jobsList, allDiscoveredJobs, showOnlySaved, savedJobIds, resumeProfile, minAtsScoreFilter]);
+  }, [
+    jobsList,
+    allDiscoveredJobs,
+    showOnlySaved,
+    savedJobIds,
+    selectedChannel,
+    selectedWorkMode,
+    selectedSkills,
+    resumeProfile,
+    minAtsScoreFilter,
+  ]);
 
   const allCombinedJobs = useMemo(() => {
     const map = new Map<string, DiscoveredJobItem>();
@@ -580,7 +634,15 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     jobsList.forEach((j) => {
       if (j?.id && !map.has(j.id)) map.set(j.id, j);
     });
-    return Array.from(map.values());
+    const combined = Array.from(map.values());
+    // Sort latest to oldest
+    combined.sort((a, b) => {
+      const dateA = a.discovered_at ? new Date(a.discovered_at).getTime() : 0;
+      const dateB = b.discovered_at ? new Date(b.discovered_at).getTime() : 0;
+      if (dateB !== dateA) return dateB - dateA;
+      return String(b.id || '').localeCompare(String(a.id || ''));
+    });
+    return combined;
   }, [allDiscoveredJobs, jobsList]);
 
   const appliedCount = useMemo(() => {
@@ -610,6 +672,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         onTabChange={setActiveNavTab}
         savedCount={savedJobIds.length}
         appliedCount={appliedCount}
+        totalDiscoveredCount={allDiscoveredJobs.length > 0 ? allDiscoveredJobs.length : 1500}
         onNavigateHome={onNavigateHome}
         onNavigateSignIn={onNavigateSignIn}
         engineOnline={engineOnline}
@@ -674,14 +737,15 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                   onToggleSkill={handleToggleSkill}
                   onResetFilters={handleResetFilters}
                   totalFilteredCount={displayedJobsList.length}
-                  totalDiscoveredCount={allCombinedJobs.length > 0 ? allCombinedJobs.length : 950}
+                  totalDiscoveredCount={allCombinedJobs.length > 0 ? allCombinedJobs.length : 1500}
                   savedCount={savedJobIds.length}
                   appliedCount={appliedCount}
                   showOnlySaved={showOnlySaved}
+                  hasResume={!!resumeProfile}
                   onToggleShowSaved={() => setShowOnlySaved((prev) => !prev)}
                   onShowAllJobs={() => {
                     setShowOnlySaved(false);
-                    handleChannelChange('all');
+                    setSelectedChannel('all');
                   }}
                   onNavigateTracker={() => setActiveNavTab('tracker')}
                 />
@@ -722,14 +786,14 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                     </p>
                   </div>
 
-                  {/* Channel quick buttons & Reset */}
+                  {/* Channel quick buttons, Saved toggle & 1000+ Archive Shortcut */}
                   <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
                     <div className={`flex items-center ${theme.innerBoxClass} p-1 rounded-xl ${theme.innerBoxBorderClass} flex-wrap sm:flex-nowrap gap-1`}>
                       <button
                         type="button"
                         onClick={() => {
                           setShowOnlySaved(false);
-                          handleChannelChange('all');
+                          setSelectedChannel('all');
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'all'
@@ -743,7 +807,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                         type="button"
                         onClick={() => {
                           setShowOnlySaved(false);
-                          handleChannelChange('career_page');
+                          setSelectedChannel('career_page');
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'career_page'
@@ -757,7 +821,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                         type="button"
                         onClick={() => {
                           setShowOnlySaved(false);
-                          handleChannelChange('linkedin');
+                          setSelectedChannel('linkedin');
                         }}
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'linkedin'
@@ -781,7 +845,18 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       </button>
                     </div>
 
-                    {/* Reset Seen History (High Visibility) */}
+                    {/* View All 1000+ Archive */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('archive')}
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 border bg-[#00C896]/15 hover:bg-[#00C896]/25 text-[#00C896] border-[#00C896]/35 shadow-sm"
+                      title="Explore complete 1000+ discovered repository ordered latest to oldest"
+                    >
+                      <Archive className="w-3.5 h-3.5" />
+                      <span>1000+ Archive &rarr;</span>
+                    </button>
+
+                    {/* Reset Seen History */}
                     <button
                       type="button"
                       onClick={handleResetSeenHistory}
@@ -821,6 +896,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                         key={job.id}
                         job={job}
                         isSaved={savedJobIds.includes(job.id)}
+                        hasResume={!!resumeProfile}
                         onToggleStar={handleToggleStar}
                         onViewDetails={handleViewDetail}
                         onApplyNow={() => handleApplyNow(job)}
@@ -925,12 +1001,13 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         </main>
       )}
 
-      {/* 4. Saved Jobs View */}
-      {activeNavTab === 'saved' && (
+      {/* 4. Discovered Jobs Repository View (All 1000+ Jobs Latest to Old) */}
+      {(activeNavTab === 'archive' || activeNavTab === 'saved') && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <SavedJobsView
+          <DiscoveredArchiveView
             allJobs={allCombinedJobs}
             savedJobIds={savedJobIds}
+            candidateProfile={resumeProfile}
             onToggleStar={handleToggleStar}
             onViewDetails={handleViewDetail}
             onApplyNow={handleApplyNow}

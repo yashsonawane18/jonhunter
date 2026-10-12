@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Compass,
   Sparkles,
-  Bookmark,
+  Archive,
   ClipboardList,
   Menu,
   X,
@@ -11,13 +11,14 @@ import { useUser } from '../../contexts/UserContext';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
 
-export type JonHunterNavTab = 'discover' | 'recommended' | 'saved' | 'tracker';
+export type JonHunterNavTab = 'discover' | 'recommended' | 'archive' | 'saved' | 'tracker';
 
 export interface JonHunterNavProps {
   activeTab: JonHunterNavTab;
   onTabChange: (tab: JonHunterNavTab) => void;
   savedCount?: number;
   appliedCount?: number;
+  totalDiscoveredCount?: number;
   onNavigateHome?: () => void;
   onNavigateSignIn?: () => void;
   engineOnline?: boolean | null;
@@ -26,8 +27,8 @@ export interface JonHunterNavProps {
 export const JonHunterNav: React.FC<JonHunterNavProps> = ({
   activeTab,
   onTabChange,
-  savedCount = 0,
   appliedCount = 0,
+  totalDiscoveredCount = 1000,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const theme = getActiveTheme();
@@ -45,10 +46,10 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
       badge: 'Curated',
     }] : []),
     {
-      id: 'saved' as JonHunterNavTab,
-      label: 'Saved Jobs',
-      icon: Bookmark,
-      count: savedCount,
+      id: 'archive' as JonHunterNavTab,
+      label: 'Discovered Jobs (1000+)',
+      icon: Archive,
+      badge: `${totalDiscoveredCount > 0 ? totalDiscoveredCount : '1000'}+ Openings`,
     },
     {
       id: 'tracker' as JonHunterNavTab,

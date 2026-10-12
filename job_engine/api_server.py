@@ -37,6 +37,7 @@ from two_source_matcher import find_two_source_jobs
 from db_store import (
     init_db,
     db_get_candidate_discovered_jobs,
+    db_get_all_discovered_jobs,
     db_get_candidate_batches,
     db_update_job_status_and_remarks,
     db_record_discovered_jobs,
@@ -547,19 +548,24 @@ async def find_jobs_endpoint(req: JobSearchRequest):
 
 
 @app.get("/api/discovered-jobs")
-async def get_discovered_jobs_endpoint(candidate_email: str = Query(...)):
+async def get_discovered_jobs_endpoint(candidate_email: Optional[str] = Query(None)):
     """
     Returns all past discovered jobs.
+    If candidate_email is 'all', None, or returns 0 records, returns all 1000+ jobs ordered latest to oldest.
     """
-    if not candidate_email:
-        raise HTTPException(status_code=400, detail="candidate_email is required")
+    all_jobs = []
+    clean_email = (candidate_email or "").strip().lower()
+    if clean_email and clean_email not in ("all", "undefined", "null", "guest_consulting@drc.internal"):
+        all_jobs = db_get_candidate_discovered_jobs(clean_email)
 
-    all_jobs = db_get_candidate_discovered_jobs(candidate_email)
-    batches = db_get_candidate_batches(candidate_email)
+    if not all_jobs:
+        all_jobs = db_get_all_discovered_jobs(limit=1500)
+
+    batches = db_get_candidate_batches(clean_email) if clean_email and clean_email != "all" else []
     cand_name = all_jobs[0].get("candidate_name", "Candidate") if all_jobs else "Candidate"
 
     return {
-        "candidate_email": candidate_email,
+        "candidate_email": candidate_email or "all",
         "candidate_name": cand_name,
         "total_jobs": len(all_jobs),
         "total_batches": len(batches),
