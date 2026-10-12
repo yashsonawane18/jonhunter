@@ -381,6 +381,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
           skills
         );
 
+        setEngineOnline(true);
         let retrieved = result.jobs || [];
 
         // If resume profile active, calculate deep ATS scores
@@ -467,13 +468,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
     return getSuggestedSkillsForRole(roleText);
   }, [searchQuery, selectedActiveRole, resumeProfile?.primary_domain]);
 
-  // Initial load
+  // Initial load: trigger search immediately to eliminate cold-start delay
   useEffect(() => {
-    verifyEngine().then((online) => {
-      if (online) {
-        executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false);
-      }
-    });
+    // 1. Immediately launch discovery search so jobs appear without waiting
+    executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false);
+
+    // 2. Concurrently verify engine health & fetch locations in the background
+    verifyEngine();
   }, [verifyEngine]);
 
   // Handlers for instant clicks

@@ -4,12 +4,43 @@
  * Enhanced for Instant Sub-20ms Search, Pan-India Geo-Routing & Consulting ATS Scoring.
  */
 
+let cachedWorkingEngineUrl: string | null = (() => {
+  if (typeof window !== 'undefined') {
+    try {
+      return sessionStorage.getItem('drc_working_engine_url') || null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+})();
+
+export function setCachedWorkingEngineUrl(url: string | null): void {
+  if (!url) return;
+  const cleanUrl = url.replace(/\/$/, '');
+  cachedWorkingEngineUrl = cleanUrl;
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.setItem('drc_working_engine_url', cleanUrl);
+    } catch {}
+  }
+}
+
+export function getCachedWorkingEngineUrl(): string | null {
+  return cachedWorkingEngineUrl;
+}
+
 export function getJobEngineCandidates(): string[] {
   const explicit = (import.meta as any).env?.VITE_JOB_ENGINE_URL;
   const isLocal =
     typeof window !== 'undefined' &&
     ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const candidates: string[] = [];
+
+  // Prioritize cached responsive URL from current session
+  if (cachedWorkingEngineUrl) {
+    candidates.push(cachedWorkingEngineUrl);
+  }
 
   if (explicit) {
     candidates.push(explicit.replace(/\/$/, ''));
@@ -113,40 +144,54 @@ export interface CandidateSearchPayload {
 
 /**
  * Checks if the local/hosted Job Engine micro-service is running.
+ * Runs fast parallel probes (2.5s timeout) across all candidates.
+ * Resolves in milliseconds if local or remote responds, caching the responsive base URL.
  */
 export async function checkJobEngineHealth(): Promise<boolean> {
-  const endpoints = [
-    ENGINE_BASE_URL ? `${ENGINE_BASE_URL}/api/health` : null,
-    ENGINE_BASE_URL ? `${ENGINE_BASE_URL}/` : null,
-    '/api/health',
-    'http://127.0.0.1:5055/api/health',
-  ].filter(Boolean) as string[];
+  const candidates = getJobEngineCandidates();
+  if (candidates.length === 0) return false;
 
-  for (const ep of endpoints) {
+  const probePromises = candidates.map(async (base) => {
+    const url = base ? `${base}/api/health` : '/api/health';
     try {
-      const res = await fetch(ep, { method: 'GET', signal: AbortSignal.timeout(8000) });
+      const res = await fetch(url, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2500),
+      });
       if (res.ok) {
-        const data = await res.json();
-        if (data.status === 'ONLINE') return true;
+        const data = await res.json().catch(() => null);
+        if (data && (data.status === 'ONLINE' || data.service)) {
+          setCachedWorkingEngineUrl(base);
+          return true;
+        }
       }
     } catch {
-      continue;
+      // Unreachable or timed out
     }
+    throw new Error(`Probe failed for ${url}`);
+  });
+
+  try {
+    await Promise.any(probePromises);
+    return true;
+  } catch {
+    return false;
   }
-  return false;
 }
 
 /**
  * Fetches canonical Pan-India location dropdown list from backend.
  */
 export async function fetchPanIndiaLocations(): Promise<string[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/locations`);
-  for (const ep of endpoints) {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const ep = base ? `${base}/api/locations` : '/api/locations';
     try {
-      const res = await fetch(ep);
+      const res = await fetch(ep, { signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         const data = await res.json();
         if (data.locations && Array.isArray(data.locations)) {
+          setCachedWorkingEngineUrl(base);
           return data.locations;
         }
       }
@@ -194,7 +239,7 @@ export async function searchInstantJobs(
   noticePeriod: string = 'Immediate',
   skills: string[] = []
 ): Promise<{ success: boolean; total: number; jobs: DiscoveredJobItem[] }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/jobs/search`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
@@ -228,15 +273,18 @@ export async function searchInstantJobs(
     skills: skills || [],
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/jobs/search` : '/api/jobs/search';
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(6000),
       });
 
       if (response.ok) {
+        setCachedWorkingEngineUrl(base);
         return await response.json();
       }
       const errorText = await response.text();
@@ -266,7 +314,7 @@ export async function findMatchingJobs(
   noticePeriod: string = 'Immediate',
   skills: string[] = []
 ): Promise<DiscoveredJobItem[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/find-jobs`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
@@ -297,15 +345,18 @@ export async function findMatchingJobs(
     skills: skills || [],
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/find-jobs` : '/api/find-jobs';
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (response.ok) {
+        setCachedWorkingEngineUrl(base);
         return await response.json();
       }
       const errorText = await response.text();
@@ -332,7 +383,7 @@ export async function findTwoSourceJobs(
   career_page_jobs: DiscoveredJobItem[];
   counts: { total: number; linkedin: number; career_pages: number };
 }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/find-two-source-jobs`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
@@ -352,15 +403,18 @@ export async function findTwoSourceJobs(
     location_override: locationOverride,
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/find-two-source-jobs` : '/api/find-two-source-jobs';
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (response.ok) {
+        setCachedWorkingEngineUrl(base);
         return await response.json();
       }
       const errorText = await response.text();
@@ -377,15 +431,17 @@ export async function findTwoSourceJobs(
  * Retrieves all historically discovered batches and jobs for a candidate.
  */
 export async function getDiscoveredJobsHistory(candidateEmail: string): Promise<DiscoveredJobsResponse> {
-  const endpoints = getJobEngineCandidates().map(
-    (base) => `${base}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
-  );
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base
+      ? `${base}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
+      : `/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(4000) });
       if (response.ok) {
+        setCachedWorkingEngineUrl(base);
         return await response.json();
       }
     } catch (e: any) {
@@ -405,7 +461,7 @@ export async function updateJobStatus(
   status: 'Applied' | 'Not Applied',
   remarks = ''
 ): Promise<{ status: string; new_status: string; remarks: string }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/update-job-status`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
@@ -415,15 +471,18 @@ export async function updateJobStatus(
     remarks,
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/update-job-status` : '/api/update-job-status';
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(5000),
       });
 
       if (response.ok) {
+        setCachedWorkingEngineUrl(base);
         return await response.json();
       }
     } catch (e: any) {

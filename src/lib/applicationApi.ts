@@ -3,7 +3,7 @@
  * Connects frontend multi-step application flow to the Job Engine on Port 5055.
  */
 
-import { DiscoveredJobItem, getJobEngineCandidates } from './drcDiscoveryApi';
+import { DiscoveredJobItem, getJobEngineCandidates, setCachedWorkingEngineUrl } from './drcDiscoveryApi';
 
 const getEngineBaseUrl = (): string => {
   const candidates = getJobEngineCandidates();
@@ -80,19 +80,22 @@ export async function parseCandidateResume(file: File): Promise<{
   filename: string;
   profile: CandidateParsedProfile;
 }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/parse-resume`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/parse-resume` : '/api/parse-resume';
     try {
       const formData = new FormData();
       formData.append('file', file);
       const res = await fetch(url, {
         method: 'POST',
         body: formData,
+        signal: AbortSignal.timeout(12000),
       });
 
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         return await res.json();
       }
       const err = await res.json().catch(() => ({ detail: 'Failed to parse resume.' }));
@@ -114,8 +117,9 @@ export async function fetchJobRecommendations(
   excludeJobId: string = '',
   limit: number = 4
 ): Promise<DiscoveredJobItem[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/recommendations`);
-  for (const url of endpoints) {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/recommendations` : '/api/recommendations';
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -126,9 +130,11 @@ export async function fetchJobRecommendations(
           exclude_job_id: excludeJobId,
           limit,
         }),
+        signal: AbortSignal.timeout(5000),
       });
 
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         const data = await res.json();
         return data.recommended_jobs || [];
       }
@@ -145,18 +151,21 @@ export async function fetchJobRecommendations(
 export async function submitCandidateApplication(
   payload: CandidateApplicationPayload
 ): Promise<{ success: boolean; application_id: string; message: string }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/applications`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/applications` : '/api/applications';
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(6000),
       });
 
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         return await res.json();
       }
       const err = await res.json().catch(() => ({ detail: 'Application submission failed.' }));
@@ -173,11 +182,13 @@ export async function submitCandidateApplication(
  * Lists candidate applications for recruiter review
  */
 export async function fetchCandidateApplications(limit = 50): Promise<CandidateApplicationPayload[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/applications?limit=${limit}`);
-  for (const url of endpoints) {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/applications?limit=${limit}` : `/api/applications?limit=${limit}`;
     try {
-      const res = await fetch(url, { method: 'GET' });
+      const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(4000) });
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         const data = await res.json();
         return data.applications || [];
       }
@@ -198,7 +209,7 @@ export async function calculateAtsScore(
   jobExperienceRequired: string = '',
   jobKeySkills: string[] = []
 ): Promise<AtsScoreResult> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/ats-score`);
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
@@ -213,15 +224,18 @@ export async function calculateAtsScore(
     job_key_skills: jobKeySkills,
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/ats-score` : '/api/ats-score';
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(5000),
       });
 
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         return await res.json();
       }
     } catch (e: any) {
@@ -239,8 +253,9 @@ export async function scoreDiscoveredJobsWithResume(
   profile: CandidateParsedProfile,
   jobs: DiscoveredJobItem[]
 ): Promise<DiscoveredJobItem[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/score-jobs`);
-  for (const url of endpoints) {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/score-jobs` : '/api/score-jobs';
     try {
       const res = await fetch(url, {
         method: 'POST',
@@ -253,9 +268,11 @@ export async function scoreDiscoveredJobsWithResume(
           candidate_resume_text: profile.raw_resume_text || '',
           jobs: jobs,
         }),
+        signal: AbortSignal.timeout(6000),
       });
 
       if (res.ok) {
+        setCachedWorkingEngineUrl(base);
         const data = await res.json();
         return data.scored_jobs || jobs;
       }
