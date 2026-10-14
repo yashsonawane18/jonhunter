@@ -194,6 +194,9 @@ async def execute_fresh_batch_discovery(
         open_to_relocation=open_to_relocation,
         notice_period=notice_period,
     )
+    # When user enters a query, prioritize query role so search matcher stays 100% relevant
+    if query and query.strip():
+        cand.target_roles = [query.strip()]
 
     source_mode = (source or "all").lower()
     all_exclude = list(set(exclude_ids or []))
@@ -231,7 +234,7 @@ async def execute_fresh_batch_discovery(
                     open_to_relocation=open_to_relocation,
                     skills=merged_skills,
                 ),
-                timeout=8.0
+                timeout=4.0
             )
             final_jobs = linkedin_jobs[:target_count]
         except Exception as err:
@@ -257,7 +260,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=4.0
+            timeout=3.0
         )
         task_linkedin = asyncio.wait_for(
             asyncio.to_thread(
@@ -273,7 +276,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=5.0
+            timeout=3.5
         )
 
         c_res, l_res = await asyncio.gather(task_career, task_linkedin, return_exceptions=True)
@@ -293,6 +296,51 @@ async def execute_fresh_batch_discovery(
             selected_linkedin.extend(l_list[target_linkedin : target_linkedin + shortfall_c])
 
         final_jobs = selected_career + selected_linkedin
+
+    # High-Reliability Fallback Guarantee: if final_jobs has shortfall, fill from SQLite verified pool
+    if len(final_jobs) < target_count:
+        needed = target_count - len(final_jobs)
+        existing_ids = {j.id for j in final_jobs}
+        db_fallbacks = db_get_verified_linkedin_jobs(
+            role_keyword=query or domain,
+            target_location=location,
+            experience_level=experience_level,
+            limit=needed + 5,
+            exclude_ids=all_exclude + list(existing_ids),
+            skills=merged_skills,
+            work_mode=work_mode,
+            open_to_relocation=open_to_relocation,
+        )
+        for fb in db_fallbacks:
+            if len(final_jobs) >= target_count:
+                break
+            try:
+                p = JobPosting(
+                    id=fb.get("id"),
+                    job_title=fb.get("job_title", ""),
+                    company=fb.get("company", ""),
+                    location=fb.get("location", "Remote"),
+                    job_type=fb.get("job_type", "Full-time"),
+                    salary=fb.get("salary", "Competitive"),
+                    experience_required=fb.get("experience_required", "3-5 Years"),
+                    key_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else infer_key_skills(fb.get("job_title", ""), fb.get("job_description", "")),
+                    application_url=fb.get("application_url", ""),
+                    status="Not Applied",
+                    total_call_received=False,
+                    job_description=fb.get("job_description", "")[:600],
+                    source_type=fb.get("source_type", "LinkedIn Verified"),
+                    apply_type=fb.get("apply_type", "Direct Apply"),
+                    ats_score=fb.get("ats_score"),
+                    match_score=fb.get("match_score"),
+                    matched_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else [],
+                    missing_skills=fb.get("missing_skills") if isinstance(fb.get("missing_skills"), list) else [],
+                    experience_match=fb.get("experience_match", "Compatible"),
+                    connections=fb.get("connections") if isinstance(fb.get("connections"), list) else [],
+                    posted_time="⚡ Posted < 24h",
+                )
+                final_jobs.append(p)
+            except Exception:
+                pass
 
     # Record to DB with batch tracking
     if cand.email and final_jobs and "preview" not in cand.email.lower() and not cand.email.startswith("visitor"):

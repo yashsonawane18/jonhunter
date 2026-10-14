@@ -978,8 +978,7 @@ def db_get_verified_linkedin_jobs(
                    apply_type, ats_score, match_score, matched_skills, missing_skills,
                    experience_match, connections, batch_number, discovered_at
             FROM discovered_jobs
-            WHERE (application_url LIKE '%linkedin.com/jobs/view/%' OR application_url LIKE '%linkedin.com/jobs%')
-              AND id LIKE 'LN-%'
+            WHERE application_url IS NOT NULL AND application_url != ''
             ORDER BY batch_number DESC, id DESC
         """)
         rows = cursor.fetchall()
@@ -1047,15 +1046,17 @@ def db_get_verified_linkedin_jobs(
             if not keywords:
                 score = 1
             else:
+                if role_clean.lower() in t_low:
+                    score += 25
                 for kw in keywords:
                     if kw in t_low:
-                        score += 5
+                        score += 10
                 # Check matched_skills / JD
                 if score == 0:
-                    skills_text = (r["matched_skills"] or "").lower() + " " + (r["job_description"] or "")[:200].lower()
+                    skills_text = (r["matched_skills"] or "").lower() + " " + (r["job_description"] or "")[:400].lower()
                     for kw in keywords:
                         if kw in skills_text:
-                            score += 2
+                            score += 4
 
             # User Skills Boost
             if active_skills:
@@ -1102,8 +1103,8 @@ def db_get_verified_linkedin_jobs(
                 if len(results) >= limit:
                     break
 
-        # If primary matches are fewer than limit, fill from secondary tech roles
-        if len(results) < limit:
+        # If primary matches are fewer than limit, fill from secondary tech roles ONLY if no specific role keyword was given
+        if len(results) < limit and not role_clean:
             for _, _, comp_norm, d in matched_secondary:
                 if comp_norm not in seen_companies:
                     seen_companies.add(comp_norm)

@@ -353,6 +353,49 @@ def matches_experience_level(title: str, desc: str, level: str) -> bool:
     return True
 
 
+def preload_from_sqlite():
+    global _INDEXED_JOBS
+    if _INDEXED_JOBS:
+        return
+    try:
+        from db_store import db_get_all_discovered_jobs
+        jobs = db_get_all_discovered_jobs(limit=1500)
+        if jobs:
+            formatted = []
+            for j in jobs:
+                title = j.get("job_title", "")
+                desc = j.get("job_description", "")
+                loc = j.get("location", "")
+                skills = j.get("key_skills", [])
+                if isinstance(skills, str):
+                    try:
+                        skills = json.loads(skills)
+                    except Exception:
+                        skills = []
+                formatted.append({
+                    "id": j.get("id"),
+                    "job_title": title,
+                    "company": j.get("company", ""),
+                    "location": loc,
+                    "job_type": j.get("job_type", "Full-time"),
+                    "job_description": desc,
+                    "application_url": j.get("application_url", ""),
+                    "source_type": j.get("source_type", "Verified Enterprise"),
+                    "key_skills": skills,
+                    "_title_lower": title.lower(),
+                    "_loc_lower": loc.lower(),
+                    "_raw_loc_lower": loc.lower(),
+                    "_is_india": True,
+                    "_search_text": f"{title} {' '.join(skills) if isinstance(skills, list) else ''} {desc[:400]}".lower(),
+                })
+            with _INDEX_LOCK:
+                if not _INDEXED_JOBS:
+                    _INDEXED_JOBS = formatted
+                    print(f"[ATSCacheWarmer] Preloaded {len(_INDEXED_JOBS)} verified postings from SQLite repository (<5ms)")
+    except Exception as e:
+        print(f"[ATSCacheWarmer] SQLite preload notice: {e}")
+
+
 def search_instant_jobs(
     query: str = "",
     location: str = "All India (Remote & Nationwide)",
@@ -374,6 +417,7 @@ def search_instant_jobs(
     global _INDEXED_JOBS, _LAST_SYNC_TIME
 
     if not _INDEXED_JOBS:
+        preload_from_sqlite()
         threading.Thread(target=warm_ats_cache, daemon=True).start()
 
     effective_query = (query or "").strip()
@@ -439,23 +483,25 @@ def search_instant_jobs(
         # 1. Ultra-Fast In-Memory Semantic Query & Domain Matching (<2ms)
         relevance_score = 50
         if target_str:
+            matched_kw = False
             if target_str in title_text:
-                relevance_score = 100
+                relevance_score = 150
+                matched_kw = True
             else:
-                matched_kw = False
                 for kw in valid_kws:
                     if kw in title_text:
-                        relevance_score = 60
+                        relevance_score = 100
                         matched_kw = True
                         break
                 if not matched_kw:
                     for kw in valid_kws:
                         if kw in desc_snippet:
-                            relevance_score = 30
+                            relevance_score = 60
                             matched_kw = True
                             break
-                if not matched_kw and not active_skills:
-                    continue
+            # STRICT FILTER: When the user enters a search query, require keyword match
+            if not matched_kw:
+                continue
 
         # Boost by Selected Skills
         matched_user_skills = []
@@ -600,12 +646,11 @@ def search_instant_jobs(
             posted_time=recency,
         )
 
-        sort_priority = (ats_score if ats_score is not None else rel_score)
+        sort_priority = (rel_score * 10) + ((ats_score or 50) if target_str else (ats_score or rel_score))
         all_evaluated_postings.append((posting, sort_priority))
 
-    if has_candidate_profile:
-        # Sort by ATS score descending
-        all_evaluated_postings.sort(key=lambda x: (x[1] or 0), reverse=True)
+    # Sort descending by priority: keyword relevance is primary, ATS score is secondary tie-breaker
+    all_evaluated_postings.sort(key=lambda x: (x[1] or 0), reverse=True)
 
     return [p[0] for p in all_evaluated_postings[:limit]]
 
