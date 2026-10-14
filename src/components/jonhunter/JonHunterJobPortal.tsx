@@ -604,8 +604,27 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   ]);
 
   const displayedJobsList = useMemo(() => {
-    // If jobsList is empty, fall back to top 20 latest discovered jobs from database
-    let list = jobsList.length > 0 ? jobsList : allDiscoveredJobs.slice(0, 20);
+    const qClean = (searchQuery || '').trim().toLowerCase();
+
+    // Determine initial candidate list
+    let list: DiscoveredJobItem[] = [];
+    if (jobsList.length > 0) {
+      list = jobsList;
+    } else if (allDiscoveredJobs.length > 0) {
+      if (qClean) {
+        // Fall back to matching jobs from allDiscoveredJobs repository
+        const qWords = qClean.split(/\s+/).filter((w) => w.length > 1);
+        const matches = allDiscoveredJobs.filter((j) => {
+          const t = (j.job_title || '').toLowerCase();
+          const d = (j.job_description || '').toLowerCase();
+          const s = (Array.isArray(j.key_skills) ? j.key_skills.join(' ') : '').toLowerCase();
+          return t.includes(qClean) || qWords.every((w) => t.includes(w) || d.includes(w) || s.includes(w));
+        });
+        list = matches.length > 0 ? matches : allDiscoveredJobs.slice(0, 20);
+      } else {
+        list = allDiscoveredJobs.slice(0, 20);
+      }
+    }
 
     // 1. Saved Filter
     if (showOnlySaved) {
@@ -620,7 +639,19 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       list = Array.from(map.values());
     }
 
-    // 2. Channel Filter
+    // 2. Keyword relevance prioritization if user typed a search query
+    if (qClean) {
+      const qWords = qClean.split(/\s+/).filter((w) => w.length > 1);
+      list = [...list].sort((a, b) => {
+        const aTitle = (a.job_title || '').toLowerCase();
+        const bTitle = (b.job_title || '').toLowerCase();
+        const aExact = aTitle.includes(qClean) ? 2 : qWords.some((w) => aTitle.includes(w)) ? 1 : 0;
+        const bExact = bTitle.includes(qClean) ? 2 : qWords.some((w) => bTitle.includes(w)) ? 1 : 0;
+        return bExact - aExact;
+      });
+    }
+
+    // 3. Channel Filter
     if (selectedChannel === 'career_page') {
       list = list.filter((j) => {
         const src = (j.source_type || j.apply_type || '').toLowerCase();
@@ -633,7 +664,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       });
     }
 
-    // 3. Work Mode Filter
+    // 4. Work Mode Filter
     if (selectedWorkMode === 'remote') {
       list = list.filter((j) => (j.location || '').toLowerCase().includes('remote') || (j.job_type || '').toLowerCase().includes('remote'));
     } else if (selectedWorkMode === 'hybrid') {
@@ -642,7 +673,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       list = list.filter((j) => !(j.location || '').toLowerCase().includes('remote'));
     }
 
-    // 4. Skills Filter
+    // 5. Skills Filter
     if (selectedSkills.length > 0) {
       list = list.filter((j) => {
         const jobSkills = Array.isArray(j.key_skills) ? j.key_skills.map((s) => s.toLowerCase()) : [];
@@ -651,7 +682,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       });
     }
 
-    // 5. ATS Score Filter (ONLY applied if candidate uploaded a resume)
+    // 6. ATS Score Filter (ONLY applied if candidate uploaded a resume)
     if (!resumeProfile || minAtsScoreFilter === 'all') {
       return list;
     }
@@ -660,6 +691,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   }, [
     jobsList,
     allDiscoveredJobs,
+    searchQuery,
     showOnlySaved,
     savedJobIds,
     selectedChannel,
