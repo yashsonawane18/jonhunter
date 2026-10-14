@@ -492,17 +492,60 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   // Apply Now handler - Supports direct external apply mode or modal flow via JSON config
   const handleApplyNow = (job: DiscoveredJobItem | JobDetailData) => {
     if (!job) return;
-    if (discoveryFiltersConfig?.bypassApplicationModal) {
-      const url = ('application_url' in job ? job.application_url : (job as any).applicationUrl) || '';
-      if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-        const companyName = ('company' in job ? job.company : '') || 'Opening';
-        toast.success(`Opening direct job posting for ${companyName} ↗`);
+
+    // Check JSON config: default to bypassing application modal (direct apply) unless explicitly set to false
+    const shouldBypassModal = discoveryFiltersConfig?.bypassApplicationModal !== false;
+
+    if (shouldBypassModal) {
+      const rawUrl =
+        (job as any).application_url ||
+        (job as any).applicationUrl ||
+        (job as any).job_url ||
+        (job as any).jobUrl ||
+        (job as any).url ||
+        (job as any).link ||
+        '';
+
+      const companyName = ('company' in job ? job.company : (job as any).company) || 'Enterprise Partner';
+
+      if (rawUrl && typeof rawUrl === 'string' && rawUrl.trim().length > 0) {
+        let cleanUrl = rawUrl.trim();
+        if (!/^https?:\/\//i.test(cleanUrl)) {
+          cleanUrl = `https://${cleanUrl}`;
+        }
+
+        try {
+          // Attempt standard window.open
+          const win = window.open(cleanUrl, '_blank', 'noopener,noreferrer');
+          // Fallback if popup blocker intercepted or prevented window.open
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            const anchor = document.createElement('a');
+            anchor.href = cleanUrl;
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+          }
+          toast.success(`Opening direct job posting for ${companyName} ↗`);
+        } catch {
+          // Fallback link click
+          const anchor = document.createElement('a');
+          anchor.href = cleanUrl;
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer';
+          document.body.appendChild(anchor);
+          anchor.click();
+          document.body.removeChild(anchor);
+          toast.success(`Opening direct job posting for ${companyName} ↗`);
+        }
+        return;
       } else {
         toast.info('Direct application link not available for this role.');
       }
       return;
     }
+
     handleOpenApplicationModal(job);
   };
 

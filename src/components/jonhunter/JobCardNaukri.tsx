@@ -325,7 +325,10 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
           {/* Apply Now - Solid High-Visibility Green Button */}
           <button
             type="button"
-            onClick={() => onApplyNow?.(job)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onApplyNow?.(job);
+            }}
             className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
           >
             <span>Apply Now</span>

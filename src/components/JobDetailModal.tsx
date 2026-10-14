@@ -294,18 +294,18 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               <Share2 className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300">
-              <Lock className="w-3.5 h-3.5 text-[#00C896] shrink-0" />
-              <span>Official LinkedIn Link unlocks upon submission</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#00C896] shrink-0" />
+              <span>Verified Direct Company Requisition</span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => onApply(job)}
-            className="px-8 py-3 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black font-black text-sm flex items-center justify-center gap-2 border-2 border-[#00E5AA] shadow-xl shadow-[#00C896]/30 hover:scale-105 transition-all"
+            className="px-8 py-3 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black font-black text-sm flex items-center justify-center gap-2 border-2 border-[#00E5AA] shadow-xl shadow-[#00C896]/30 hover:scale-105 transition-all cursor-pointer"
           >
-            <Send className="w-4 h-4" />
-            <span>Apply Now & Unlock Link (0 Login)</span>
+            <span>Apply Now (Direct Opening)</span>
+            <ExternalLink className="w-4 h-4 text-black" />
           </button>
         </div>
       </div>
