@@ -47,15 +47,30 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
       label: `Discovered Jobs (${totalDiscoveredCount > 0 ? totalDiscoveredCount.toLocaleString() : '1,500'}+ Openings)`,
     },
     {
+      id: 'ats-match' as const,
+      label: 'ATS Match Engine',
+      action: () => {
+        const el = document.getElementById('ats-scoring-banner');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      },
+    },
+    {
       id: 'tracker' as JonHunterNavTab,
       label: 'Application Tracker',
       count: appliedCount,
     },
+    {
+      id: 'concierge' as const,
+      label: 'Direct Concierge',
+      action: () => {
+        onTabChange('tracker');
+      },
+    },
   ];
 
   return (
-    <header className="sticky top-0 w-full z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
-      <div className="h-20 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex items-center justify-between gap-space-md">
+    <header className="sticky top-0 w-full z-50 bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(0,0,0,0.4)]">
+      <div className="h-20 w-full px-margin flex items-center justify-between gap-space-md max-w-7xl mx-auto">
         {/* Left: DRC Logo & Title */}
         <div className="flex items-center gap-space-md shrink-0">
           <button
@@ -63,7 +78,7 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
             onClick={onNavigateHome || (() => onTabChange('discover'))}
             className="flex items-center gap-space-sm text-left cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-lg bg-surface-container-high border border-outline-variant/40 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] group-hover:border-primary/50 transition-colors">
+            <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] group-hover:border-primary/50 transition-colors">
               <span className="font-headline-sm text-headline-sm text-primary tracking-tight font-bold">DRC</span>
             </div>
             <div className="flex flex-col">
@@ -88,8 +103,14 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onTabChange(item.id)}
-                className={`px-space-sm py-2 transition-all cursor-pointer text-sm font-medium rounded-lg flex items-center gap-2 ${
+                onClick={() => {
+                  if ('action' in item && item.action) {
+                    item.action();
+                  } else {
+                    onTabChange(item.id as JonHunterNavTab);
+                  }
+                }}
+                className={`px-space-sm py-2 transition-all cursor-pointer font-body-md text-body-md rounded-lg flex items-center gap-2 ${
                   isActive
                     ? 'bg-primary-container text-on-primary-container font-semibold shadow-[0_0_16px_rgba(16,185,129,0.3)]'
                     : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
@@ -110,9 +131,9 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
           })}
         </nav>
 
-        {/* Right: Live Counter, Sign In, Upload Resume CTA */}
-        <div className="flex items-center gap-3 sm:gap-space-md shrink-0">
-          <div className="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-high border border-outline-variant/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+        {/* Right: Live Counter, Sign In, Upload Resume CTA & Avatar */}
+        <div className="flex items-center gap-space-md shrink-0">
+          <div className="hidden md:flex items-center gap-space-xs px-space-sm py-1.5 rounded-full bg-surface-container-high shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -141,12 +162,17 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
                 }
               })
             }
-            className="px-space-md py-2.5 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all flex items-center gap-1.5 cursor-pointer text-xs sm:text-sm"
+            className="px-space-md py-2.5 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all flex items-center gap-space-xs cursor-pointer text-xs sm:text-sm"
           >
             <span className="material-symbols-outlined text-[18px]">upload_file</span>
-            <span className="hidden sm:inline">Upload Resume (Instant Match)</span>
-            <span className="sm:hidden">Upload Resume</span>
+            <span>Upload Resume</span>
+            <span className="hidden lg:inline text-on-primary-container/80 font-normal">(Instant Match)</span>
           </button>
+
+          {/* Profile Circle Icon */}
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </div>
 
           {/* Mobile menu toggle */}
           <button
