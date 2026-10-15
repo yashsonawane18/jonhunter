@@ -10,6 +10,7 @@ import {
   Search,
   WifiOff,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -964,17 +965,24 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                   <div>
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <h2 className="text-base sm:text-lg font-bold text-white">
-                        {showOnlySaved
+                        {searching && !isAppending
+                          ? 'Searching Opportunities...'
+                          : showOnlySaved
                           ? `Saved Opportunities (${displayedJobsList.length})`
                           : displayedJobsList.length > 0
                           ? `Showing 1 - ${displayedJobsList.length} verified opportunities`
                           : 'Job Search Results'}
                       </h2>
-                      {activeFilterCount > 0 && (
+                      {searching && !isAppending ? (
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30 flex items-center gap-1.5 animate-pulse">
+                          <Loader2 className="w-3 h-3 animate-spin text-[#00C896]" />
+                          <span>Scanning Engine</span>
+                        </span>
+                      ) : activeFilterCount > 0 ? (
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30">
                           {activeFilterCount} active filters
                         </span>
-                      )}
+                      ) : null}
                     </div>
                     <p className="text-xs text-zinc-300 mt-1">
                       {showOnlySaved
@@ -1114,20 +1122,71 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 {/* Job Cards Feed */}
                 {searching && !isAppending ? (
                   <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
+                    {/* Prominent Animated Search In Progress Card in Middle Section */}
+                    <div className={`${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-8 sm:p-10 shadow-xl border relative overflow-hidden text-center`}>
+                      {/* Top Animated Gradient Shimmer Bar */}
+                      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00C896] to-transparent animate-pulse" />
+
+                      {/* Concentric Pulsing Radar / Spinner */}
+                      <div className="relative w-20 h-20 mx-auto mb-5 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full bg-[#00C896]/15 animate-ping" />
+                        <div className="absolute inset-1 rounded-full border-2 border-[#00C896]/30 border-t-[#00C896] animate-spin" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#00C896]/15 border border-[#00C896]/40 flex items-center justify-center text-[#00C896] shadow-[0_0_20px_rgba(0,200,150,0.3)]">
+                          <Search className="w-6 h-6 animate-pulse" />
+                        </div>
+                      </div>
+
+                      {/* Dynamic Title */}
+                      <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
+                        {searchQuery.trim()
+                          ? `Searching Verified Roles for "${searchQuery}"...`
+                          : 'Discovering Verified Opportunities...'}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-zinc-300 max-w-lg mx-auto mt-2 leading-relaxed">
+                        Querying real-time corporate career pages (Greenhouse, Lever, Workday) and pan-India requisitions
+                        {selectedLocation !== 'All India (Remote & Nationwide)' ? ` across ${selectedLocation}` : ''}.
+                      </p>
+
+                      {/* Live scanning pill badges */}
+                      <div className="flex items-center justify-center gap-2 mt-5 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                          <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
+                          <span>Direct ATS Feeds</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                          <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
+                          <span>Strict Keyword Match</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                          <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
+                          <span>Pan-India Executive Band</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Shimmer Skeleton Cards */}
+                    {[1, 2].map((i) => (
                       <div
                         key={i}
-                        className="bg-[#141519] border border-[#262830] rounded-2xl p-6 animate-pulse space-y-4 shadow-md"
+                        className={`${theme.cardClass} border ${theme.cardBorderClass} rounded-2xl p-6 animate-pulse space-y-4 shadow-md`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-[#20222A]" />
-                          <div className="space-y-2 flex-1">
-                            <div className="h-4 bg-[#20222A] rounded w-1/3" />
-                            <div className="h-3 bg-[#20222A] rounded w-1/4" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-12 h-12 rounded-xl ${theme.innerBoxClass}`} />
+                            <div className="space-y-2">
+                              <div className={`h-4 ${theme.innerBoxClass} rounded w-44`} />
+                              <div className={`h-3 ${theme.innerBoxClass} rounded w-28`} />
+                            </div>
                           </div>
+                          <div className={`h-6 ${theme.innerBoxClass} rounded-full w-20`} />
                         </div>
-                        <div className="h-3 bg-[#20222A] rounded w-3/4" />
-                        <div className="h-8 bg-[#20222A] rounded w-1/2" />
+                        <div className={`h-3 ${theme.innerBoxClass} rounded w-3/4`} />
+                        <div className="flex gap-2">
+                          <div className={`h-6 ${theme.innerBoxClass} rounded-lg w-16`} />
+                          <div className={`h-6 ${theme.innerBoxClass} rounded-lg w-20`} />
+                          <div className={`h-6 ${theme.innerBoxClass} rounded-lg w-24`} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1148,6 +1207,14 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       </JobCardErrorBoundary>
                     ))}
 
+                    {/* Appending Indicator Banner */}
+                    {isAppending && (
+                      <div className={`${theme.cardClass} rounded-2xl border border-[#00C896]/30 p-4 flex items-center justify-center gap-3 text-xs text-[#00C896] font-semibold shadow-md animate-pulse`}>
+                        <Loader2 className="w-4 h-4 animate-spin text-[#00C896]" />
+                        <span>Querying live engine for next 5 verified requisitions...</span>
+                      </div>
+                    )}
+
                     {/* Load 5 More Fresh Jobs Button (Solid, clearly visible) */}
                     {!showOnlySaved && (
                       <div className={`pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 ${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-4 shadow-md`}>
@@ -1163,7 +1230,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                         >
                           {isAppending ? (
                             <>
-                              <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                              <Loader2 className="w-4 h-4 animate-spin" />
                               <span>Fetching Next 5 Openings...</span>
                             </>
                           ) : (
