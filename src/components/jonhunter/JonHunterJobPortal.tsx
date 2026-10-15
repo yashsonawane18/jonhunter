@@ -769,51 +769,6 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
             isSearching={searching && !isAppending}
           />
 
-          {/* Metrics Ticker Strip (Material Design 3) */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-space-xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-space-md p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 shadow-sm">
-              <div className="flex items-center gap-space-md p-space-sm">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">star</span>
-                </div>
-                <div>
-                  <div className="font-headline-sm text-headline-sm text-on-surface font-bold">4.9 / 5.0</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Candidate Satisfaction</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-space-md p-space-sm">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">verified</span>
-                </div>
-                <div>
-                  <div className="font-headline-sm text-headline-sm text-on-surface font-bold">3,400+</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Direct Interviews Set</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-space-md p-space-sm">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">trending_up</span>
-                </div>
-                <div>
-                  <div className="font-headline-sm text-headline-sm text-on-surface font-bold">+42% Avg.</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Salary Spike Secured</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-space-md p-space-sm">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-primary shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">lock</span>
-                </div>
-                <div>
-                  <div className="font-headline-sm text-headline-sm text-on-surface font-bold">100% Confidential</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Zero Spam Guarantee</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {/* Recommendations ("Jobs we think you'll love") - Controlled by discoveryFilters.json */}
           {discoveryFiltersConfig?.showRecommendationsSection && (
             <div id="recommended-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -882,11 +837,11 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                   onClearResume={handleClearResume}
                 />
 
-                {/* Results Header Toolbar (Material Design 3 Layout) */}
-                <div className="p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm shadow-sm">
+                {/* Results Header Toolbar (High Contrast, Clean Layout) */}
+                <div className={`${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-4 sm:p-5 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
                   <div>
-                    <div className="flex items-center gap-space-xs flex-wrap">
-                      <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h2 className="text-base sm:text-lg font-bold text-white">
                         {showOnlySaved
                           ? `Saved Opportunities (${displayedJobsList.length})`
                           : displayedJobsList.length > 0
@@ -894,12 +849,12 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           : 'Job Search Results'}
                       </h2>
                       {activeFilterCount > 0 && (
-                        <span className="px-space-xs py-0.5 rounded bg-surface-container text-primary font-label-sm text-label-sm font-semibold">
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30">
                           {activeFilterCount} active filters
                         </span>
                       )}
                     </div>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                    <p className="text-xs text-zinc-300 mt-1">
                       {showOnlySaved
                         ? 'Quick access to all opportunities you have saved or bookmarked.'
                         : 'Direct career portals (Greenhouse, Lever, Workday) and verified hiring posts.'}
@@ -908,17 +863,17 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
                   {/* Channel quick buttons, Saved toggle & 1000+ Archive Shortcut */}
                   <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                    <div className="flex items-center bg-surface-container p-1 rounded-xl border border-outline-variant/30 flex-wrap sm:flex-nowrap gap-1">
+                    <div className={`flex items-center ${theme.innerBoxClass} p-1 rounded-xl ${theme.innerBoxBorderClass} flex-wrap sm:flex-nowrap gap-1`}>
                       <button
                         type="button"
                         onClick={() => {
                           setShowOnlySaved(false);
                           setSelectedChannel('all');
                         }}
-                        className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'all'
-                            ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                            : 'text-on-surface-variant hover:text-on-surface'
+                            ? 'bg-[#00C896] text-[#0A0A0A] font-bold shadow-sm'
+                            : 'text-zinc-300 hover:text-white'
                         }`}
                       >
                         All
@@ -929,10 +884,10 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           setShowOnlySaved(false);
                           setSelectedChannel('career_page');
                         }}
-                        className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'career_page'
-                            ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                            : 'text-on-surface-variant hover:text-on-surface'
+                            ? 'bg-[#00C896] text-[#0A0A0A] font-bold shadow-sm'
+                            : 'text-zinc-300 hover:text-white'
                         }`}
                       >
                         Career Pages
@@ -943,10 +898,10 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           setShowOnlySaved(false);
                           setSelectedChannel('linkedin');
                         }}
-                        className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-all cursor-pointer ${
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           !showOnlySaved && selectedChannel === 'linkedin'
-                            ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                            : 'text-on-surface-variant hover:text-on-surface'
+                            ? 'bg-[#00C896] text-[#0A0A0A] font-bold shadow-sm'
+                            : 'text-zinc-300 hover:text-white'
                         }`}
                       >
                         LinkedIn
@@ -954,15 +909,13 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowOnlySaved((prev) => !prev)}
-                        className={`px-3 py-1.5 rounded-lg font-label-sm text-label-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
                           showOnlySaved
-                            ? 'bg-amber-400 text-black font-bold shadow-sm'
-                            : 'text-on-surface-variant hover:text-amber-300'
+                            ? 'bg-amber-400 text-[#0A0A0A] font-bold shadow-sm'
+                            : 'text-zinc-300 hover:text-amber-300'
                         }`}
                       >
-                        <span className={`material-symbols-outlined text-[16px] ${showOnlySaved ? 'text-black' : 'text-amber-400'}`}>
-                          {showOnlySaved ? 'bookmark' : 'bookmark_border'}
-                        </span>
+                        <Bookmark className={`w-3.5 h-3.5 ${showOnlySaved ? 'fill-black text-black' : 'text-amber-400'}`} />
                         <span>Saved ({savedJobIds.length})</span>
                       </button>
                     </div>
@@ -971,11 +924,11 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                     <button
                       type="button"
                       onClick={() => setActiveNavTab('archive')}
-                      className="px-3.5 py-2 rounded-xl font-label-sm text-label-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary shadow-sm"
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 border bg-[#00C896]/15 hover:bg-[#00C896]/25 text-[#00C896] border-[#00C896]/35 shadow-sm"
                       title="Explore complete 1000+ discovered repository ordered latest to oldest"
                     >
                       <Archive className="w-3.5 h-3.5" />
-                      <span>1,500+ Archive &rarr;</span>
+                      <span>1000+ Archive &rarr;</span>
                     </button>
 
                     {/* Reset Seen History */}
@@ -983,14 +936,13 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       type="button"
                       onClick={handleResetSeenHistory}
                       title="Reset seen exclusion cache"
-                      className="px-3 py-2 rounded-xl font-label-sm text-label-sm font-semibold text-on-surface-variant hover:text-on-surface bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white bg-[#20222A] hover:bg-[#2A2D38] border border-[#343744] hover:border-[#4B4F60] transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-primary" />
+                      <RotateCcw className="w-3.5 h-3.5 text-[#00C896]" />
                       <span className="hidden sm:inline">Reset</span>
                     </button>
                   </div>
                 </div>
-
 
                 {/* Job Cards Feed */}
                 {searching && !isAppending ? (
@@ -1097,71 +1049,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 )}
               </div>
             </div>
-
-            {/* Talent Market Intelligence & Placement Velocity (MD 3 Section) */}
-            <section className="mt-space-xl p-space-lg rounded-2xl bg-surface-container-low border border-outline-variant/30 relative overflow-hidden shadow-sm">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-space-lg">
-                <div className="space-y-space-sm max-w-xl">
-                  <div className="flex items-center gap-space-xs text-primary font-badge-caps text-badge-caps uppercase">
-                    <span className="material-symbols-outlined text-[18px]">insights</span>
-                    <span>EXECUTIVE TALENT INTELLIGENCE</span>
-                  </div>
-                  <h3 className="font-headline-lg text-headline-lg text-on-surface font-bold">
-                    Talent Market Intelligence &amp; Placement Velocity
-                  </h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant">
-                    Real-time telemetry benchmarking compensation percentiles, recruiter outreach velocity, and ATS pass rates for senior technology talent across Tier-1 hubs.
-                  </p>
-                  <div className="grid grid-cols-2 gap-space-md pt-space-xs">
-                    <div>
-                      <div className="font-headline-lg text-headline-lg text-primary font-bold">14.2 Days</div>
-                      <div className="font-label-sm text-label-sm text-on-surface-variant">Median Time-to-Offer</div>
-                    </div>
-                    <div>
-                      <div className="font-headline-lg text-headline-lg text-primary font-bold">84%</div>
-                      <div className="font-label-sm text-label-sm text-on-surface-variant">First-Round Conversion Rate</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Radar Chart SVG Graphic */}
-                <div className="w-full lg:w-80 h-64 flex items-center justify-center bg-surface-container rounded-xl p-space-sm border border-outline-variant/20 shrink-0">
-                  <svg className="w-full h-full" viewBox="0 0 300 240">
-                    <polygon points="150,30 250,90 220,190 80,190 50,90" fill="none" stroke="#3c4a42" strokeWidth="1" strokeDasharray="3 3"/>
-                    <polygon points="150,60 215,100 195,170 105,170 85,100" fill="none" stroke="#3c4a42" strokeWidth="1"/>
-                    <polygon points="150,45 235,95 205,180 95,180 65,95" fill="rgba(78,222,163,0.15)" stroke="#4edea3" strokeWidth="2"/>
-                    <circle cx="150" cy="45" r="4" fill="#4edea3"/>
-                    <circle cx="235" cy="95" r="4" fill="#4edea3"/>
-                    <circle cx="205" cy="180" r="4" fill="#4edea3"/>
-                    <circle cx="95" cy="180" r="4" fill="#4edea3"/>
-                    <circle cx="65" cy="95" r="4" fill="#4edea3"/>
-                    <text x="150" y="20" textAnchor="middle" fill="#bbcabf" fontSize="10" fontFamily="Inter" fontWeight="600">COMPENSATION</text>
-                    <text x="260" y="95" textAnchor="start" fill="#bbcabf" fontSize="10" fontFamily="Inter" fontWeight="600">VELOCITY</text>
-                    <text x="225" y="210" textAnchor="middle" fill="#bbcabf" fontSize="10" fontFamily="Inter" fontWeight="600">ATS MATCH</text>
-                    <text x="75" y="210" textAnchor="middle" fill="#bbcabf" fontSize="10" fontFamily="Inter" fontWeight="600">CULTURE</text>
-                    <text x="40" y="95" textAnchor="end" fill="#bbcabf" fontSize="10" fontFamily="Inter" fontWeight="600">DIRECT ACCESS</text>
-                  </svg>
-                </div>
-              </div>
-            </section>
           </div>
-
-          {/* Footer */}
-          <footer className="mt-space-xl border-t border-outline-variant/30 bg-surface-dim/80 py-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant/30 flex items-center justify-center font-bold text-primary text-xs">
-                  DRC
-                </div>
-                <span className="font-headline-sm text-sm text-on-surface font-semibold">
-                  Dheeraj Rathod Consult &bull; Executive Placement Architecture
-                </span>
-              </div>
-              <p className="font-body-sm text-xs text-on-surface-variant text-center md:text-right">
-                &copy; {new Date().getFullYear()} Dheeraj Rathod Consult. All rights reserved. 100% Confidential Executive Sourcing.
-              </p>
-            </div>
-          </footer>
         </main>
       )}
 
