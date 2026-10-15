@@ -19,7 +19,7 @@ export interface JonHunterHeroProps {
   onLocationChange: (loc: string) => void;
   selectedSeniority: 'all' | 'entry' | 'intermediate' | 'senior' | 'lead' | 'manager';
   onSeniorityChange: (sen: 'all' | 'entry' | 'intermediate' | 'senior' | 'lead' | 'manager') => void;
-  onExecuteSearch: () => void;
+  onExecuteSearch: (queryOverride?: string) => void;
   locationsList: (string | IndiaLocationOption)[];
   isSearching?: boolean;
 }
@@ -87,7 +87,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onExecuteSearch();
+    onExecuteSearch(searchQuery);
   };
 
   const theme = getActiveTheme();
@@ -134,8 +134,12 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 {searchQuery && (
                   <button
                     type="button"
-                    onClick={() => onSearchQueryChange('')}
+                    onClick={() => {
+                      onSearchQueryChange('');
+                      onExecuteSearch('');
+                    }}
                     className="p-1 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white cursor-pointer"
+                    title="Clear search"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -271,7 +275,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 type="button"
                 onClick={() => {
                   onSearchQueryChange(term);
-                  onExecuteSearch();
+                  onExecuteSearch(term);
                 }}
                 className="text-xs px-3 py-1.5 rounded-lg bg-[#1C1E24] hover:bg-[#252832] text-zinc-200 hover:text-white border border-[#2D303B] hover:border-[#3D404E] transition-colors font-medium cursor-pointer"
               >

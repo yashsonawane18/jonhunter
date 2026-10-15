@@ -7,6 +7,9 @@ import {
   Archive,
   AlertTriangle,
   Activity,
+  Search,
+  WifiOff,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -40,7 +43,7 @@ import { DiagnosticsModal } from '../common/DiagnosticsModal';
 import { safeStorage } from '../../lib/storage/safeStorage';
 import { openExternalJobLink } from '../../lib/safeExternalLink';
 import { errorLogger } from '../../lib/errors/errorLogger';
-import { getUserFriendlyErrorMessage } from '../../lib/errors/AppError';
+import { getUserFriendlyErrorMessage, isNetworkError } from '../../lib/errors/AppError';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
 
@@ -120,6 +123,14 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   // Offline recovery & Diagnostics state
   const [isUsingOfflineCache, setIsUsingOfflineCache] = useState<boolean>(false);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
+  const [searchError, setSearchError] = useState<{
+    title: string;
+    query?: string;
+    location?: string;
+    reason: string;
+    isNetwork?: boolean;
+    timestamp: string;
+  } | null>(null);
 
   // Filter to show only saved jobs in feed
   const [showOnlySaved, setShowOnlySaved] = useState<boolean>(false);
@@ -179,6 +190,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         setIsAppending(true);
       } else {
         setSearching(true);
+        setSearchError(null);
       }
 
       try {
@@ -223,6 +235,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         );
 
         setEngineOnline(true);
+        setSearchError(null);
         const retrieved = result.jobs || [];
 
         const newSeen = new Set(currentSeenSet);
@@ -256,11 +269,17 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         errorLogger.error('JonHunterJobPortal.executeFreshSearch', err);
         setEngineOnline(false);
 
-        // Graceful Local Offline Degradation: Query cached 1,500+ requisitions
+        const isNet = isNetworkError(err);
+        const qClean = (query || '').trim();
+        const friendlyMsg = getUserFriendlyErrorMessage(
+          err,
+          'Unable to connect to the Job Discovery Engine. Please check your network or verify port 5055 is active.'
+        );
+
+        // Graceful Local Offline Degradation: Query cached requisitions
         if (allDiscoveredJobs && allDiscoveredJobs.length > 0) {
           setIsUsingOfflineCache(true);
-          const q = (query || '').toLowerCase().trim();
-          const qWords = q.split(/\s+/).filter(Boolean);
+          const qWords = qClean.toLowerCase().split(/\s+/).filter(Boolean);
 
           const filtered = allDiscoveredJobs.filter((job) => {
             if (!job) return false;
@@ -275,7 +294,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
               const title = (job.job_title || '').toLowerCase();
               const desc = (job.job_description || '').toLowerCase();
               const comp = (job.company || '').toLowerCase();
-              const skillsStr = (job.key_skills || []).join(' ').toLowerCase();
+              const skillsStr = (Array.isArray(job.key_skills) ? job.key_skills.join(' ') : '').toLowerCase();
               const haystack = `${title} ${desc} ${comp} ${skillsStr}`;
               const matches = qWords.some((word) => haystack.includes(word));
               if (!matches) return false;
@@ -286,13 +305,36 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
           const fallbackList = filtered.slice(0, 20);
           if (fallbackList.length > 0) {
             setJobsList(fallbackList);
+            setSearchError(null);
             toast.warning(`Engine offline: Showing ${fallbackList.length} verified matching jobs from local archive.`);
           } else {
-            setJobsList(allDiscoveredJobs.slice(0, 20));
-            toast.warning('Engine offline: Showing 20 recent verified jobs from local archive.');
+            // No offline matching jobs found for this specific query/location
+            setJobsList([]);
+            setSearchError({
+              title: isNet ? 'Job Search Network Connection Error' : 'Job Search Service Unavailable',
+              query: qClean || undefined,
+              location: location !== 'All India (Remote & Nationwide)' ? location : undefined,
+              reason: isNet
+                ? 'Unable to reach the Job Discovery engine (Port 5055 / Cloud API). The server may be restarting or offline, and no matching requisitions were found in the local archive.'
+                : friendlyMsg,
+              isNetwork: isNet,
+              timestamp: new Date().toLocaleTimeString(),
+            });
+            toast.error(friendlyMsg);
           }
         } else {
-          toast.error(getUserFriendlyErrorMessage(err, 'Unable to connect to Job Discovery Engine. Please check connection.'));
+          setJobsList([]);
+          setSearchError({
+            title: isNet ? 'Job Search Network Connection Error' : 'Job Search Service Unavailable',
+            query: qClean || undefined,
+            location: location !== 'All India (Remote & Nationwide)' ? location : undefined,
+            reason: isNet
+              ? 'Unable to reach the Job Discovery engine (Port 5055 / Cloud API). Please check your internet connection or verify the server status.'
+              : friendlyMsg,
+            isNetwork: isNet,
+            timestamp: new Date().toLocaleTimeString(),
+          });
+          toast.error(friendlyMsg);
         }
       } finally {
         setSearching(false);
@@ -348,11 +390,32 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   };
 
   // Explicit user input: Clicking "Search Jobs" in Hero executes fresh engine search
-  const handleManualSearch = () => {
+  const handleManualSearch = (queryOverride?: string) => {
+    const activeQuery = typeof queryOverride === 'string' ? queryOverride : searchQuery;
+    setSeenJobIds(new Set());
+    setBatchOffset(0);
+    setSearchError(null);
+    executeFreshSearch(
+      activeQuery,
+      selectedLocation,
+      selectedSeniority,
+      selectedChannel,
+      false,
+      resumeProfile,
+      new Set(),
+      selectedWorkMode,
+      selectedSkills
+    );
+  };
+
+  // Quick search pill suggestion handler
+  const handleQuickSearchSuggestion = (term: string) => {
+    setSearchQuery(term);
+    setSearchError(null);
     setSeenJobIds(new Set());
     setBatchOffset(0);
     executeFreshSearch(
-      searchQuery,
+      term,
       selectedLocation,
       selectedSeniority,
       selectedChannel,
@@ -554,6 +617,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
   // Reset all filters
   const handleResetFilters = () => {
+    setSearchError(null);
     setSearchQuery('');
     setSelectedLocation('All India (Remote & Nationwide)');
     setSelectedSeniority('all');
@@ -607,26 +671,60 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   ]);
 
   const displayedJobsList = useMemo(() => {
+    // If a search error is active, suppress displayed jobs to allow Error Card to take prominence
+    if (searchError) {
+      return [];
+    }
+
     const qClean = (searchQuery || '').trim().toLowerCase();
 
-    // Determine initial candidate list
+    // Determine initial candidate list from either active jobsList or archive pool
     let list: DiscoveredJobItem[] = [];
-    if (jobsList.length > 0) {
-      list = jobsList;
-    } else if (allDiscoveredJobs.length > 0) {
-      if (qClean) {
-        // Fall back to matching jobs from allDiscoveredJobs repository
-        const qWords = qClean.split(/\s+/).filter((w) => w.length > 1);
-        const matches = allDiscoveredJobs.filter((j) => {
-          const t = (j.job_title || '').toLowerCase();
-          const d = (j.job_description || '').toLowerCase();
-          const s = (Array.isArray(j.key_skills) ? j.key_skills.join(' ') : '').toLowerCase();
-          return t.includes(qClean) || qWords.every((w) => t.includes(w) || d.includes(w) || s.includes(w));
-        });
-        list = matches.length > 0 ? matches : allDiscoveredJobs.slice(0, 20);
-      } else {
-        list = allDiscoveredJobs.slice(0, 20);
-      }
+    const pool = jobsList.length > 0 ? jobsList : allDiscoveredJobs;
+
+    if (qClean) {
+      const qWords = qClean.split(/\s+/).filter((w) => w.length > 1);
+      // Strictly filter candidate jobs by search relevance
+      list = pool.filter((j) => {
+        if (!j) return false;
+        const t = (j.job_title || '').toLowerCase();
+        const d = (j.job_description || '').toLowerCase();
+        const c = (j.company || '').toLowerCase();
+        const s = (Array.isArray(j.key_skills) ? j.key_skills.join(' ') : '').toLowerCase();
+        const haystack = `${t} ${c} ${s} ${d}`;
+
+        // Exact match in title, company or skills
+        if (t.includes(qClean) || c.includes(qClean) || s.includes(qClean)) return true;
+        // Or all words match anywhere
+        if (qWords.length > 0 && qWords.every((w) => haystack.includes(w))) return true;
+        // Or any keyword matches title or skills
+        if (qWords.length > 0 && qWords.some((w) => t.includes(w) || s.includes(w))) return true;
+
+        return false;
+      });
+
+      // Sort by relevance (exact title > title word > skills > description)
+      list = [...list].sort((a, b) => {
+        const aTitle = (a.job_title || '').toLowerCase();
+        const bTitle = (b.job_title || '').toLowerCase();
+        const aSkills = (Array.isArray(a.key_skills) ? a.key_skills.join(' ') : '').toLowerCase();
+        const bSkills = (Array.isArray(b.key_skills) ? b.key_skills.join(' ') : '').toLowerCase();
+
+        const getScore = (title: string, skills: string) => {
+          if (title.includes(qClean)) return 100;
+          if (skills.includes(qClean)) return 75;
+          let score = 0;
+          qWords.forEach((w) => {
+            if (title.includes(w)) score += 20;
+            if (skills.includes(w)) score += 10;
+          });
+          return score;
+        };
+
+        return getScore(bTitle, bSkills) - getScore(aTitle, aSkills);
+      });
+    } else {
+      list = jobsList.length > 0 ? jobsList : allDiscoveredJobs.slice(0, 20);
     }
 
     // 1. Saved Filter
@@ -642,19 +740,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       list = Array.from(map.values());
     }
 
-    // 2. Keyword relevance prioritization if user typed a search query
-    if (qClean) {
-      const qWords = qClean.split(/\s+/).filter((w) => w.length > 1);
-      list = [...list].sort((a, b) => {
-        const aTitle = (a.job_title || '').toLowerCase();
-        const bTitle = (b.job_title || '').toLowerCase();
-        const aExact = aTitle.includes(qClean) ? 2 : qWords.some((w) => aTitle.includes(w)) ? 1 : 0;
-        const bExact = bTitle.includes(qClean) ? 2 : qWords.some((w) => bTitle.includes(w)) ? 1 : 0;
-        return bExact - aExact;
-      });
-    }
-
-    // 3. Channel Filter
+    // 2. Channel Filter
     if (selectedChannel === 'career_page') {
       list = list.filter((j) => {
         const src = (j.source_type || j.apply_type || '').toLowerCase();
@@ -667,7 +753,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       });
     }
 
-    // 4. Work Mode Filter
+    // 3. Work Mode Filter
     if (selectedWorkMode === 'remote') {
       list = list.filter((j) => (j.location || '').toLowerCase().includes('remote') || (j.job_type || '').toLowerCase().includes('remote'));
     } else if (selectedWorkMode === 'hybrid') {
@@ -676,7 +762,37 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       list = list.filter((j) => !(j.location || '').toLowerCase().includes('remote'));
     }
 
-    // 5. Skills Filter
+    // 4. Seniority Filter
+    if (selectedSeniority !== 'all') {
+      list = list.filter((j) => {
+        const sen = (j.seniority || '').toLowerCase();
+        const exp = (j.experience || '').toLowerCase();
+        if (selectedSeniority === 'intermediate') {
+          return sen.includes('intermediate') || sen.includes('mid') || exp.includes('2') || exp.includes('3') || exp.includes('4') || exp.includes('5');
+        }
+        if (selectedSeniority === 'senior') {
+          return sen.includes('senior') || exp.includes('5') || exp.includes('6') || exp.includes('7') || exp.includes('8');
+        }
+        if (selectedSeniority === 'lead') {
+          return sen.includes('lead') || sen.includes('principal') || sen.includes('staff') || exp.includes('8') || exp.includes('10');
+        }
+        if (selectedSeniority === 'manager') {
+          return sen.includes('manager') || sen.includes('director') || exp.includes('12') || exp.includes('15');
+        }
+        return true;
+      });
+    }
+
+    // 5. Location Filter
+    if (selectedLocation && selectedLocation !== 'All India (Remote & Nationwide)') {
+      const targetLoc = selectedLocation.split(',')[0].toLowerCase().trim();
+      list = list.filter((j) => {
+        const loc = (j.location || '').toLowerCase();
+        return loc.includes(targetLoc);
+      });
+    }
+
+    // 6. Skills Filter
     if (selectedSkills.length > 0) {
       list = list.filter((j) => {
         const jobSkills = Array.isArray(j.key_skills) ? j.key_skills.map((s) => s.toLowerCase()) : [];
@@ -685,7 +801,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       });
     }
 
-    // 6. ATS Score Filter (ONLY applied if candidate uploaded a resume)
+    // 7. ATS Score Filter (ONLY applied if candidate uploaded a resume)
     if (!resumeProfile || minAtsScoreFilter === 'all') {
       return list;
     }
@@ -699,9 +815,12 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     savedJobIds,
     selectedChannel,
     selectedWorkMode,
+    selectedSeniority,
+    selectedLocation,
     selectedSkills,
     resumeProfile,
     minAtsScoreFilter,
+    searchError,
   ]);
 
   const allCombinedJobs = useMemo(() => {
@@ -1057,6 +1176,70 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       </div>
                     )}
                   </div>
+                ) : searchError ? (
+                  /* Dedicated High-Contrast Error Card */
+                  <div className={`${theme.cardClass} rounded-2xl border border-red-500/40 p-6 sm:p-8 shadow-xl bg-gradient-to-b from-red-500/10 via-transparent to-transparent`}>
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                        {searchError.isNetwork ? <WifiOff className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <h3 className="text-lg font-bold text-white tracking-tight">{searchError.title}</h3>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-red-500/20 text-red-300 border border-red-500/30">
+                            {searchError.isNetwork ? 'Port 5055 / Cloud Offline' : 'Engine Error'}
+                          </span>
+                          <span className="text-[11px] text-zinc-400">
+                            {searchError.timestamp}
+                          </span>
+                        </div>
+
+                        {searchError.query && (
+                          <p className="text-sm font-semibold text-zinc-200 mt-1">
+                            Search could not be completed for role: <span className="text-[#00C896] underline font-bold">"{searchError.query}"</span>
+                            {searchError.location && <span> in {searchError.location}</span>}
+                          </p>
+                        )}
+
+                        <div className="mt-3 p-3.5 rounded-xl bg-[#0C0E14] border border-[#272A32] text-xs text-zinc-300 font-mono leading-relaxed break-words">
+                          {searchError.reason}
+                        </div>
+
+                        <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
+                          The search query could not be executed because the background engine service was unavailable or the connection was interrupted. You can retry the request, inspect system health diagnostics, or reset filters.
+                        </p>
+
+                        <div className="flex items-center gap-3 mt-5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => handleManualSearch(searchError.query)}
+                            className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] text-xs font-bold transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Retry Search Now</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setIsDiagnosticsOpen(true)}
+                            className="px-4 py-2.5 rounded-xl bg-[#20222A] hover:bg-[#2A2D38] text-white border border-[#343744] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2"
+                          >
+                            <Activity className="w-3.5 h-3.5 text-[#00C896]" />
+                            <span>Check System Status</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleResetFilters}
+                            className="px-4 py-2.5 rounded-xl bg-transparent hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-medium transition-colors cursor-pointer flex items-center gap-2"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Reset Filters</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ) : showOnlySaved ? (
                   /* Empty State for Saved Jobs */
                   <div className={`${theme.cardClass} rounded-2xl border border-dashed ${theme.cardBorderClass} p-12 text-center shadow-md`}>
@@ -1075,6 +1258,70 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       <Compass className="w-4 h-4" />
                       <span>Explore All Opportunities</span>
                     </button>
+                  </div>
+                ) : searchQuery.trim() !== '' ? (
+                  /* No Verified Jobs Found for Keyword State */
+                  <div className={`${theme.cardClass} rounded-2xl border border-dashed ${theme.cardBorderClass} p-8 sm:p-10 text-center shadow-md`}>
+                    <div className={`w-14 h-14 rounded-2xl ${theme.innerBoxClass} ${theme.innerBoxBorderClass} flex items-center justify-center text-[#00C896] mx-auto mb-4`}>
+                      <Search className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">
+                      No Verified Jobs Found for "{searchQuery}"
+                    </h3>
+                    <p className="text-sm text-zinc-300 max-w-lg mx-auto mt-2 leading-relaxed">
+                      We couldn't find active openings matching your keyword in our current verified database
+                      {selectedLocation !== 'All India (Remote & Nationwide)' ? ` for ${selectedLocation}` : ''}.
+                    </p>
+
+                    {/* Quick Suggestion Pills */}
+                    <div className="mt-5 max-w-md mx-auto">
+                      <p className="text-xs font-semibold text-zinc-400 mb-2.5 flex items-center justify-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#00C896]" />
+                        <span>Try searching for these verified high-demand roles:</span>
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {[
+                          'Full Stack Developer',
+                          'Python Engineer',
+                          'React Developer',
+                          'DevOps Engineer',
+                          'Data Analyst',
+                          'Cloud Architect',
+                        ].map((role) => (
+                          <button
+                            key={role}
+                            type="button"
+                            onClick={() => handleQuickSearchSuggestion(role)}
+                            className="px-3 py-1.5 rounded-lg bg-[#20222A] hover:bg-[#2A2D38] text-xs font-semibold text-zinc-200 hover:text-[#00C896] border border-[#343744] hover:border-[#00C896]/40 transition-colors cursor-pointer"
+                          >
+                            {role}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-3 mt-7 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSearchError(null);
+                          executeFreshSearch('', selectedLocation, selectedSeniority, selectedChannel, false);
+                        }}
+                        className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] text-xs font-bold inline-flex items-center gap-2 cursor-pointer shadow-sm"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>Clear Search & Show All</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="px-4 py-2.5 rounded-xl bg-[#20222A] hover:bg-[#2A2D38] text-zinc-300 hover:text-white border border-[#343744] text-xs font-medium inline-flex items-center gap-2 cursor-pointer"
+                      >
+                        <span>Reset All Filters</span>
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   /* Standard Empty State */
