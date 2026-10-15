@@ -135,10 +135,23 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
   // Filter to show only saved jobs in feed
   const [showOnlySaved, setShowOnlySaved] = useState<boolean>(false);
+  const [isFiltering, setIsFiltering] = useState<boolean>(false);
 
   // Seen ids to prevent duplicate cards during load more
   const [seenJobIds, setSeenJobIds] = useState<Set<string>>(new Set());
   const [batchOffset, setBatchOffset] = useState<number>(0);
+
+  // Set global loader cursor when search or filter is processing
+  useEffect(() => {
+    if (searching || isAppending || isFiltering) {
+      document.body.style.cursor = 'wait';
+    } else {
+      document.body.style.cursor = '';
+    }
+    return () => {
+      document.body.style.cursor = '';
+    };
+  }, [searching, isAppending, isFiltering]);
 
   // Modals state
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobDetailData | null>(null);
@@ -367,28 +380,48 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     return getSuggestedSkillsForRole(searchQuery);
   }, [searchQuery]);
 
-  // Handlers for Filters - in-memory client-side filtering without network wipes
+  // Handlers for Filters - in-memory client-side filtering with smooth middle loader feedback
+  const triggerFilterTransition = useCallback(() => {
+    setIsFiltering(true);
+    const timer = setTimeout(() => {
+      setIsFiltering(false);
+    }, 280);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleLocationChange = (loc: string) => {
     setSelectedLocation(loc);
+    triggerFilterTransition();
   };
 
   const handleSenioritySelect = (seniority: 'all' | 'entry' | 'intermediate' | 'senior' | 'lead' | 'manager') => {
     setSelectedSeniority(seniority);
+    triggerFilterTransition();
   };
 
   const handleChannelChange = (channel: 'all' | 'career_page' | 'linkedin') => {
     setSelectedChannel(channel);
+    triggerFilterTransition();
   };
 
   const handleWorkModeChange = (wm: 'all' | 'remote' | 'hybrid' | 'onsite') => {
     setSelectedWorkMode(wm);
+    triggerFilterTransition();
   };
 
   const handleToggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
+    triggerFilterTransition();
   };
+
+  const handleMinAtsScoreChange = (score: 'all' | '70' | '80' | '85') => {
+    setMinAtsScoreFilter(score);
+    triggerFilterTransition();
+  };
+
+  const isSearchProcessing = (searching && !isAppending) || isFiltering;
 
   // Explicit user input: Clicking "Search Jobs" in Hero executes fresh engine search
   const handleManualSearch = (queryOverride?: string) => {
@@ -929,7 +962,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                   selectedWorkMode={selectedWorkMode}
                   onWorkModeChange={handleWorkModeChange}
                   minAtsScoreFilter={minAtsScoreFilter}
-                  onMinAtsScoreChange={setMinAtsScoreFilter}
+                  onMinAtsScoreChange={handleMinAtsScoreChange}
                   selectedSkills={selectedSkills}
                   suggestedSkills={suggestedSkills}
                   onToggleSkill={handleToggleSkill}
@@ -949,8 +982,13 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 />
               </div>
 
-              {/* Right Column: Search Results Feed */}
-              <div className="lg:col-span-8 xl:col-span-9 space-y-5">
+              {/* Right Column: Search Results Feed (Middle Section) */}
+              <div
+                className={`lg:col-span-8 xl:col-span-9 space-y-5 relative transition-all duration-200 ${
+                  isSearchProcessing ? 'cursor-wait select-none' : ''
+                }`}
+                style={isSearchProcessing ? { cursor: 'wait' } : undefined}
+              >
                 {/* Resume ATS Scanner Banner */}
                 <ResumeAtsBanner
                   resumeProfile={resumeProfile}
@@ -965,7 +1003,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                   <div>
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <h2 className="text-base sm:text-lg font-bold text-white">
-                        {searching && !isAppending
+                        {isSearchProcessing && !isAppending
                           ? 'Searching Opportunities...'
                           : showOnlySaved
                           ? `Saved Opportunities (${displayedJobsList.length})`
@@ -973,7 +1011,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           ? `Showing 1 - ${displayedJobsList.length} verified opportunities`
                           : 'Job Search Results'}
                       </h2>
-                      {searching && !isAppending ? (
+                      {isSearchProcessing && !isAppending ? (
                         <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30 flex items-center gap-1.5 animate-pulse">
                           <Loader2 className="w-3 h-3 animate-spin text-[#00C896]" />
                           <span>Scanning Engine</span>
@@ -1120,10 +1158,10 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 )}
 
                 {/* Job Cards Feed */}
-                {searching && !isAppending ? (
+                {isSearchProcessing && displayedJobsList.length === 0 ? (
                   <div className="space-y-4">
                     {/* Prominent Animated Search In Progress Card in Middle Section */}
-                    <div className={`${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-8 sm:p-10 shadow-xl border relative overflow-hidden text-center`}>
+                    <div className={`${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-8 sm:p-10 shadow-xl border relative overflow-hidden text-center cursor-wait`}>
                       {/* Top Animated Gradient Shimmer Bar */}
                       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00C896] to-transparent animate-pulse" />
 
@@ -1191,7 +1229,32 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                     ))}
                   </div>
                 ) : displayedJobsList.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4 relative">
+                    {/* Middle Section Center Loading Overlay Animation when search/filter is processing */}
+                    {isSearchProcessing && (
+                      <div className="absolute inset-0 z-30 bg-[#10131A]/75 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center p-6 min-h-[350px] transition-all duration-200 cursor-wait">
+                        <div className="relative w-20 h-20 mb-4 flex items-center justify-center pointer-events-none">
+                          <div className="absolute inset-0 rounded-full bg-[#00C896]/20 animate-ping" />
+                          <div className="absolute inset-1 rounded-full border-2 border-[#00C896]/30 border-t-[#00C896] animate-spin" />
+                          <div className="w-12 h-12 rounded-2xl bg-[#00C896]/15 border border-[#00C896]/40 flex items-center justify-center text-[#00C896] shadow-[0_0_25px_rgba(0,200,150,0.35)]">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#00C896]" />
+                          </div>
+                        </div>
+
+                        <div className="text-center px-4 pointer-events-none">
+                          <h4 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center justify-center gap-2">
+                            <span>
+                              {searchQuery.trim()
+                                ? `Searching Verified Roles for "${searchQuery}"...`
+                                : 'Updating Verified Opportunities...'}
+                            </span>
+                          </h4>
+                          <p className="text-xs text-zinc-300 mt-1 max-w-sm">
+                            Querying live corporate career portals & verified hiring posts
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {displayedJobsList.map((job) => (
                       <JobCardErrorBoundary key={job.id} jobId={job.id} jobTitle={job.job_title}>
                         <JobCardNaukri
