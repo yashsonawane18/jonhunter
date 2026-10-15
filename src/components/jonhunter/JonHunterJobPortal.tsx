@@ -5,6 +5,8 @@ import {
   RefreshCw,
   Bookmark,
   Archive,
+  AlertTriangle,
+  Activity,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -28,11 +30,17 @@ import { JonHunterNav, JonHunterNavTab } from './JonHunterNav';
 import { JonHunterHero } from './JonHunterHero';
 import { RecommendedJobsSection } from './RecommendedJobsSection';
 import { JobCardNaukri } from './JobCardNaukri';
+import { JobCardErrorBoundary } from './JobCardErrorBoundary';
 import { FiltersSidebar } from './FiltersSidebar';
 import { ResumeAtsBanner } from './ResumeAtsBanner';
 import { SavedJobsView } from './SavedJobsView';
 import { DiscoveredArchiveView } from './DiscoveredArchiveView';
 import { ApplicationTrackerView } from './ApplicationTrackerView';
+import { DiagnosticsModal } from '../common/DiagnosticsModal';
+import { safeStorage } from '../../lib/storage/safeStorage';
+import { openExternalJobLink } from '../../lib/safeExternalLink';
+import { errorLogger } from '../../lib/errors/errorLogger';
+import { getUserFriendlyErrorMessage } from '../../lib/errors/AppError';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
 
@@ -102,22 +110,16 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   // Jobs state
   const [jobsList, setJobsList] = useState<DiscoveredJobItem[]>([]);
   const [allDiscoveredJobs, setAllDiscoveredJobs] = useState<DiscoveredJobItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('drc_discovered_all_jobs_v2');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
+    return safeStorage.getItem<DiscoveredJobItem[]>('drc_discovered_all_jobs_v2', []);
   });
 
   const [savedJobIds, setSavedJobIds] = useState<string[]>(() => {
-    try {
-      const cached = localStorage.getItem('drc_starred_job_ids_v2');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
+    return safeStorage.getItem<string[]>('drc_starred_job_ids_v2', []);
   });
+
+  // Offline recovery & Diagnostics state
+  const [isUsingOfflineCache, setIsUsingOfflineCache] = useState<boolean>(false);
+  const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState<boolean>(false);
 
   // Filter to show only saved jobs in feed
   const [showOnlySaved, setShowOnlySaved] = useState<boolean>(false);
@@ -150,16 +152,14 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       .then((res) => {
         if (res && res.all_jobs && res.all_jobs.length > 0) {
           setAllDiscoveredJobs(res.all_jobs);
-          try {
-            localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(res.all_jobs.slice(0, 1500)));
-          } catch (e) {
-            console.warn('LocalStorage save notice:', e);
-          }
+          safeStorage.setItem('drc_discovered_all_jobs_v2', res.all_jobs.slice(0, 1500));
           // Seed the initial feed with the top 20 latest verified jobs so user immediately sees opportunities
           setJobsList((prev) => (prev.length === 0 ? res.all_jobs.slice(0, 20) : prev));
         }
       })
-      .catch((err) => console.log('SQLite history fetch notice:', err));
+      .catch((err) => {
+        errorLogger.warn('JonHunterJobPortal', `SQLite history fetch notice: ${err?.message || err}`);
+      });
   }, []);
 
   // 2. Fresh Search Requisitions
@@ -239,7 +239,9 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
           setBatchOffset(retrieved.length);
         }
 
-        // Cache all discovered jobs
+        setIsUsingOfflineCache(false);
+
+        // Cache all discovered jobs safely
         setAllDiscoveredJobs((prev) => {
           const map = new Map(prev.map((j) => [j.id || j.application_url, j]));
           retrieved.forEach((j) => {
@@ -247,15 +249,51 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
             if (!map.has(key)) map.set(key, j);
           });
           const merged = Array.from(map.values());
-          try {
-            localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(merged.slice(0, 1000)));
-          } catch {}
+          safeStorage.setItem('drc_discovered_all_jobs_v2', merged.slice(0, 1000));
           return merged;
         });
       } catch (err: any) {
-        console.error('Job search failure:', err);
-        toast.error('Search request encountered an issue. Re-verifying engine...');
+        errorLogger.error('JonHunterJobPortal.executeFreshSearch', err);
         setEngineOnline(false);
+
+        // Graceful Local Offline Degradation: Query cached 1,500+ requisitions
+        if (allDiscoveredJobs && allDiscoveredJobs.length > 0) {
+          setIsUsingOfflineCache(true);
+          const q = (query || '').toLowerCase().trim();
+          const qWords = q.split(/\s+/).filter(Boolean);
+
+          const filtered = allDiscoveredJobs.filter((job) => {
+            if (!job) return false;
+            // Match location if user requested a specific city
+            if (location && location !== 'All India (Remote & Nationwide)') {
+              const jobLoc = (job.location || '').toLowerCase();
+              const reqLoc = location.split(',')[0].toLowerCase();
+              if (!jobLoc.includes(reqLoc)) return false;
+            }
+            // Match keywords
+            if (qWords.length > 0) {
+              const title = (job.job_title || '').toLowerCase();
+              const desc = (job.job_description || '').toLowerCase();
+              const comp = (job.company || '').toLowerCase();
+              const skillsStr = (job.key_skills || []).join(' ').toLowerCase();
+              const haystack = `${title} ${desc} ${comp} ${skillsStr}`;
+              const matches = qWords.some((word) => haystack.includes(word));
+              if (!matches) return false;
+            }
+            return true;
+          });
+
+          const fallbackList = filtered.slice(0, 20);
+          if (fallbackList.length > 0) {
+            setJobsList(fallbackList);
+            toast.warning(`Engine offline: Showing ${fallbackList.length} verified matching jobs from local archive.`);
+          } else {
+            setJobsList(allDiscoveredJobs.slice(0, 20));
+            toast.warning('Engine offline: Showing 20 recent verified jobs from local archive.');
+          }
+        } else {
+          toast.error(getUserFriendlyErrorMessage(err, 'Unable to connect to Job Discovery Engine. Please check connection.'));
+        }
       } finally {
         setSearching(false);
         setIsAppending(false);
@@ -389,9 +427,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     const jobId = job.id;
     setSavedJobIds((prev) => {
       const next = prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId];
-      try {
-        localStorage.setItem('drc_starred_job_ids_v2', JSON.stringify(next));
-      } catch {}
+      safeStorage.setItem('drc_starred_job_ids_v2', next);
       if (prev.includes(jobId)) {
         toast.info('Removed from saved jobs');
       } else {
@@ -413,9 +449,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       );
       setAllDiscoveredJobs((prev) => {
         const updated = prev.map((j) => (j.id === job.id ? { ...j, status: nextStatus, remarks: remark } : j));
-        try {
-          localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(updated.slice(0, 1000)));
-        } catch {}
+        safeStorage.setItem('drc_discovered_all_jobs_v2', updated.slice(0, 1000));
         return updated;
       });
       toast.success(`Job marked as ${nextStatus}`);
@@ -434,9 +468,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       );
       setAllDiscoveredJobs((prev) => {
         const updated = prev.map((j) => (j.id === job.id ? { ...j, remarks: remarkText } : j));
-        try {
-          localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(updated.slice(0, 1000)));
-        } catch {}
+        safeStorage.setItem('drc_discovered_all_jobs_v2', updated.slice(0, 1000));
         return updated;
       });
       toast.success('Note saved successfully');
@@ -509,36 +541,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       const companyName = ('company' in job ? job.company : (job as any).company) || 'Enterprise Partner';
 
       if (rawUrl && typeof rawUrl === 'string' && rawUrl.trim().length > 0) {
-        let cleanUrl = rawUrl.trim();
-        if (!/^https?:\/\//i.test(cleanUrl)) {
-          cleanUrl = `https://${cleanUrl}`;
-        }
-
-        try {
-          // Attempt standard window.open
-          const win = window.open(cleanUrl, '_blank', 'noopener,noreferrer');
-          // Fallback if popup blocker intercepted or prevented window.open
-          if (!win || win.closed || typeof win.closed === 'undefined') {
-            const anchor = document.createElement('a');
-            anchor.href = cleanUrl;
-            anchor.target = '_blank';
-            anchor.rel = 'noopener noreferrer';
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
-          }
-          toast.success(`Opening direct job posting for ${companyName} ↗`);
-        } catch {
-          // Fallback link click
-          const anchor = document.createElement('a');
-          anchor.href = cleanUrl;
-          anchor.target = '_blank';
-          anchor.rel = 'noopener noreferrer';
-          document.body.appendChild(anchor);
-          anchor.click();
-          document.body.removeChild(anchor);
-          toast.success(`Opening direct job posting for ${companyName} ↗`);
-        }
+        openExternalJobLink(rawUrl, companyName);
         return;
       } else {
         toast.info('Direct application link not available for this role.');
@@ -941,8 +944,53 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       <RotateCcw className="w-3.5 h-3.5 text-[#00C896]" />
                       <span className="hidden sm:inline">Reset</span>
                     </button>
+
+                    {/* System Diagnostics Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setIsDiagnosticsOpen(true)}
+                      title="Inspect engine connection & diagnostics"
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-[#20222A] hover:bg-[#2A2D38] border border-[#343744] hover:border-[#4B4F60] transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Activity className="w-3.5 h-3.5 text-zinc-400" />
+                      <span className="hidden lg:inline text-[11px]">System Status</span>
+                    </button>
                   </div>
                 </div>
+
+                {/* Offline Cache Recovery Banner */}
+                {isUsingOfflineCache && (
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-md">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-white">Live Search Engine Reconnecting</p>
+                        <p className="text-[11px] text-zinc-300">
+                          Showing verified offline requisitions from local archive ({displayedJobsList.length} matching).
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                      <button
+                        type="button"
+                        onClick={handleManualSearch}
+                        className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Retry Live</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsDiagnosticsOpen(true)}
+                        className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-medium transition-colors cursor-pointer"
+                      >
+                        Diagnostics
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Job Cards Feed */}
                 {searching && !isAppending ? (
@@ -967,17 +1015,18 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 ) : displayedJobsList.length > 0 ? (
                   <div className="space-y-4">
                     {displayedJobsList.map((job) => (
-                      <JobCardNaukri
-                        key={job.id}
-                        job={job}
-                        isSaved={savedJobIds.includes(job.id)}
-                        hasResume={!!resumeProfile}
-                        onToggleStar={handleToggleStar}
-                        onViewDetails={handleViewDetail}
-                        onApplyNow={() => handleApplyNow(job)}
-                        onToggleStatus={handleToggleStatus}
-                        onSaveRemark={(j, r) => handleSaveRemark(j, r)}
-                      />
+                      <JobCardErrorBoundary key={job.id} jobId={job.id} jobTitle={job.job_title}>
+                        <JobCardNaukri
+                          job={job}
+                          isSaved={savedJobIds.includes(job.id)}
+                          hasResume={!!resumeProfile}
+                          onToggleStar={handleToggleStar}
+                          onViewDetails={handleViewDetail}
+                          onApplyNow={() => handleApplyNow(job)}
+                          onToggleStatus={handleToggleStatus}
+                          onSaveRemark={(j, r) => handleSaveRemark(j, r)}
+                        />
+                      </JobCardErrorBoundary>
                     ))}
 
                     {/* Load 5 More Fresh Jobs Button (Solid, clearly visible) */}
@@ -1130,6 +1179,12 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
           />
         </ErrorBoundary>
       )}
+
+      {/* Diagnostics Telemetry Modal */}
+      <DiagnosticsModal
+        isOpen={isDiagnosticsOpen}
+        onClose={() => setIsDiagnosticsOpen(false)}
+      />
     </div>
   );
 };

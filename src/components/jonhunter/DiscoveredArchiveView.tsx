@@ -13,6 +13,7 @@ import {
 import { DiscoveredJobItem } from '../../lib/drcDiscoveryApi';
 import { CandidateParsedProfile } from '../../lib/applicationApi';
 import { JobCardNaukri } from './JobCardNaukri';
+import { JobCardErrorBoundary } from './JobCardErrorBoundary';
 import { getActiveTheme } from '../../config/themeConfig';
 
 export interface DiscoveredArchiveViewProps {
@@ -255,17 +256,18 @@ export const DiscoveredArchiveView: React.FC<DiscoveredArchiveViewProps> = ({
       {displayedJobs.length > 0 ? (
         <div className="space-y-4">
           {displayedJobs.map((job) => (
-            <JobCardNaukri
-              key={job.id}
-              job={job}
-              isSaved={savedJobIds.includes(job.id)}
-              hasResume={!!candidateProfile}
-              onToggleStar={onToggleStar}
-              onViewDetails={onViewDetails}
-              onApplyNow={onApplyNow || onViewDetails}
-              onToggleStatus={onToggleStatus}
-              onSaveRemark={onSaveRemark}
-            />
+            <JobCardErrorBoundary key={job.id} jobId={job.id} jobTitle={job.job_title}>
+              <JobCardNaukri
+                job={job}
+                isSaved={savedJobIds.includes(job.id)}
+                hasResume={!!candidateProfile}
+                onToggleStar={onToggleStar}
+                onViewDetails={onViewDetails}
+                onApplyNow={onApplyNow || onViewDetails}
+                onToggleStatus={onToggleStatus}
+                onSaveRemark={onSaveRemark}
+              />
+            </JobCardErrorBoundary>
           ))}
 
           {/* Show More Button */}

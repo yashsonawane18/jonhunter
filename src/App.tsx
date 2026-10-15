@@ -24,6 +24,7 @@ import AuditCallPage from './components/home/AuditCallPage';
 import { Toaster } from './components/ui/sonner';
 import DiscoveredJobsTrackerComponent from './components/DiscoveredJobsTracker';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { NetworkStatusIndicator } from './components/common/NetworkStatusIndicator';
 
 declare global {
   interface Window {
@@ -841,6 +842,7 @@ const [jobKpiFilter, setJobKpiFilter] = useState<string>('all');
           {renderCurrentScreen()}
         </ErrorBoundary>
       )}
+      <NetworkStatusIndicator />
       <Toaster richColors position="top-right" />
     </div>
   );

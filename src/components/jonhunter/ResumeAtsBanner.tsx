@@ -6,6 +6,8 @@ import {
   Target,
 } from 'lucide-react';
 import { CandidateParsedProfile } from '../../lib/applicationApi';
+import { toast } from 'sonner';
+import { errorLogger } from '../../lib/errors/errorLogger';
 
 export interface ResumeAtsBannerProps {
   resumeProfile: CandidateParsedProfile | null;
@@ -26,9 +28,38 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      onFileUpload(file);
+    if (!file) return;
+
+    // Reset input value so user can re-upload same file if desired
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
+
+    // 1. Check file size (max 10MB)
+    const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      toast.error('File exceeds 10MB limit. Please upload a smaller resume.');
+      errorLogger.warn('ResumeAtsBanner', `File too large: ${file.name} (${file.size} bytes)`);
+      return;
+    }
+
+    // 2. Check 0-byte file
+    if (file.size === 0) {
+      toast.error('The selected file appears to be empty. Please choose a valid resume.');
+      return;
+    }
+
+    // 3. Check allowed extensions
+    const validExtensions = ['.pdf', '.docx', '.doc', '.txt'];
+    const fileNameLower = file.name.toLowerCase();
+    const hasValidExt = validExtensions.some((ext) => fileNameLower.endsWith(ext));
+    if (!hasValidExt) {
+      toast.error('Unsupported file format. Please upload a PDF, DOCX, or TXT document.');
+      errorLogger.warn('ResumeAtsBanner', `Unsupported extension: ${file.name}`);
+      return;
+    }
+
+    onFileUpload(file);
   };
 
   return (

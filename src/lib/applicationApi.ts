@@ -4,6 +4,8 @@
  */
 
 import { DiscoveredJobItem, getJobEngineCandidates, setCachedWorkingEngineUrl } from './drcDiscoveryApi';
+import { ApiError } from './errors/AppError';
+import { errorLogger } from './errors/errorLogger';
 
 const getEngineBaseUrl = (): string => {
   const candidates = getJobEngineCandidates();
@@ -99,13 +101,23 @@ export async function parseCandidateResume(file: File): Promise<{
         return await res.json();
       }
       const err = await res.json().catch(() => ({ detail: 'Failed to parse resume.' }));
-      lastError = new Error(err.detail || 'Resume parsing failed.');
+      lastError = new ApiError(err.detail || 'Resume parsing failed.', {
+        statusCode: res.status,
+        endpoint: url,
+        userMessage: err.detail || 'Resume parser could not process this file format.',
+      });
     } catch (e: any) {
-      lastError = e;
+      errorLogger.warn('applicationApi', `Resume parse request to ${url} failed`, { e });
+      lastError = new ApiError(e?.message || 'Resume parsing connection failed', {
+        category: 'NETWORK_OFFLINE',
+        endpoint: url,
+        cause: e,
+        userMessage: 'Unable to reach resume scanning engine. Please check your connection and try again.',
+      });
     }
   }
 
-  throw lastError || new Error('Resume parsing failed: Unable to reach Job Discovery Engine.');
+  throw lastError || new ApiError('Resume parsing failed: Unable to reach Job Discovery Engine.', { category: 'NETWORK_OFFLINE' });
 }
 
 /**

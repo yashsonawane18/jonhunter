@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { DiscoveredJobItem } from '../../lib/drcDiscoveryApi';
 import { JobCardNaukri } from './JobCardNaukri';
+import { JobCardErrorBoundary } from './JobCardErrorBoundary';
 
 export interface SavedJobsViewProps {
   allJobs: DiscoveredJobItem[];
@@ -76,16 +77,17 @@ export const SavedJobsView: React.FC<SavedJobsViewProps> = ({
       {filteredSavedJobs.length > 0 ? (
         <div className="space-y-4">
           {filteredSavedJobs.map((job) => (
-            <JobCardNaukri
-              key={job.id}
-              job={job}
-              isSaved={true}
-              onToggleStar={onToggleStar}
-              onViewDetails={onViewDetails}
-              onApplyNow={onApplyNow || onViewDetails}
-              onToggleStatus={onToggleStatus}
-              onSaveRemark={onSaveRemark}
-            />
+            <JobCardErrorBoundary key={job.id} jobId={job.id} jobTitle={job.job_title}>
+              <JobCardNaukri
+                job={job}
+                isSaved={true}
+                onToggleStar={onToggleStar}
+                onViewDetails={onViewDetails}
+                onApplyNow={onApplyNow || onViewDetails}
+                onToggleStatus={onToggleStatus}
+                onSaveRemark={onSaveRemark}
+              />
+            </JobCardErrorBoundary>
           ))}
         </div>
       ) : savedJobs.length > 0 ? (

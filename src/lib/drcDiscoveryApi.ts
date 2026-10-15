@@ -1,29 +1,14 @@
-/**
- * DRC Job Discovery & Excel Exporter API Client (drcDiscoveryApi.ts)
- * Connects the React Frontend to the co-located Job Discovery Engine (Port 5055).
- * Enhanced for Instant Sub-20ms Search, Pan-India Geo-Routing & Consulting ATS Scoring.
- */
+import { safeStorage } from './storage/safeStorage';
+import { ApiError } from './errors/AppError';
+import { errorLogger } from './errors/errorLogger';
 
-let cachedWorkingEngineUrl: string | null = (() => {
-  if (typeof window !== 'undefined') {
-    try {
-      return sessionStorage.getItem('drc_working_engine_url') || null;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-})();
+let cachedWorkingEngineUrl: string | null = safeStorage.getItem<string | null>('drc_working_engine_url', null, 'session');
 
 export function setCachedWorkingEngineUrl(url: string | null): void {
   if (!url) return;
   const cleanUrl = url.replace(/\/$/, '');
   cachedWorkingEngineUrl = cleanUrl;
-  if (typeof window !== 'undefined') {
-    try {
-      sessionStorage.setItem('drc_working_engine_url', cleanUrl);
-    } catch {}
-  }
+  safeStorage.setItem('drc_working_engine_url', cleanUrl, 'session');
 }
 
 export function getCachedWorkingEngineUrl(): string | null {
@@ -287,14 +272,24 @@ export async function searchInstantJobs(
         setCachedWorkingEngineUrl(base);
         return await response.json();
       }
-      const errorText = await response.text();
-      lastError = new Error(`Instant search failed: ${errorText || response.statusText}`);
+      const errorText = await response.text().catch(() => '');
+      lastError = new ApiError(`Instant search failed: ${errorText || response.statusText}`, {
+        statusCode: response.status,
+        endpoint: url,
+        userMessage: 'Job discovery engine reported an issue. Falling back to local verified requisitions...',
+      });
     } catch (e: any) {
-      lastError = e;
+      errorLogger.warn('drcDiscoveryApi', `Probe ${url} error: ${e?.message}`);
+      lastError = new ApiError(e?.message || 'Connection error', {
+        category: 'NETWORK_OFFLINE',
+        endpoint: url,
+        cause: e,
+        userMessage: 'Unable to contact live search server. Falling back to verified archive...',
+      });
     }
   }
 
-  throw lastError || new Error('Instant search failed: Unable to reach Job Discovery Engine.');
+  throw lastError || new ApiError('Unable to reach Job Discovery Engine.', { category: 'NETWORK_OFFLINE' });
 }
 
 /**
