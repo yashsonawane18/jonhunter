@@ -399,13 +399,14 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
 
 
 class CareerPagesSearchRequest(BaseModel):
+    model_config = {"extra": "allow"}
     query: Optional[str] = "Software Engineer"
     location: Optional[str] = "All India (Remote & Nationwide)"
     ats_provider: Optional[str] = "all"
     archetype: Optional[str] = "all"
     min_grade: Optional[str] = "all"
     limit: Optional[int] = 15
-    candidate: Optional[CandidateProfile] = None
+    candidate: Optional[Any] = None
 
 
 @app.get("/api/career-pages/companies")

@@ -150,7 +150,7 @@ _TECH_EQUIVALENCE_CLUSTERS = {
 def compute_fit_grade_and_score(
     title: str,
     desc: str,
-    candidate: Optional[CandidateProfile] = None,
+    candidate: Optional[Any] = None,
     location: str = "",
 ) -> Dict[str, Any]:
     """
@@ -158,9 +158,26 @@ def compute_fit_grade_and_score(
     along with actionable positive match reasons and candidate gaps.
     """
     t = title.lower()
-    cand_roles = [r.lower() for r in (candidate.target_roles if candidate else [])]
-    cand_domain = (candidate.primary_domain or "").lower() if candidate else ""
-    cand_skills = [s.lower() for s in (candidate.top_skills if candidate else [])]
+    
+    cand_roles = []
+    cand_domain = ""
+    cand_skills = []
+    cand_exp = 3.0
+
+    if candidate:
+        if isinstance(candidate, dict):
+            cand_roles = [str(r).lower() for r in (candidate.get("target_roles") or candidate.get("target_role") or [])]
+            cand_domain = str(candidate.get("primary_domain") or candidate.get("current_role") or "").lower()
+            cand_skills = [str(s).lower() for s in (candidate.get("top_skills") or candidate.get("skills") or [])]
+            try:
+                cand_exp = float(candidate.get("total_experience_years") or candidate.get("experience_years") or 3.0)
+            except Exception:
+                cand_exp = 3.0
+        else:
+            cand_roles = [r.lower() for r in (candidate.target_roles if hasattr(candidate, "target_roles") and candidate.target_roles else [])]
+            cand_domain = (candidate.primary_domain or "").lower() if hasattr(candidate, "primary_domain") and candidate.primary_domain else ""
+            cand_skills = [s.lower() for s in (candidate.top_skills if hasattr(candidate, "top_skills") and candidate.top_skills else [])]
+            cand_exp = float(candidate.total_experience_years) if hasattr(candidate, "total_experience_years") else 3.0
 
     score = 3.2
     reasons: List[str] = []
@@ -170,7 +187,7 @@ def compute_fit_grade_and_score(
     if cand_domain and cand_domain in t:
         score += 1.2
         matched_role = True
-        reasons.append(f"Direct match with target domain: {candidate.primary_domain}")
+        reasons.append(f"Direct match with target domain: {cand_domain.title()}")
 
     for r in cand_roles:
         if r in t:
@@ -191,7 +208,7 @@ def compute_fit_grade_and_score(
         if any(lead in t for lead in ["director", "vp", "chief", "head of"]):
             score += 0.5
             reasons.append("Executive & Engineering Leadership tier with high strategic impact")
-        elif candidate and candidate.total_experience_years >= 4.0:
+        elif cand_exp >= 4.0:
             score += 0.4
             reasons.append("Seniority tier aligns with candidate's professional trajectory")
         else:
@@ -586,12 +603,31 @@ def fetch_career_page_jobs(
     if not unique_candidates:
         return []
 
-    # Profile for scoring
-    cand_profile = candidate or CandidateProfile(
-        primary_domain=clean_query,
-        target_roles=[clean_query],
-        top_skills=["Python", "FastAPI", "React", "Docker", "PostgreSQL", "AWS", "Git"],
-    )
+    # Profile for scoring - normalize dict or CandidateProfile safely
+    if isinstance(candidate, dict):
+        cand_skills = candidate.get("top_skills") or candidate.get("skills") or ["Python", "FastAPI", "React", "Docker", "PostgreSQL", "AWS", "Git"]
+        try:
+            cand_exp = float(candidate.get("total_experience_years") or candidate.get("experience_years") or 3.0)
+        except Exception:
+            cand_exp = 3.0
+        cand_role = candidate.get("reference_role") or candidate.get("current_role") or candidate.get("primary_domain") or clean_query
+        cand_profile = CandidateProfile(
+            name=candidate.get("name", "Candidate"),
+            email=candidate.get("email", "candidate@drc.com"),
+            primary_domain=cand_role,
+            target_roles=[cand_role] if cand_role else [clean_query],
+            top_skills=cand_skills,
+            total_experience_years=cand_exp,
+            raw_resume_text=candidate.get("raw_resume_text", ""),
+        )
+    elif isinstance(candidate, CandidateProfile):
+        cand_profile = candidate
+    else:
+        cand_profile = CandidateProfile(
+            primary_domain=clean_query,
+            target_roles=[clean_query],
+            top_skills=["Python", "FastAPI", "React", "Docker", "PostgreSQL", "AWS", "Git"],
+        )
 
     final_postings: List[JobPosting] = []
 
