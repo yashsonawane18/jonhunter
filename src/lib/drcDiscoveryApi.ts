@@ -39,8 +39,9 @@ export function getJobEngineCandidates(): string[] {
     candidates.push(apiBase.replace(/\/$/, ''));
   }
   if (!isLocal) {
+    // Hosted Cloud Engine & Vercel Same-Origin Reverse Proxy
+    candidates.push('https://jonhunter-9pkh.onrender.com');
     candidates.push('');
-    candidates.push('http://127.0.0.1:5055');
   }
   return Array.from(new Set(candidates));
 }
@@ -287,12 +288,16 @@ export async function searchInstantJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (response.ok) {
         setCachedWorkingEngineUrl(base);
         return await response.json();
+      }
+      if (response.status === 405) {
+        // Skip endpoints that do not accept POST (e.g. static fallbacks)
+        continue;
       }
       const errorText = await response.text().catch(() => '');
       lastError = new ApiError(`Instant search failed: ${errorText || response.statusText}`, {
@@ -369,12 +374,15 @@ export async function findMatchingJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (response.ok) {
         setCachedWorkingEngineUrl(base);
         return await response.json();
+      }
+      if (response.status === 405) {
+        continue;
       }
       const errorText = await response.text();
       lastError = new Error(`Job discovery failed: ${errorText || response.statusText}`);
@@ -427,12 +435,15 @@ export async function findTwoSourceJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (response.ok) {
         setCachedWorkingEngineUrl(base);
         return await response.json();
+      }
+      if (response.status === 405) {
+        continue;
       }
       const errorText = await response.text();
       lastError = new Error(`Two-source job discovery failed: ${errorText || response.statusText}`);
@@ -456,7 +467,7 @@ export async function getDiscoveredJobsHistory(candidateEmail: string): Promise<
       ? `${base}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
       : `/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`;
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(4000) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
       if (response.ok) {
         setCachedWorkingEngineUrl(base);
         return await response.json();
