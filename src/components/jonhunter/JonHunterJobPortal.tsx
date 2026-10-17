@@ -82,6 +82,15 @@ const getSuggestedSkillsForRole = (roleQuery?: string): string[] => {
   return POPULAR_SKILLS_BY_DOMAIN['default'];
 };
 
+const sanitizeJobsForCache = (jobs: DiscoveredJobItem[]): DiscoveredJobItem[] => {
+  if (!Array.isArray(jobs)) return [];
+  return jobs.slice(0, 150).map((j) => ({
+    ...j,
+    job_description: j.job_description ? j.job_description.slice(0, 180) : '',
+    connections: [],
+  }));
+};
+
 export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   onNavigateHome,
   onNavigateSignIn,
@@ -163,13 +172,24 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
   // 1. Verify Engine Health & Fetch Locations
   const verifyEngine = useCallback(async () => {
-    const online = await checkJobEngineHealth();
-    setEngineOnline(online);
-    if (online) {
-      const locs = await fetchPanIndiaLocations();
-      setAvailableLocations(locs);
+    try {
+      const online = await checkJobEngineHealth();
+      setEngineOnline(online);
+      if (online) {
+        try {
+          const locs = await fetchPanIndiaLocations();
+          if (locs && locs.length > 0) {
+            setAvailableLocations(locs);
+          }
+        } catch {
+          // Non-critical: default location options already initialized
+        }
+      }
+      return online;
+    } catch {
+      setEngineOnline(false);
+      return false;
     }
-    return online;
   }, []);
 
   // Sync with Backend SQLite Discovered History on Mount (Loads all 1000+ jobs latest to oldest)
@@ -178,7 +198,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       .then((res) => {
         if (res && res.all_jobs && res.all_jobs.length > 0) {
           setAllDiscoveredJobs(res.all_jobs);
-          safeStorage.setItem('drc_discovered_all_jobs_v2', res.all_jobs.slice(0, 1500));
+          safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(res.all_jobs));
           // Seed the initial feed with the top 20 latest verified jobs so user immediately sees opportunities
           setJobsList((prev) => (prev.length === 0 ? res.all_jobs.slice(0, 20) : prev));
         }
@@ -277,7 +297,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
             if (!map.has(key)) map.set(key, j);
           });
           const merged = Array.from(map.values());
-          safeStorage.setItem('drc_discovered_all_jobs_v2', merged.slice(0, 1000));
+          safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(merged));
           return merged;
         });
       } catch (err: any) {
@@ -373,9 +393,16 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
   // Initial load
   useEffect(() => {
-    verifyEngine().then(() => {
-      executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false);
-    });
+    verifyEngine()
+      .then(() => {
+        executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false).catch((err) => {
+          errorLogger.warn('JonHunterJobPortal.initialSearch', err);
+        });
+      })
+      .catch((err) => {
+        errorLogger.warn('JonHunterJobPortal.verifyEngine', err);
+        executeFreshSearch('', 'All India (Remote & Nationwide)', 'all', 'all', false).catch(() => {});
+      });
   }, []);
 
   // Suggested skills
@@ -549,7 +576,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       );
       setAllDiscoveredJobs((prev) => {
         const updated = prev.map((j) => (j.id === job.id ? { ...j, status: nextStatus, remarks: remark } : j));
-        safeStorage.setItem('drc_discovered_all_jobs_v2', updated.slice(0, 1000));
+        safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(updated));
         return updated;
       });
       toast.success(`Job marked as ${nextStatus}`);
@@ -568,7 +595,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       );
       setAllDiscoveredJobs((prev) => {
         const updated = prev.map((j) => (j.id === job.id ? { ...j, remarks: remarkText } : j));
-        safeStorage.setItem('drc_discovered_all_jobs_v2', updated.slice(0, 1000));
+        safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(updated));
         return updated;
       });
       toast.success('Note saved successfully');

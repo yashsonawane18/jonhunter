@@ -159,10 +159,11 @@ export async function checkJobEngineHealth(): Promise<boolean> {
 
   const probePromises = candidates.map(async (base) => {
     const url = base ? `${base}/api/health` : '/api/health';
+    const isLocalProbe = base.startsWith('http://localhost') || base.startsWith('http://127.0.0.1');
     try {
       const res = await fetch(url, {
         method: 'GET',
-        signal: AbortSignal.timeout(2500),
+        signal: AbortSignal.timeout(isLocalProbe ? 2500 : 4500),
       });
       if (res.ok) {
         const data = await res.json().catch(() => null);

@@ -92,15 +92,14 @@ export const safeStorage = {
       return fallback;
     }
 
-    // Attempt JSON parse if fallback is not a primitive string
-    if (typeof fallback === 'string') {
-      return rawValue as unknown as T;
-    }
-
+    // Attempt JSON parse
     try {
       return JSON.parse(rawValue) as T;
-    } catch (parseErr) {
-      errorLogger.warn('safeStorage', `Corrupt JSON data for key ${key}. Resetting to fallback.`, { parseErr });
+    } catch {
+      // Gracefully handle legacy raw unquoted strings (e.g. URLs or tokens)
+      if (typeof rawValue === 'string') {
+        return rawValue as unknown as T;
+      }
       return fallback;
     }
   },
@@ -115,7 +114,7 @@ export const safeStorage = {
     let serialized: string;
 
     try {
-      serialized = typeof value === 'string' ? value : JSON.stringify(value);
+      serialized = JSON.stringify(value);
     } catch (serializeErr) {
       errorLogger.error('safeStorage', `Serialization failed for key ${key}`, { serializeErr });
       return false;
