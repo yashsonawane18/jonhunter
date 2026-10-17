@@ -349,7 +349,20 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
             return true;
           });
 
-          const fallbackList = filtered.slice(0, 20);
+          let fallbackList = filtered.slice(0, 20);
+          if (fallbackList.length === 0 && qWords.length > 0) {
+            // Relaxed keyword fallback: match core technical words from local verified cache
+            const fillers = new Set(['in', 'of', 'for', 'at', 'with', 'and', 'the', 'a', 'an', 'to', 'lead', 'senior', 'junior', 'associate']);
+            const techWords = qWords.filter((w) => !fillers.has(w));
+            const wordsToSoftCheck = techWords.length > 0 ? techWords : qWords;
+            const softFiltered = allDiscoveredJobs.filter((job) => {
+              if (!job) return false;
+              const text = `${job.job_title || ''} ${job.company || ''} ${Array.isArray(job.key_skills) ? job.key_skills.join(' ') : ''}`.toLowerCase();
+              return wordsToSoftCheck.some((w) => text.includes(w));
+            });
+            fallbackList = softFiltered.slice(0, 20);
+          }
+
           if (fallbackList.length > 0) {
             setJobsList(fallbackList);
             setSearchError(null);

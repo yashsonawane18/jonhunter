@@ -44,6 +44,7 @@ from db_store import (
     db_record_candidate_application,
     db_get_candidate_applications,
     db_get_recommended_jobs,
+    db_get_verified_linkedin_jobs,
 )
 from ats_calculator import calculate_ats_score
 
@@ -295,46 +296,49 @@ async def execute_fresh_batch_discovery(
     if len(final_jobs) < target_count:
         needed = target_count - len(final_jobs)
         existing_ids = {j.id for j in final_jobs}
-        db_fallbacks = db_get_verified_linkedin_jobs(
-            role_keyword=query or domain,
-            target_location=location,
-            experience_level=experience_level,
-            limit=needed + 5,
-            exclude_ids=all_exclude + list(existing_ids),
-            skills=merged_skills,
-            work_mode=work_mode,
-            open_to_relocation=open_to_relocation,
-        )
-        for fb in db_fallbacks:
-            if len(final_jobs) >= target_count:
-                break
-            try:
-                p = JobPosting(
-                    id=fb.get("id"),
-                    job_title=fb.get("job_title", ""),
-                    company=fb.get("company", ""),
-                    location=fb.get("location", "Remote"),
-                    job_type=fb.get("job_type", "Full-time"),
-                    salary=fb.get("salary", "Competitive"),
-                    experience_required=fb.get("experience_required", "3-5 Years"),
-                    key_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else infer_key_skills(fb.get("job_title", ""), fb.get("job_description", "")),
-                    application_url=fb.get("application_url", ""),
-                    status="Not Applied",
-                    total_call_received=False,
-                    job_description=fb.get("job_description", "")[:600],
-                    source_type=fb.get("source_type", "LinkedIn Verified"),
-                    apply_type=fb.get("apply_type", "Direct Apply"),
-                    ats_score=fb.get("ats_score"),
-                    match_score=fb.get("match_score"),
-                    matched_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else [],
-                    missing_skills=fb.get("missing_skills") if isinstance(fb.get("missing_skills"), list) else [],
-                    experience_match=fb.get("experience_match", "Compatible"),
-                    connections=fb.get("connections") if isinstance(fb.get("connections"), list) else [],
-                    posted_time="⚡ Posted < 24h",
-                )
-                final_jobs.append(p)
-            except Exception:
-                pass
+        try:
+            db_fallbacks = db_get_verified_linkedin_jobs(
+                role_keyword=query or domain,
+                target_location=location,
+                experience_level=experience_level,
+                limit=needed + 5,
+                exclude_ids=all_exclude + list(existing_ids),
+                skills=merged_skills,
+                work_mode=work_mode,
+                open_to_relocation=open_to_relocation,
+            )
+            for fb in db_fallbacks:
+                if len(final_jobs) >= target_count:
+                    break
+                try:
+                    p = JobPosting(
+                        id=fb.get("id"),
+                        job_title=fb.get("job_title", ""),
+                        company=fb.get("company", ""),
+                        location=fb.get("location", "Remote"),
+                        job_type=fb.get("job_type", "Full-time"),
+                        salary=fb.get("salary", "Competitive"),
+                        experience_required=fb.get("experience_required", "3-5 Years"),
+                        key_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else infer_key_skills(fb.get("job_title", ""), fb.get("job_description", "")),
+                        application_url=fb.get("application_url", ""),
+                        status="Not Applied",
+                        total_call_received=False,
+                        job_description=fb.get("job_description", "")[:600],
+                        source_type=fb.get("source_type", "LinkedIn Verified"),
+                        apply_type=fb.get("apply_type", "Direct Apply"),
+                        ats_score=fb.get("ats_score"),
+                        match_score=fb.get("match_score"),
+                        matched_skills=fb.get("matched_skills") if isinstance(fb.get("matched_skills"), list) else [],
+                        missing_skills=fb.get("missing_skills") if isinstance(fb.get("missing_skills"), list) else [],
+                        experience_match=fb.get("experience_match", "Compatible"),
+                        connections=fb.get("connections") if isinstance(fb.get("connections"), list) else [],
+                        posted_time="⚡ Posted < 24h",
+                    )
+                    final_jobs.append(p)
+                except Exception:
+                    pass
+        except Exception as fb_err:
+            print(f"[api_server] DB fallback notice: {fb_err}")
 
     # Record to DB with batch tracking - unconditionally auto-save every discovered job to SQLite
     if final_jobs:
@@ -378,7 +382,20 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
             "jobs": job_dicts,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Instant search failed: {str(e)}")
+        print(f"[api_server] Instant search exception: {e}")
+        try:
+            fallback_jobs = db_get_all_discovered_jobs(limit=req.limit or 10)
+            return {
+                "success": True,
+                "total": len(fallback_jobs),
+                "query": req.query,
+                "location": req.location,
+                "work_mode": req.work_mode,
+                "jobs": fallback_jobs,
+                "fallback": True,
+            }
+        except Exception:
+            raise HTTPException(status_code=500, detail=f"Instant search failed: {str(e)}")
 
 
 class CareerPagesSearchRequest(BaseModel):
