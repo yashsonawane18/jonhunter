@@ -93,6 +93,27 @@ export interface DiscoveredJobItem {
   experience_match: string;
   connections: ConnectionRecord[];
   discovered_at: string;
+  fit_grade?: string;
+  archetype?: string;
+  match_reasons?: string[];
+  ats_provider?: string;
+  posted_time?: string;
+}
+
+export interface CareerCompanyInfo {
+  name: string;
+  ats: string;
+  slug: string;
+  hub: string;
+  domain: string;
+  careers_url: string;
+}
+
+export interface CareerPageStats {
+  total_companies_tracked: number;
+  ats_breakdown: Record<string, number>;
+  direct_link_guarantee: string;
+  supported_archetypes: string[];
 }
 
 export interface DiscoveredBatch {
@@ -486,4 +507,93 @@ export async function updateJobStatus(
   }
 
   throw lastError || new Error('Failed to update job status');
+}
+
+/**
+ * Fetches the verified 140+ corporate employer catalog tracked on direct ATS portals.
+ */
+export async function fetchCareerPagesCompanies(): Promise<CareerCompanyInfo[]> {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/companies` : '/api/career-pages/companies';
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (response.ok) {
+        const data = await response.json();
+        setCachedWorkingEngineUrl(base);
+        return data.companies || [];
+      }
+    } catch {
+      // try next
+    }
+  }
+  return [];
+}
+
+/**
+ * Fetches live coverage statistics for Corporate ATS portals.
+ */
+export async function fetchCareerPagesStats(): Promise<CareerPageStats | null> {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/stats` : '/api/career-pages/stats';
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (response.ok) {
+        const data = await response.json();
+        setCachedWorkingEngineUrl(base);
+        return data.stats || null;
+      }
+    } catch {
+      // try next
+    }
+  }
+  return null;
+}
+
+/**
+ * Searches real-time corporate ATS portals directly with Archetype and Grade filters.
+ */
+export async function searchCareerPages(params: {
+  query?: string;
+  location?: string;
+  ats_provider?: string;
+  archetype?: string;
+  min_grade?: string;
+  limit?: number;
+  candidate?: CandidateSearchPayload | null;
+}): Promise<{ success: boolean; count: number; jobs: DiscoveredJobItem[] }> {
+  const candidates = getJobEngineCandidates();
+  let lastError: Error | null = null;
+
+  const payload = {
+    query: params.query || 'Software Engineer',
+    location: params.location || 'All India (Remote & Nationwide)',
+    ats_provider: params.ats_provider || 'all',
+    archetype: params.archetype || 'all',
+    min_grade: params.min_grade || 'all',
+    limit: params.limit || 15,
+    candidate: params.candidate || null,
+  };
+
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/search` : '/api/career-pages/search';
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(12000),
+      });
+
+      if (response.ok) {
+        setCachedWorkingEngineUrl(base);
+        return await response.json();
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
+  }
+
+  throw lastError || new Error('Corporate Career Pages search failed');
 }

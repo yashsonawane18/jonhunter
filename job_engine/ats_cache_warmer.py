@@ -6,9 +6,10 @@ Enhanced with Semantic Query Expansion, Priority Location Ranking & Instant Seed
 """
 
 import time
+import re
 import sqlite3
 import threading
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from requests.adapters import HTTPAdapter
@@ -19,6 +20,9 @@ from query_expander import match_job_with_expanded_query, expand_query_keywords
 from models import JobPosting, CandidateProfile, ConnectionRecord
 from recruiter_outreach import generate_real_hr_connections
 
+import json
+from pathlib import Path
+
 _SESSION = requests.Session()
 _adapter = HTTPAdapter(pool_connections=60, pool_maxsize=60, max_retries=1)
 _SESSION.mount("https://", _adapter)
@@ -28,8 +32,26 @@ _SESSION.headers.update({
     "Accept": "application/json, text/html;q=0.9",
 })
 
+REGISTRY_JSON_PATH = Path(__file__).resolve().parent / "merged_ats_registry.json"
+
+def _load_ats_registry() -> List[Dict[str, str]]:
+    """Loads unified corporate ATS registry from disk or fallback."""
+    if REGISTRY_JSON_PATH.exists():
+        try:
+            with open(REGISTRY_JSON_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    for item in data:
+                        if "hub" in item and "default_hub" not in item:
+                            item["default_hub"] = item["hub"]
+                    return data
+        except Exception as e:
+            print(f"[ATSCacheWarmer] Warning loading merged_ats_registry.json: {e}")
+
+    return FALLBACK_ATS_REGISTRY
+
 # Verified active tech employers with public ATS endpoints (India Mass Hiring & Global Unicorns)
-EXPANDED_ATS_REGISTRY = [
+FALLBACK_ATS_REGISTRY = [
     # --- Tier 1: Indian Tech Giants, Mass Hiring Scaleups & FinTechs ---
     {"company": "Razorpay", "ats": "greenhouse", "slug": "razorpaysoftwareprivatelimited", "domain": "razorpay.com", "default_hub": "Bengaluru / Pune / Remote"},
     {"company": "Groww", "ats": "greenhouse", "slug": "groww", "domain": "groww.in", "default_hub": "Bengaluru"},
@@ -106,6 +128,8 @@ EXPANDED_ATS_REGISTRY = [
     {"company": "Figma", "ats": "greenhouse", "slug": "figma", "domain": "figma.com", "default_hub": "Remote / Global"},
     {"company": "GitLab", "ats": "greenhouse", "slug": "gitlab", "domain": "gitlab.com", "default_hub": "Remote / Global"},
 ]
+
+EXPANDED_ATS_REGISTRY: List[Dict[str, str]] = _load_ats_registry()
 
 # Thread-safe in-memory cache
 _INDEXED_JOBS: List[Dict[str, Any]] = []
@@ -348,7 +372,10 @@ def matches_experience_level(title: str, desc: str, level: str) -> bool:
         return any(w in t for w in ["staff", "principal", "architect", "lead", "distinguished", "fellow", "chief"])
 
     elif level == "manager":
-        return any(w in t for w in ["manager", "director", "head of", "engineering manager", "vp", "vice president"])
+        return any(w in t for w in ["manager", "engineering manager", "lead manager"]) and not any(w in t for w in ["director", "vp", "chief"])
+
+    elif level == "director":
+        return any(w in t for w in ["director", "senior director", "head of", "vp", "vice president", "chief architect", "cto", "managing director", "executive director"])
 
     return True
 
@@ -424,7 +451,10 @@ def search_instant_jobs(
     effective_domain = (consulting_domain or "").strip()
     target_str = (effective_query or effective_domain).lower()
     expanded_kws = expand_query_keywords(target_str) if target_str else []
-    valid_kws = [kw for kw in expanded_kws if len(kw) >= 3]
+    valid_kws = [kw for kw in expanded_kws if len(kw) >= 2]
+
+    target_regex = re.compile(r'(?:\b|_)' + re.escape(target_str) + r'(?:\b|_)') if target_str else None
+    valid_kw_pairs = [(kw, re.compile(r'(?:\b|_)' + re.escape(kw) + r'(?:\b|_)')) for kw in valid_kws if kw != target_str]
 
     active_skills = [
         s.strip().lower()
@@ -484,21 +514,25 @@ def search_instant_jobs(
         relevance_score = 50
         if target_str:
             matched_kw = False
-            if target_str in title_text:
+            # Check title word-boundary match first (exact phrase or key token)
+            if target_regex and (target_str in title_text) and target_regex.search(title_text):
                 relevance_score = 150
                 matched_kw = True
             else:
-                for kw in valid_kws:
-                    if kw in title_text:
+                for kw, kw_reg in valid_kw_pairs:
+                    if (kw in title_text) and kw_reg.search(title_text):
                         relevance_score = 100
                         matched_kw = True
                         break
                 if not matched_kw:
-                    for kw in valid_kws:
-                        if kw in desc_snippet:
-                            relevance_score = 60
-                            matched_kw = True
-                            break
+                    raw_skills = item.get("key_skills")
+                    if raw_skills:
+                        job_skills = [str(s).lower() for s in raw_skills]
+                        for kw, kw_reg in valid_kw_pairs:
+                            if any((kw in sk) and kw_reg.search(sk) for sk in job_skills):
+                                relevance_score = 80
+                                matched_kw = True
+                                break
             # STRICT FILTER: When the user enters a search query, require keyword match
             if not matched_kw:
                 continue

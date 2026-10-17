@@ -204,17 +204,11 @@ async def execute_fresh_batch_discovery(
 
     if source_mode == "career_page":
         career_jobs = await asyncio.to_thread(
-            search_instant_jobs,
-            query=query,
-            location=location,
-            consulting_domain=domain,
+            fetch_career_page_jobs,
+            query=query or domain or "Software Engineer",
+            location_preference=location,
+            max_jobs=target_count,
             candidate=cand,
-            limit=target_count,
-            exclude_ids=all_exclude,
-            experience_level=experience_level,
-            work_mode=work_mode,
-            open_to_relocation=open_to_relocation,
-            skills=merged_skills,
         )
         final_jobs = career_jobs[:target_count]
 
@@ -383,6 +377,87 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Instant search failed: {str(e)}")
+
+
+class CareerPagesSearchRequest(BaseModel):
+    query: Optional[str] = "Software Engineer"
+    location: Optional[str] = "All India (Remote & Nationwide)"
+    ats_provider: Optional[str] = "all"
+    archetype: Optional[str] = "all"
+    min_grade: Optional[str] = "all"
+    limit: Optional[int] = 15
+    candidate: Optional[CandidateProfile] = None
+
+
+@app.get("/api/career-pages/companies")
+async def get_career_companies_endpoint():
+    """Returns the full verified employer catalog for the Career Pages explorer."""
+    try:
+        from career_pages_engine import get_all_career_companies
+        companies = await asyncio.to_thread(get_all_career_companies)
+        return {"success": True, "count": len(companies), "companies": companies}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/career-pages/stats")
+async def get_career_stats_endpoint():
+    """Returns live stats on corporate ATS coverage and supported archetypes."""
+    try:
+        from career_pages_engine import get_career_page_stats
+        stats = await asyncio.to_thread(get_career_page_stats)
+        return {"success": True, "stats": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/career-pages/search")
+async def search_career_pages_endpoint(req: CareerPagesSearchRequest):
+    """
+    Dedicated Corporate Career Pages Search:
+    Dispatches parallel searches across 140+ real employer ATS APIs (Greenhouse, Lever, Ashby, SmartRecruiters).
+    Returns Grade A / Grade B scored jobs, role archetypes, and guaranteed 1-click ATS application links.
+    """
+    try:
+        from career_pages_engine import fetch_career_page_jobs
+        jobs = await asyncio.to_thread(
+            fetch_career_page_jobs,
+            query=req.query or "Software Engineer",
+            location_preference=req.location or "Remote",
+            max_jobs=req.limit or 15,
+            candidate=req.candidate,
+            ats_provider_filter=req.ats_provider or "all",
+            archetype_filter=req.archetype or "all",
+            min_grade=req.min_grade or "all",
+        )
+        return {
+            "success": True,
+            "count": len(jobs),
+            "jobs": [j.model_dump() for j in jobs],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/career-pages/top-matches")
+async def get_career_top_matches_endpoint(query: Optional[str] = "Software Engineer", limit: int = 10):
+    """Returns top Grade A / Grade B corporate ATS postings for instant browsing."""
+    try:
+        from career_pages_engine import fetch_career_page_jobs
+        jobs = await asyncio.to_thread(
+            fetch_career_page_jobs,
+            query=query or "Software Engineer",
+            location_preference="Remote",
+            max_jobs=limit,
+            min_grade="Grade A",
+        )
+        return {
+            "success": True,
+            "count": len(jobs),
+            "jobs": [j.model_dump() for j in jobs],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/resume/parse-fast")

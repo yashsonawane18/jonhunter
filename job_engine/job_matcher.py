@@ -247,36 +247,49 @@ def is_single_role_match(job_title: str, candidate_role: str) -> bool:
     c_lower = candidate_role.lower()
 
     # 1. Java Developer / Spring Boot / JVM
-    if any(k in c_lower for k in ["java developer", "java engineer", "java backend", "spring boot", "j2ee", "core java"]):
-        valid_terms = ["java", "spring boot", "spring", "j2ee", "jvm", "backend developer", "microservices"]
-        # Ensure 'java' doesn't accidentally match 'javascript' only
+    if (bool(re.search(r"\bjava\b", c_lower)) and "javascript" not in c_lower) or any(k in c_lower for k in ["spring boot", "j2ee", "core java"]):
         is_java = bool(re.search(r"\bjava\b", t_lower)) or any(term in t_lower for term in ["spring boot", "spring", "j2ee", "jvm"])
         has_neg = "javascript" in t_lower and not is_java
         return is_java and not has_neg
 
     # 2. Python Developer / Django / FastAPI
-    if any(k in c_lower for k in ["python developer", "python engineer", "python backend", "django", "fastapi", "flask"]):
-        valid_terms = ["python", "django", "fastapi", "flask", "pyspark", "backend developer", "software engineer"]
+    if bool(re.search(r"\bpython\b", c_lower)) or any(k in c_lower for k in ["django", "fastapi", "flask", "pyspark"]):
         is_py = bool(re.search(r"\bpython\b", t_lower)) or any(term in t_lower for term in ["django", "fastapi", "flask", "pyspark"])
         has_neg = any(neg in t_lower for neg in ["java developer", ".net developer", "php developer", "ruby on rails"])
         return is_py and not has_neg
 
     # 3. MERN Stack Developer
     if any(k in c_lower for k in ["mern", "mern stack", "mean stack"]):
-        valid_terms = ["mern", "mean", "full stack", "fullstack", "react", "node", "javascript developer", "web developer"]
+        valid_terms = ["mern", "mean", "full stack", "fullstack", "react", "node"]
         has_pos = any(term in t_lower for term in valid_terms)
         return has_pos
 
-    # 4. React / Frontend Developer
-    if any(k in c_lower for k in ["frontend", "front end", "front-end", "react", "next.js", "angular", "vue", "ui engineer", "web developer"]):
-        valid_terms = ["frontend", "front end", "front-end", "react", "next.js", "angular", "vue", "ui developer", "ui engineer", "web developer", "ui/ux"]
+    # 4. React Developer
+    if any(k in c_lower for k in ["react", "react.js", "reactjs", "next.js", "nextjs"]):
+        is_react = any(term in t_lower for term in ["react", "react.js", "reactjs", "next.js", "nextjs"])
+        has_neg = any(neg in t_lower for neg in ["sales", "marketing", "hr", "recruiter", "backend only"])
+        return is_react and not has_neg
+
+    # 4b. Angular Developer
+    if any(k in c_lower for k in ["angular", "angularjs"]):
+        is_ang = any(term in t_lower for term in ["angular", "angularjs"])
+        return is_ang and "sales" not in t_lower
+
+    # 4c. Vue Developer
+    if any(k in c_lower for k in ["vue", "vue.js", "vuejs", "nuxt"]):
+        is_vue = any(term in t_lower for term in ["vue", "vue.js", "vuejs", "nuxt"])
+        return is_vue and "sales" not in t_lower
+
+    # 4d. Frontend Developer (General)
+    if any(k in c_lower for k in ["frontend", "front end", "front-end", "ui developer", "ui engineer"]):
+        valid_terms = ["frontend", "front end", "front-end", "ui developer", "ui engineer", "react", "angular", "vue", "next.js", "web developer"]
         has_pos = any(term in t_lower for term in valid_terms)
         has_neg = any(neg in t_lower for neg in ["sales", "marketing", "hr", "recruiter", "backend only", "data engineer"])
         return has_pos and not has_neg
 
     # 5. Node.js Backend Developer
     if any(k in c_lower for k in ["node.js", "nodejs", "node developer", "nest.js", "express.js"]):
-        valid_terms = ["node", "node.js", "nodejs", "express", "nestjs", "backend", "full stack", "javascript"]
+        valid_terms = ["node", "node.js", "nodejs", "express", "nestjs"]
         has_pos = any(term in t_lower for term in valid_terms)
         return has_pos
 
@@ -414,16 +427,24 @@ def is_single_role_match(job_title: str, candidate_role: str) -> bool:
         has_neg = any(neg in t_lower for neg in ["project manager", "scrum master only", "sales manager", "store manager", "branch manager"])
         return has_pos and not has_neg
 
-    # Fallback: Filter out generic stop words and test distinctive tech tokens
-    stop_words = {
-        "engineer", "developer", "software", "specialist", "associate", "consultant",
-        "intern", "trainee", "lead", "senior", "junior", "job", "jobs", "role", "roles",
-        "position", "fresher", "staff", "principal", "member", "tech", "technology", "level"
-    }
-    role_words = [w for w in re.split(r"\W+", c_lower) if len(w) > 2 and w not in stop_words]
-    if not role_words:
+    # 21. Director / Executive Leadership
+    if any(k in c_lower for k in ["director", "vp", "vice president", "head of", "chief architect", "cto", "managing director"]):
+        valid_lead = ["director", "vp", "vice president", "head of", "chief architect", "cto", "managing director", "executive director"]
+        is_lead = any(re.search(r'(?:\b|_)' + re.escape(l) + r'(?:\b|_)', t_lower) for l in valid_lead)
+        if not is_lead:
+            return False
+        if any(d in c_lower for d in ["engineering", "software", "tech", "technology"]):
+            return any(k in t_lower for k in ["engineering", "technology", "software", "tech", "systems", "architecture"])
+        if "product" in c_lower:
+            return "product" in t_lower
         return True
-    return any(w in t_lower for w in role_words)
+
+    # Fallback: Clean non-generic tokens and verify presence with word boundary
+    generic_words = {"job", "jobs", "role", "roles", "position", "candidate", "level"}
+    role_words = [w for w in re.split(r"\W+", c_lower) if len(w) > 2 and w not in generic_words]
+    if not role_words:
+        return c_lower in t_lower
+    return any(re.search(r'(?:\b|_)' + re.escape(w) + r'(?:\b|_)', t_lower) for w in role_words)
 
 
 def is_strict_domain_match(job_title: str, candidate_role: Any) -> bool:
@@ -967,9 +988,11 @@ def fetch_live_linkedin_jobs_for_role(
                     continue
                 elif experience_level == "senior" and not any(w in t_low for w in ["senior", "sr.", "sr ", "lead", "specialist"]):
                     continue
-                elif experience_level == "lead" and not any(w in t_low for w in ["staff", "principal", "architect", "lead", "distinguished", "head"]):
+                elif experience_level == "lead" and not any(w in t_low for w in ["staff", "principal", "architect", "lead", "distinguished"]):
                     continue
-                elif experience_level == "manager" and not any(w in t_low for w in ["manager", "director", "head of", "vp"]):
+                elif experience_level == "manager" and not any(w in t_low for w in ["manager", "engineering manager", "lead manager"]):
+                    continue
+                elif experience_level == "director" and not any(w in t_low for w in ["director", "senior director", "head of", "vp", "vice president", "chief architect", "cto", "managing director"]):
                     continue
 
             seen_ids.add(job_id)

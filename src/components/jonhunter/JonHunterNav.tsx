@@ -6,12 +6,13 @@ import {
   ClipboardList,
   Menu,
   X,
+  Building2,
 } from 'lucide-react';
 import { useUser } from '../../contexts/UserContext';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
 
-export type JonHunterNavTab = 'discover' | 'recommended' | 'archive' | 'saved' | 'tracker';
+export type JonHunterNavTab = 'discover' | 'career_pages' | 'recommended' | 'archive' | 'saved' | 'tracker';
 
 export interface JonHunterNavProps {
   activeTab: JonHunterNavTab;
@@ -38,6 +39,12 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
       id: 'discover' as JonHunterNavTab,
       label: 'Discover Roles',
       icon: Compass,
+    },
+    {
+      id: 'career_pages' as JonHunterNavTab,
+      label: 'Career Pages (Direct ATS)',
+      icon: Building2,
+      badge: '140+ Boards',
     },
     ...(discoveryFiltersConfig?.showRecommendationsSection ? [{
       id: 'recommended' as JonHunterNavTab,

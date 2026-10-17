@@ -59,6 +59,10 @@ class JobPosting(BaseModel):
     connections: List[ConnectionRecord] = Field(default_factory=list, description="HR / Hiring Team contacts")
     discovered_at: Optional[str] = Field(default="", description="Timestamp when job was discovered")
     posted_time: Optional[str] = Field(default="⚡ Posted < 24h", description="Recency tier: < 24h, < 48h, < 7d")
+    fit_grade: Optional[str] = Field(default="Grade A", description="Fit Grade: Grade A, Grade B, Grade C")
+    archetype: Optional[str] = Field(default="Engineering", description="Role Archetype: e.g. Agentic / Automation, AI / ML, Backend")
+    match_reasons: List[str] = Field(default_factory=list, description="Top positive fit reasons")
+    ats_provider: Optional[str] = Field(default="Corporate ATS", description="ATS Provider: Greenhouse, Lever, Ashby, SmartRecruiters")
 
 
 class CandidateProfile(BaseModel):
@@ -78,7 +82,7 @@ class CandidateProfile(BaseModel):
     summary: Optional[str] = Field(default="", description="Professional summary")
     raw_resume_text: Optional[str] = Field(default="", description="Parsed Plain Text from Resume")
     reference_role: Optional[str] = Field(default="", description="Reference target role")
-    suggested_seniority: Optional[str] = Field(default="all", description="Inferred Seniority Level: entry, intermediate, senior, lead, manager")
+    suggested_seniority: Optional[str] = Field(default="all", description="Inferred Seniority Level: entry, intermediate, senior, lead, manager, director")
     recommended_search_role: Optional[str] = Field(default="", description="Primary clean role keyword for instant search")
     work_mode: Optional[str] = Field(default="remote_included", description="Preference: remote_included, remote_only, hybrid, onsite")
     open_to_relocation: Optional[bool] = Field(default=True, description="Open to relocating to top metro hubs")

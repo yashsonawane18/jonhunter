@@ -40,6 +40,7 @@ import { ResumeAtsBanner } from './ResumeAtsBanner';
 import { SavedJobsView } from './SavedJobsView';
 import { DiscoveredArchiveView } from './DiscoveredArchiveView';
 import { ApplicationTrackerView } from './ApplicationTrackerView';
+import { CareerPagesView } from './CareerPagesView';
 import { DiagnosticsModal } from '../common/DiagnosticsModal';
 import { safeStorage } from '../../lib/storage/safeStorage';
 import { openExternalJobLink } from '../../lib/safeExternalLink';
@@ -303,14 +304,16 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
               const reqLoc = location.split(',')[0].toLowerCase();
               if (!jobLoc.includes(reqLoc)) return false;
             }
-            // Match keywords
+            // Match keywords precisely: all non-filler words must match title or skills
             if (qWords.length > 0) {
               const title = (job.job_title || '').toLowerCase();
-              const desc = (job.job_description || '').toLowerCase();
               const comp = (job.company || '').toLowerCase();
               const skillsStr = (Array.isArray(job.key_skills) ? job.key_skills.join(' ') : '').toLowerCase();
-              const haystack = `${title} ${desc} ${comp} ${skillsStr}`;
-              const matches = qWords.some((word) => haystack.includes(word));
+              const titleAndSkills = `${title} ${comp} ${skillsStr}`;
+              const fillers = new Set(['in', 'of', 'for', 'at', 'with', 'and', 'the', 'a', 'an', 'to']);
+              const contentWords = qWords.filter((w) => !fillers.has(w));
+              const wordsToCheck = contentWords.length > 0 ? contentWords : qWords;
+              const matches = wordsToCheck.every((word) => titleAndSkills.includes(word));
               if (!matches) return false;
             }
             return true;
@@ -1476,6 +1479,20 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
               </div>
             </div>
           </div>
+        </main>
+      )}
+
+      {/* 2.5. Corporate Career Pages (Direct ATS) View */}
+      {activeNavTab === 'career_pages' && (
+        <main>
+          <CareerPagesView
+            candidateProfile={resumeProfile}
+            savedJobIds={savedJobIds}
+            onToggleStar={handleToggleStar}
+            onViewDetails={handleViewDetail}
+            onApplyNow={handleApplyNow}
+            onExploreRoles={() => setActiveNavTab('discover')}
+          />
         </main>
       )}
 

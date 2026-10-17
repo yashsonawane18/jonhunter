@@ -1035,10 +1035,13 @@ def db_get_verified_linkedin_jobs(
                     if not any(w in t_low for w in ["senior", "sr.", "sr ", "lead", "specialist"]):
                         continue
                 elif experience_level == "lead":
-                    if not any(w in t_low for w in ["staff", "principal", "architect", "lead", "distinguished", "head"]):
+                    if not any(w in t_low for w in ["staff", "principal", "architect", "lead", "distinguished"]):
                         continue
                 elif experience_level == "manager":
-                    if not any(w in t_low for w in ["manager", "director", "head of", "vp"]):
+                    if not any(w in t_low for w in ["manager", "engineering manager", "lead manager"]):
+                        continue
+                elif experience_level == "director":
+                    if not any(w in t_low for w in ["director", "senior director", "head of", "vp", "vice president", "chief architect", "cto", "managing director"]):
                         continue
 
             # Role relevance scoring
@@ -1046,17 +1049,19 @@ def db_get_verified_linkedin_jobs(
             if not keywords:
                 score = 1
             else:
-                if role_clean.lower() in t_low:
+                if re.search(r'(?:\b|_)' + re.escape(role_clean.lower()) + r'(?:\b|_)', t_low):
                     score += 25
                 for kw in keywords:
-                    if kw in t_low:
+                    if re.search(r'(?:\b|_)' + re.escape(kw) + r'(?:\b|_)', t_low):
+                        if kw == "java" and "javascript" in t_low and not re.search(r'\bjava\b', t_low.replace("javascript", "")):
+                            continue
                         score += 10
-                # Check matched_skills / JD
+                # Check matched_skills / JD only if primary stack aligns
                 if score == 0:
-                    skills_text = (r["matched_skills"] or "").lower() + " " + (r["job_description"] or "")[:400].lower()
+                    skills_text = (r["matched_skills"] or "").lower()
                     for kw in keywords:
-                        if kw in skills_text:
-                            score += 4
+                        if re.search(r'(?:\b|_)' + re.escape(kw) + r'(?:\b|_)', skills_text):
+                            score += 6
 
             # User Skills Boost
             if active_skills:
