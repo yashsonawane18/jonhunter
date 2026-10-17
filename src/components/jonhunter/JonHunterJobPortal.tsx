@@ -231,7 +231,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       try {
         const currentSeenSet = customSeen || seenJobIds;
         const currentSeenArray = Array.from(currentSeenSet);
-        const limit = 5;
+        const limit = 10;
 
         // Convert workMode for API
         const apiWorkMode =
@@ -278,6 +278,16 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
           if (j.id) newSeen.add(j.id);
         });
         setSeenJobIds(newSeen);
+
+        // Automatically save discovered jobs into Saved Opportunities collection & local cache
+        const newlyDiscoveredIds = retrieved.map((j) => j.id).filter(Boolean);
+        if (newlyDiscoveredIds.length > 0) {
+          setSavedJobIds((prev) => {
+            const next = Array.from(new Set([...prev, ...newlyDiscoveredIds]));
+            safeStorage.setItem('drc_starred_job_ids_v2', next);
+            return next;
+          });
+        }
 
         if (isAppend) {
           setJobsList((prev) => [...prev, ...retrieved]);
@@ -1304,11 +1314,11 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                     {isAppending && (
                       <div className={`${theme.cardClass} rounded-2xl border border-[#00C896]/30 p-4 flex items-center justify-center gap-3 text-xs text-[#00C896] font-semibold shadow-md animate-pulse`}>
                         <Loader2 className="w-4 h-4 animate-spin text-[#00C896]" />
-                        <span>Querying live engine for next 5 verified requisitions...</span>
+                        <span>Querying live engine for next 10 verified requisitions...</span>
                       </div>
                     )}
 
-                    {/* Load 5 More Fresh Jobs Button (Solid, clearly visible) */}
+                    {/* Load 10 More Fresh Jobs Button (Solid, clearly visible) */}
                     {!showOnlySaved && (
                       <div className={`pt-3 flex flex-col sm:flex-row items-center justify-between gap-4 ${theme.cardClass} rounded-2xl ${theme.cardBorderClass} p-4 shadow-md`}>
                         <div className="text-xs text-zinc-300">
@@ -1324,12 +1334,12 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           {isAppending ? (
                             <>
                               <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Fetching Next 5 Openings...</span>
+                              <span>Fetching Next 10 Openings...</span>
                             </>
                           ) : (
                             <>
                               <RefreshCw className="w-4 h-4" />
-                              <span>Load 5 More Opportunities</span>
+                              <span>Load 10 More Opportunities</span>
                             </>
                           )}
                         </button>

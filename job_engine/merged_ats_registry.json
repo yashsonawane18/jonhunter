@@ -21,6 +21,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "23andMe",
+    "ats": "greenhouse",
+    "slug": "23andme",
+    "domain": "23andme.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "5paisa",
+    "ats": "lever",
+    "slug": "5paisa",
+    "domain": "5paisa.com",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "Aave",
     "ats": "greenhouse",
     "slug": "aave",
@@ -46,6 +60,20 @@
     "ats": "greenhouse",
     "slug": "abnormalsecurity",
     "domain": "abnormalsecurity.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Ada Health",
+    "ats": "greenhouse",
+    "slug": "adahealth",
+    "domain": "ada.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Adept AI",
+    "ats": "ashby",
+    "slug": "adept",
+    "domain": "adept.ai",
     "hub": "Remote / Global"
   },
   {
@@ -133,6 +161,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Amagi Media Labs",
+    "ats": "greenhouse",
+    "slug": "amagi",
+    "domain": "amagi.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Amdocs",
     "ats": "greenhouse",
     "slug": "amdocs",
@@ -147,8 +182,22 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Angel One",
+    "ats": "smartrecruiters",
+    "slug": "angelone",
+    "domain": "angelone.in",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "Anthropic",
     "ats": "greenhouse",
+    "slug": "anthropic",
+    "domain": "anthropic.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Anthropic",
+    "ats": "ashby",
     "slug": "anthropic",
     "domain": "anthropic.com",
     "hub": "Remote / Global"
@@ -159,6 +208,13 @@
     "slug": "anyscale",
     "domain": "anyscale.com",
     "hub": "Ray Distributed AI / Remote"
+  },
+  {
+    "company": "Apex.AI",
+    "ats": "greenhouse",
+    "slug": "apexai",
+    "domain": "apex.ai",
+    "hub": "Remote / Global"
   },
   {
     "company": "Apollo GraphQL",
@@ -179,6 +235,13 @@
     "ats": "greenhouse",
     "slug": "applause",
     "domain": "applause.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Applied Intuition",
+    "ats": "greenhouse",
+    "slug": "appliedintuition",
+    "domain": "appliedintuition.com",
     "hub": "Remote / Global"
   },
   {
@@ -231,6 +294,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Artlist",
+    "ats": "greenhouse",
+    "slug": "artlist",
+    "domain": "artlist.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Aryaka Networks India",
+    "ats": "greenhouse",
+    "slug": "aryaka",
+    "domain": "aryaka.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Asana",
     "ats": "greenhouse",
     "slug": "asana",
@@ -254,6 +331,13 @@
   {
     "company": "Ather Energy",
     "ats": "smartrecruiters",
+    "slug": "atherenergy",
+    "domain": "atherenergy.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Ather Energy",
+    "ats": "lever",
     "slug": "atherenergy",
     "domain": "atherenergy.com",
     "hub": "Bengaluru"
@@ -308,10 +392,24 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Babylon Health",
+    "ats": "smartrecruiters",
+    "slug": "babylon",
+    "domain": "babylonhealth.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Backblaze",
     "ats": "greenhouse",
     "slug": "backblaze",
     "domain": "backblaze.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "BandLab",
+    "ats": "greenhouse",
+    "slug": "bandlab",
+    "domain": "bandlab.com",
     "hub": "Remote / Global"
   },
   {
@@ -336,10 +434,31 @@
     "hub": "Delhi NCR"
   },
   {
+    "company": "Benchling",
+    "ats": "greenhouse",
+    "slug": "benchling",
+    "domain": "benchling.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "BenevolentAI",
+    "ats": "greenhouse",
+    "slug": "benevolentai",
+    "domain": "benevolent.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Better Stack",
     "ats": "ashby",
     "slug": "betterstack",
     "domain": "betterstack.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "BetterHelp",
+    "ats": "greenhouse",
+    "slug": "betterhelp",
+    "domain": "betterhelp.com",
     "hub": "Remote / Global"
   },
   {
@@ -357,10 +476,31 @@
     "hub": "Gurgaon / Bengaluru / Delhi"
   },
   {
+    "company": "BharatPe",
+    "ats": "lever",
+    "slug": "bharatpe",
+    "domain": "bharatpe.com",
+    "hub": "Delhi NCR / Bengaluru"
+  },
+  {
+    "company": "BigBasket",
+    "ats": "lever",
+    "slug": "bigbasket",
+    "domain": "bigbasket.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "BigCommerce",
     "ats": "greenhouse",
     "slug": "bigcommerce",
     "domain": "bigcommerce.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Biorender",
+    "ats": "greenhouse",
+    "slug": "biorender",
+    "domain": "biorender.com",
     "hub": "Remote / Global"
   },
   {
@@ -390,6 +530,13 @@
     "slug": "blinkit",
     "domain": "blinkit.com",
     "hub": "Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Blinkit",
+    "ats": "lever",
+    "slug": "blinkit",
+    "domain": "blinkit.com",
+    "hub": "Gurgaon / Delhi NCR"
   },
   {
     "company": "BluSmart",
@@ -425,6 +572,13 @@
     "slug": "bounce",
     "domain": "bounceshare.com",
     "hub": "Bengaluru"
+  },
+  {
+    "company": "Brain.fm",
+    "ats": "ashby",
+    "slug": "brainfm",
+    "domain": "brain.fm",
+    "hub": "Remote / Global"
   },
   {
     "company": "Braze",
@@ -518,6 +672,27 @@
     "hub": "Design AI / Remote"
   },
   {
+    "company": "Carbon Health",
+    "ats": "greenhouse",
+    "slug": "carbonhealth",
+    "domain": "carbonhealth.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "CarDekho",
+    "ats": "lever",
+    "slug": "cardekho",
+    "domain": "cardekho.com",
+    "hub": "Jaipur / Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Cars24",
+    "ats": "lever",
+    "slug": "cars24",
+    "domain": "cars24.com",
+    "hub": "Gurgaon / Bengaluru"
+  },
+  {
     "company": "Carta",
     "ats": "greenhouse",
     "slug": "carta",
@@ -530,6 +705,13 @@
     "slug": "cartesia",
     "domain": "cartesia.ai",
     "hub": "Remote / Voice AI"
+  },
+  {
+    "company": "Cashfree Payments",
+    "ats": "lever",
+    "slug": "cashfree",
+    "domain": "cashfree.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Cast AI",
@@ -560,6 +742,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Cerebral",
+    "ats": "greenhouse",
+    "slug": "cerebral",
+    "domain": "cerebral.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Cerebras Systems",
+    "ats": "greenhouse",
+    "slug": "cerebrassystems",
+    "domain": "cerebras.net",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Chainguard",
     "ats": "greenhouse",
     "slug": "chainguard",
@@ -581,11 +777,25 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Character.AI",
+    "ats": "ashby",
+    "slug": "characterai",
+    "domain": "character.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Chargebee",
     "ats": "greenhouse",
     "slug": "chargebee",
     "domain": "chargebee.com",
     "hub": "Chennai / Bengaluru / Remote India"
+  },
+  {
+    "company": "Chargebee",
+    "ats": "lever",
+    "slug": "chargebee",
+    "domain": "chargebee.com",
+    "hub": "Chennai / Bengaluru / Remote"
   },
   {
     "company": "Checkout.com",
@@ -637,6 +847,27 @@
     "hub": "Bengaluru / Pune / Chennai"
   },
   {
+    "company": "Cityblock Health",
+    "ats": "greenhouse",
+    "slug": "cityblock",
+    "domain": "cityblock.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Civitai",
+    "ats": "ashby",
+    "slug": "civitai",
+    "domain": "civitai.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "ClassPass",
+    "ats": "greenhouse",
+    "slug": "classpass",
+    "domain": "classpass.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Classplus",
     "ats": "greenhouse",
     "slug": "classplus",
@@ -679,6 +910,13 @@
     "hub": "Mumbai / Bengaluru / Remote India"
   },
   {
+    "company": "Clevertap",
+    "ats": "lever",
+    "slug": "clevertap",
+    "domain": "clevertap.com",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "ClickHouse",
     "ats": "ashby",
     "slug": "clickhouse",
@@ -690,6 +928,13 @@
     "ats": "greenhouse",
     "slug": "clickup",
     "domain": "clickup.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Clipchamp",
+    "ats": "smartrecruiters",
+    "slug": "clipchamp",
+    "domain": "clipchamp.com",
     "hub": "Remote / Global"
   },
   {
@@ -777,6 +1022,13 @@
     "hub": "Pune / Full Stack Tech"
   },
   {
+    "company": "CoFit",
+    "ats": "ashby",
+    "slug": "cofit",
+    "domain": "cofit.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Cognism",
     "ats": "greenhouse",
     "slug": "cognism",
@@ -798,6 +1050,13 @@
     "hub": "Remote / LLMs"
   },
   {
+    "company": "Cohere",
+    "ats": "lever",
+    "slug": "cohere",
+    "domain": "cohere.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Coinbase",
     "ats": "greenhouse",
     "slug": "coinbase",
@@ -817,6 +1076,13 @@
     "slug": "coinswitch",
     "domain": "coinswitch.co",
     "hub": "Bengaluru"
+  },
+  {
+    "company": "Color Health",
+    "ats": "greenhouse",
+    "slug": "color",
+    "domain": "color.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "CometChat",
@@ -875,6 +1141,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "CoRover.ai",
+    "ats": "lever",
+    "slug": "corover",
+    "domain": "corover.ai",
+    "hub": "Bengaluru / Delhi"
+  },
+  {
     "company": "Correlated",
     "ats": "ashby",
     "slug": "correlated",
@@ -896,6 +1169,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Covariant",
+    "ats": "greenhouse",
+    "slug": "covariant",
+    "domain": "covariant.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Cradle Bio",
+    "ats": "ashby",
+    "slug": "cradle",
+    "domain": "cradle.bio",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Crazy Egg",
     "ats": "greenhouse",
     "slug": "crazyegg",
@@ -908,6 +1195,20 @@
     "slug": "cred",
     "domain": "cred.club",
     "hub": "Bengaluru / Hybrid"
+  },
+  {
+    "company": "CRED",
+    "ats": "greenhouse",
+    "slug": "cred",
+    "domain": "cred.club",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "CredAvenue (Yubi)",
+    "ats": "lever",
+    "slug": "yubi",
+    "domain": "go-yubi.com",
+    "hub": "Chennai / Bengaluru"
   },
   {
     "company": "Cresta",
@@ -924,6 +1225,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Cronometer",
+    "ats": "ashby",
+    "slug": "cronometer",
+    "domain": "cronometer.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Crusoe Energy",
     "ats": "greenhouse",
     "slug": "crusoeenergy",
@@ -935,6 +1243,13 @@
     "ats": "lever",
     "slug": "cuemath",
     "domain": "cuemath.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Cult.fit",
+    "ats": "lever",
+    "slug": "curefit",
+    "domain": "cult.fit",
     "hub": "Bengaluru"
   },
   {
@@ -1006,6 +1321,13 @@
     "slug": "dailyco",
     "domain": "daily.co",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Darwinbox",
+    "ats": "lever",
+    "slug": "darwinbox",
+    "domain": "darwinbox.com",
+    "hub": "Hyderabad / Bengaluru"
   },
   {
     "company": "Databricks",
@@ -1085,6 +1407,13 @@
     "hub": "Gurgaon / Bengaluru / Pune"
   },
   {
+    "company": "Delhivery",
+    "ats": "lever",
+    "slug": "delhivery",
+    "domain": "delhivery.com",
+    "hub": "Gurgaon / Bengaluru / Mumbai"
+  },
+  {
     "company": "Deliveroo",
     "ats": "greenhouse",
     "slug": "deliveroo",
@@ -1162,6 +1491,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Doist",
+    "ats": "greenhouse",
+    "slug": "doist",
+    "domain": "doist.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "DoltHub (Dolt)",
     "ats": "ashby",
     "slug": "dolthub",
@@ -1204,6 +1540,13 @@
     "hub": "Mumbai"
   },
   {
+    "company": "Dream11",
+    "ats": "lever",
+    "slug": "dream11",
+    "domain": "dream11.com",
+    "hub": "Mumbai / Remote"
+  },
+  {
     "company": "Dremio",
     "ats": "greenhouse",
     "slug": "dremio",
@@ -1232,6 +1575,13 @@
     "hub": "Pune / Remote"
   },
   {
+    "company": "Druva",
+    "ats": "smartrecruiters",
+    "slug": "druva",
+    "domain": "druva.com",
+    "hub": "Pune / Bengaluru"
+  },
+  {
     "company": "DuckDB",
     "ats": "greenhouse",
     "slug": "duckdb",
@@ -1251,6 +1601,13 @@
     "slug": "duckduckgo",
     "domain": "duckduckgo.com",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Dunzo",
+    "ats": "lever",
+    "slug": "dunzo",
+    "domain": "dunzo.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Duolingo",
@@ -1288,6 +1645,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Eight Sleep",
+    "ats": "greenhouse",
+    "slug": "eightsleep",
+    "domain": "eightsleep.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Einride",
+    "ats": "greenhouse",
+    "slug": "einride",
+    "domain": "einride.tech",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Elastic",
     "ats": "greenhouse",
     "slug": "elastic",
@@ -1309,11 +1680,25 @@
     "hub": "Remote / Voice AI"
   },
   {
+    "company": "Endel",
+    "ats": "ashby",
+    "slug": "endel",
+    "domain": "endel.io",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Endgame",
     "ats": "ashby",
     "slug": "endgame",
     "domain": "endgame.io",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Entropik Tech",
+    "ats": "lever",
+    "slug": "entropik",
+    "domain": "entropik.io",
+    "hub": "Bengaluru / Remote"
   },
   {
     "company": "Env0",
@@ -1337,6 +1722,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Epidemic Sound",
+    "ats": "greenhouse",
+    "slug": "epidemicsound",
+    "domain": "epidemicsound.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Eruditus",
     "ats": "greenhouse",
     "slug": "eruditus",
@@ -1351,6 +1743,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Evozyne",
+    "ats": "greenhouse",
+    "slug": "evozyne",
+    "domain": "evozyne.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Expedia Group India",
     "ats": "greenhouse",
     "slug": "expedia",
@@ -1362,6 +1761,13 @@
     "ats": "greenhouse",
     "slug": "expel",
     "domain": "expel.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Exscientia",
+    "ats": "greenhouse",
+    "slug": "exscientia",
+    "domain": "exscientia.ai",
     "hub": "Remote / Global"
   },
   {
@@ -1421,6 +1827,13 @@
     "hub": "Noida / Bengaluru"
   },
   {
+    "company": "Fastly",
+    "ats": "greenhouse",
+    "slug": "fastly",
+    "domain": "fastly.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Fauna",
     "ats": "greenhouse",
     "slug": "fauna",
@@ -1438,6 +1851,13 @@
     "company": "Fi Money",
     "ats": "lever",
     "slug": "epifi",
+    "domain": "fi.money",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Fi Money",
+    "ats": "lever",
+    "slug": "fimoney",
     "domain": "fi.money",
     "hub": "Bengaluru"
   },
@@ -1463,6 +1883,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Fisdom",
+    "ats": "lever",
+    "slug": "fisdom",
+    "domain": "fisdom.com",
+    "hub": "Bengaluru / Mumbai"
+  },
+  {
     "company": "Fivetran",
     "ats": "greenhouse",
     "slug": "fivetran",
@@ -1477,10 +1904,31 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Flatiron Health",
+    "ats": "greenhouse",
+    "slug": "flatiron",
+    "domain": "flatiron.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Flipkart",
+    "ats": "greenhouse",
+    "slug": "flipkart",
+    "domain": "flipkart.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Fly.io",
     "ats": "greenhouse",
     "slug": "flyio",
     "domain": "fly.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Forward Health",
+    "ats": "greenhouse",
+    "slug": "forward",
+    "domain": "goforward.com",
     "hub": "Remote / Global"
   },
   {
@@ -1495,6 +1943,20 @@
     "ats": "greenhouse",
     "slug": "framer",
     "domain": "framer.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Framer",
+    "ats": "ashby",
+    "slug": "framer",
+    "domain": "framer.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Freenome",
+    "ats": "greenhouse",
+    "slug": "freenome",
+    "domain": "freenome.com",
     "hub": "Remote / Global"
   },
   {
@@ -1547,11 +2009,32 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Future (Fitness)",
+    "ats": "ashby",
+    "slug": "future",
+    "domain": "future.co",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Games24x7",
     "ats": "greenhouse",
     "slug": "games24x7",
     "domain": "games24x7.com",
     "hub": "Mumbai / Bengaluru"
+  },
+  {
+    "company": "Games24x7",
+    "ats": "lever",
+    "slug": "games24x7",
+    "domain": "games24x7.com",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
+    "company": "Gatik",
+    "ats": "greenhouse",
+    "slug": "gatik",
+    "domain": "gatik.ai",
+    "hub": "Remote / Global"
   },
   {
     "company": "Gem Software",
@@ -1561,10 +2044,38 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Generate Biomedicines",
+    "ats": "greenhouse",
+    "slug": "generatebiomedicines",
+    "domain": "generatebiomedicines.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "GetYourGuide",
     "ats": "greenhouse",
     "slug": "getyourguide",
     "domain": "getyourguide.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Ghost",
+    "ats": "greenhouse",
+    "slug": "ghost",
+    "domain": "ghost.org",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Ghost Autonomy",
+    "ats": "greenhouse",
+    "slug": "ghostautonomy",
+    "domain": "ghostautonomy.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Ginger (Headspace)",
+    "ats": "greenhouse",
+    "slug": "ginger",
+    "domain": "ginger.com",
     "hub": "Remote / Global"
   },
   {
@@ -1617,6 +2128,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Gnani.ai",
+    "ats": "lever",
+    "slug": "gnaniai",
+    "domain": "gnani.ai",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Goibibo",
     "ats": "greenhouse",
     "slug": "goibibo",
@@ -1635,6 +2153,13 @@
     "ats": "greenhouse",
     "slug": "grafanalabs",
     "domain": "grafana.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "GRAIL",
+    "ats": "greenhouse",
+    "slug": "grail",
+    "domain": "grail.com",
     "hub": "Remote / Global"
   },
   {
@@ -1666,6 +2191,27 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "GreyOrange",
+    "ats": "greenhouse",
+    "slug": "greyorange",
+    "domain": "greyorange.com",
+    "hub": "Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Groq",
+    "ats": "greenhouse",
+    "slug": "groq",
+    "domain": "groq.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Groq",
+    "ats": "ashby",
+    "slug": "groq",
+    "domain": "groq.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "GrowthBook",
     "ats": "ashby",
     "slug": "growthbook",
@@ -1680,10 +2226,31 @@
     "hub": "Bengaluru"
   },
   {
+    "company": "Guardant Health",
+    "ats": "greenhouse",
+    "slug": "guardanthealth",
+    "domain": "guardanthealth.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Gupshup",
+    "ats": "lever",
+    "slug": "gupshup",
+    "domain": "gupshup.io",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "Gusto",
     "ats": "greenhouse",
     "slug": "gusto",
     "domain": "gusto.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Gympass (Wellhub)",
+    "ats": "greenhouse",
+    "slug": "gympass",
+    "domain": "wellhub.com",
     "hub": "Remote / Global"
   },
   {
@@ -1699,6 +2266,13 @@
     "slug": "hackerrank",
     "domain": "hackerrank.com",
     "hub": "Bengaluru / Remote"
+  },
+  {
+    "company": "Haptik",
+    "ats": "greenhouse",
+    "slug": "haptik",
+    "domain": "haptik.ai",
+    "hub": "Mumbai / Bengaluru"
   },
   {
     "company": "Harness",
@@ -1747,6 +2321,20 @@
     "ats": "greenhouse",
     "slug": "heap",
     "domain": "heap.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Helix",
+    "ats": "greenhouse",
+    "slug": "helix",
+    "domain": "helix.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Helm.ai",
+    "ats": "greenhouse",
+    "slug": "helmai",
+    "domain": "helm.ai",
     "hub": "Remote / Global"
   },
   {
@@ -1799,6 +2387,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Hims & Hers",
+    "ats": "greenhouse",
+    "slug": "hims",
+    "domain": "forhims.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Honeycomb.io",
     "ats": "greenhouse",
     "slug": "honeycombio",
@@ -1817,6 +2412,13 @@
     "ats": "greenhouse",
     "slug": "hotjar",
     "domain": "hotjar.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "HubSpot",
+    "ats": "greenhouse",
+    "slug": "hubspot",
+    "domain": "hubspot.com",
     "hub": "Remote / Global"
   },
   {
@@ -1841,6 +2443,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Hydrow",
+    "ats": "greenhouse",
+    "slug": "hydrow",
+    "domain": "hydrow.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Hygraph (GraphCMS)",
     "ats": "greenhouse",
     "slug": "hygraph",
@@ -1855,10 +2464,38 @@
     "hub": "Pune HQ / Enterprise AI"
   },
   {
+    "company": "Icertis",
+    "ats": "smartrecruiters",
+    "slug": "icertis",
+    "domain": "icertis.com",
+    "hub": "Pune / Bengaluru"
+  },
+  {
     "company": "Ideogram",
     "ats": "ashby",
     "slug": "ideogram",
     "domain": "ideogram.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Imbue",
+    "ats": "ashby",
+    "slug": "imbue",
+    "domain": "imbue.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Indmoney",
+    "ats": "lever",
+    "slug": "indmoney",
+    "domain": "indmoney.com",
+    "hub": "Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Inflection AI",
+    "ats": "greenhouse",
+    "slug": "inflection",
+    "domain": "inflection.ai",
     "hub": "Remote / Global"
   },
   {
@@ -1897,6 +2534,13 @@
     "hub": "Bengaluru / Remote"
   },
   {
+    "company": "InMobi",
+    "ats": "smartrecruiters",
+    "slug": "inmobi",
+    "domain": "inmobi.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Inngest",
     "ats": "ashby",
     "slug": "inngest",
@@ -1918,11 +2562,25 @@
     "hub": "Noida / Bengaluru / Remote India"
   },
   {
+    "company": "Insitro",
+    "ats": "greenhouse",
+    "slug": "insitro",
+    "domain": "insitro.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Instacart",
     "ats": "greenhouse",
     "slug": "instacart",
     "domain": "instacart.com",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Instamart",
+    "ats": "greenhouse",
+    "slug": "instamart",
+    "domain": "swiggy.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Intercom",
@@ -1944,6 +2602,20 @@
     "slug": "intugine",
     "domain": "intugine.com",
     "hub": "Bengaluru"
+  },
+  {
+    "company": "InVideo",
+    "ats": "greenhouse",
+    "slug": "invideo",
+    "domain": "invideo.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Invitae",
+    "ats": "greenhouse",
+    "slug": "invitae",
+    "domain": "invitae.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "Ironscales",
@@ -1981,6 +2653,20 @@
     "hub": "Bengaluru / Remote India"
   },
   {
+    "company": "Jasper",
+    "ats": "greenhouse",
+    "slug": "jasper",
+    "domain": "jasper.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Jio Platforms",
+    "ats": "smartrecruiters",
+    "slug": "jio",
+    "domain": "jio.com",
+    "hub": "Mumbai / Bengaluru / Hyderabad"
+  },
+  {
     "company": "June.so",
     "ats": "ashby",
     "slug": "june",
@@ -2009,6 +2695,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Juspay",
+    "ats": "lever",
+    "slug": "juspay",
+    "domain": "juspay.in",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Justworks",
     "ats": "greenhouse",
     "slug": "justworks",
@@ -2016,10 +2709,31 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "K Health",
+    "ats": "greenhouse",
+    "slug": "khealth",
+    "domain": "khealth.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Kaiber",
+    "ats": "ashby",
+    "slug": "kaiber",
+    "domain": "kaiber.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Kameleoon",
     "ats": "greenhouse",
     "slug": "kameleoon",
     "domain": "kameleoon.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Kapwing",
+    "ats": "ashby",
+    "slug": "kapwing",
+    "domain": "kapwing.com",
     "hub": "Remote / Global"
   },
   {
@@ -2079,6 +2793,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Kite Connect",
+    "ats": "lever",
+    "slug": "kiteconnect",
+    "domain": "kite.trade",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Klarna",
     "ats": "greenhouse",
     "slug": "klarna",
@@ -2104,6 +2825,20 @@
     "ats": "ashby",
     "slug": "koala",
     "domain": "getkoala.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Kodiak Robotics",
+    "ats": "greenhouse",
+    "slug": "kodiak",
+    "domain": "kodiak.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Komoot",
+    "ats": "greenhouse",
+    "slug": "komoot",
+    "domain": "komoot.com",
     "hub": "Remote / Global"
   },
   {
@@ -2135,6 +2870,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Krutrim AI",
+    "ats": "lever",
+    "slug": "krutrim",
+    "domain": "olakrutrim.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Kubecost",
     "ats": "greenhouse",
     "slug": "kubecost",
@@ -2153,6 +2895,13 @@
     "ats": "greenhouse",
     "slug": "lacework",
     "domain": "lacework.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Ladder Teams",
+    "ats": "ashby",
+    "slug": "ladder",
+    "domain": "joinladder.com",
     "hub": "Remote / Global"
   },
   {
@@ -2205,6 +2954,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "LeadSquared",
+    "ats": "lever",
+    "slug": "leadsquared",
+    "domain": "leadsquared.com",
+    "hub": "Bengaluru / Noida"
+  },
+  {
     "company": "Leap Finance",
     "ats": "greenhouse",
     "slug": "leapfinance",
@@ -2219,11 +2975,39 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Lenskart",
+    "ats": "lever",
+    "slug": "lenskart",
+    "domain": "lenskart.com",
+    "hub": "Delhi NCR / Bengaluru"
+  },
+  {
     "company": "Leonardo AI",
     "ats": "ashby",
     "slug": "leonardo",
     "domain": "leonardo.ai",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Leonardo.Ai",
+    "ats": "ashby",
+    "slug": "leonardoai",
+    "domain": "leonardo.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Levels Health",
+    "ats": "ashby",
+    "slug": "levels",
+    "domain": "levelshealth.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Licious",
+    "ats": "lever",
+    "slug": "licious",
+    "domain": "licious.in",
+    "hub": "Bengaluru"
   },
   {
     "company": "Lightstep (ServiceNow)",
@@ -2303,6 +3087,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Luma AI",
+    "ats": "ashby",
+    "slug": "lumaai",
+    "domain": "lumalabs.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Lusha",
     "ats": "greenhouse",
     "slug": "lusha",
@@ -2317,11 +3108,32 @@
     "hub": "Rideshare / Remote"
   },
   {
+    "company": "Lyra Health",
+    "ats": "greenhouse",
+    "slug": "lyrahealth",
+    "domain": "lyrahealth.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Mabl",
     "ats": "greenhouse",
     "slug": "mabl",
     "domain": "mabl.com",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "MacroFactor",
+    "ats": "ashby",
+    "slug": "macrofactor",
+    "domain": "macrofactorapp.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Mad Street Den (Vue.ai)",
+    "ats": "lever",
+    "slug": "madstreetden",
+    "domain": "vue.ai",
+    "hub": "Chennai / Bengaluru"
   },
   {
     "company": "Magic (Fortmatic)",
@@ -2338,6 +3150,13 @@
     "hub": "Gurgaon / Bengaluru"
   },
   {
+    "company": "MakeMyTrip",
+    "ats": "smartrecruiters",
+    "slug": "makemytrip",
+    "domain": "makemytrip.com",
+    "hub": "Gurgaon / Bengaluru / Mumbai"
+  },
+  {
     "company": "MasterClass",
     "ats": "greenhouse",
     "slug": "masterclass",
@@ -2349,6 +3168,13 @@
     "ats": "greenhouse",
     "slug": "materialize",
     "domain": "materialize.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "May Mobility",
+    "ats": "greenhouse",
+    "slug": "maymobility",
+    "domain": "maymobility.com",
     "hub": "Remote / Global"
   },
   {
@@ -2382,6 +3208,13 @@
   {
     "company": "Meilisearch",
     "ats": "greenhouse",
+    "slug": "meilisearch",
+    "domain": "meilisearch.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Meilisearch",
+    "ats": "lever",
     "slug": "meilisearch",
     "domain": "meilisearch.com",
     "hub": "Remote / Global"
@@ -2422,6 +3255,13 @@
     "hub": "Bengaluru"
   },
   {
+    "company": "Midjourney",
+    "ats": "lever",
+    "slug": "midjourney",
+    "domain": "midjourney.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Milvus",
     "ats": "greenhouse",
     "slug": "zilliz",
@@ -2434,6 +3274,13 @@
     "slug": "mindtickle",
     "domain": "mindtickle.com",
     "hub": "Pune / Bengaluru"
+  },
+  {
+    "company": "Mindtickle",
+    "ats": "greenhouse",
+    "slug": "mindtickle",
+    "domain": "mindtickle.com",
+    "hub": "Pune / Bengaluru / Remote India"
   },
   {
     "company": "MinIO",
@@ -2457,6 +3304,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Mistral AI",
+    "ats": "greenhouse",
+    "slug": "mistralai",
+    "domain": "mistral.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Mixpanel",
     "ats": "greenhouse",
     "slug": "mixpanel",
@@ -2466,6 +3320,13 @@
   {
     "company": "Mobile Premier League (MPL)",
     "ats": "greenhouse",
+    "slug": "mpl",
+    "domain": "mpl.live",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Mobile Premier League (MPL)",
+    "ats": "lever",
     "slug": "mpl",
     "domain": "mpl.live",
     "hub": "Bengaluru"
@@ -2485,11 +3346,32 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Modern Health",
+    "ats": "greenhouse",
+    "slug": "modernhealth",
+    "domain": "modernhealth.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "MoEngage",
     "ats": "greenhouse",
     "slug": "moengage",
     "domain": "moengage.com",
     "hub": "Bengaluru / Remote India"
+  },
+  {
+    "company": "MoEngage",
+    "ats": "lever",
+    "slug": "moengage",
+    "domain": "moengage.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Moises",
+    "ats": "ashby",
+    "slug": "moises",
+    "domain": "moises.ai",
+    "hub": "Remote / Global"
   },
   {
     "company": "Momento",
@@ -2534,6 +3416,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Motilal Oswal Financial",
+    "ats": "smartrecruiters",
+    "slug": "motilaloswal",
+    "domain": "motilaloswal.com",
+    "hub": "Mumbai"
+  },
+  {
     "company": "Moveworks",
     "ats": "greenhouse",
     "slug": "moveworks",
@@ -2553,6 +3442,20 @@
     "slug": "musigma",
     "domain": "musigma.com",
     "hub": "Data Analytics / India"
+  },
+  {
+    "company": "Mu Sigma",
+    "ats": "smartrecruiters",
+    "slug": "musigma",
+    "domain": "mu-sigma.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Mubert",
+    "ats": "ashby",
+    "slug": "mubert",
+    "domain": "mubert.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "Mudrex",
@@ -2581,6 +3484,20 @@
     "slug": "mux",
     "domain": "mux.com",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "MyFitnessPal",
+    "ats": "greenhouse",
+    "slug": "myfitnesspal",
+    "domain": "myfitnesspal.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Myntra",
+    "ats": "greenhouse",
+    "slug": "myntra",
+    "domain": "myntra.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Navi Technologies",
@@ -2702,6 +3619,20 @@
     "hub": "Bengaluru / Pune"
   },
   {
+    "company": "Nykaa",
+    "ats": "lever",
+    "slug": "nykaa",
+    "domain": "nykaa.com",
+    "hub": "Mumbai / Gurgaon"
+  },
+  {
+    "company": "Oak Street Health",
+    "ats": "greenhouse",
+    "slug": "oakstreethealth",
+    "domain": "oakstreethealth.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "OctoML",
     "ats": "greenhouse",
     "slug": "octoml",
@@ -2716,6 +3647,13 @@
     "hub": "Bengaluru / Remote"
   },
   {
+    "company": "Ola",
+    "ats": "lever",
+    "slug": "ola",
+    "domain": "olacabs.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Ola Electric",
     "ats": "greenhouse",
     "slug": "olaelectric",
@@ -2728,6 +3666,27 @@
     "slug": "omio",
     "domain": "omio.com",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "On Running",
+    "ats": "smartrecruiters",
+    "slug": "onrunning",
+    "domain": "on-running.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "One Medical",
+    "ats": "greenhouse",
+    "slug": "onemedical",
+    "domain": "onemedical.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "OneCard (FPL)",
+    "ats": "lever",
+    "slug": "onecard",
+    "domain": "getonecard.app",
+    "hub": "Pune / Bengaluru"
   },
   {
     "company": "OpenSea",
@@ -2779,11 +3738,25 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Oxbotica",
+    "ats": "greenhouse",
+    "slug": "oxbotica",
+    "domain": "oxbotica.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Oyo Rooms",
     "ats": "greenhouse",
     "slug": "oyo",
     "domain": "oyorooms.com",
     "hub": "Gurgaon / Hyderabad / Bengaluru"
+  },
+  {
+    "company": "Oyo Rooms",
+    "ats": "lever",
+    "slug": "oyo",
+    "domain": "oyorooms.com",
+    "hub": "Gurgaon / Bengaluru"
   },
   {
     "company": "Oyster HR",
@@ -2877,8 +3850,22 @@
     "hub": "Mumbai / Bengaluru"
   },
   {
+    "company": "PharmEasy",
+    "ats": "lever",
+    "slug": "pharmeasy",
+    "domain": "pharmeasy.in",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "PhonePe",
     "ats": "greenhouse",
+    "slug": "phonepe",
+    "domain": "phonepe.com",
+    "hub": "Bengaluru / Pune"
+  },
+  {
+    "company": "PhonePe",
+    "ats": "lever",
     "slug": "phonepe",
     "domain": "phonepe.com",
     "hub": "Bengaluru / Pune"
@@ -2891,6 +3878,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Photoroom",
+    "ats": "ashby",
+    "slug": "photoroom",
+    "domain": "photoroom.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "PhysicsWallah",
     "ats": "greenhouse",
     "slug": "physicswallah",
@@ -2898,11 +3892,32 @@
     "hub": "Noida / Bengaluru"
   },
   {
+    "company": "PhysicsWallah",
+    "ats": "lever",
+    "slug": "physicswallah",
+    "domain": "pw.live",
+    "hub": "Noida / Bengaluru"
+  },
+  {
+    "company": "Picsart",
+    "ats": "greenhouse",
+    "slug": "picsart",
+    "domain": "picsart.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Pika Labs",
     "ats": "ashby",
     "slug": "pika",
     "domain": "pika.art",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Pine Labs",
+    "ats": "smartrecruiters",
+    "slug": "pinelabs",
+    "domain": "pinelabs.com",
+    "hub": "Noida / Bengaluru / Mumbai"
   },
   {
     "company": "Pinecone",
@@ -2940,11 +3955,25 @@
     "hub": "Database / Remote India"
   },
   {
+    "company": "PlanetScale",
+    "ats": "ashby",
+    "slug": "planetscale",
+    "domain": "planetscale.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "PlayHT",
     "ats": "ashby",
     "slug": "playht",
     "domain": "play.ht",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Pocket FM",
+    "ats": "lever",
+    "slug": "pocketfm",
+    "domain": "pocketfm.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Pocus",
@@ -2975,6 +4004,13 @@
     "hub": "Bengaluru"
   },
   {
+    "company": "Porter",
+    "ats": "lever",
+    "slug": "porter",
+    "domain": "porter.in",
+    "hub": "Bengaluru / Mumbai"
+  },
+  {
     "company": "PostHog",
     "ats": "ashby",
     "slug": "posthog",
@@ -2991,6 +4027,13 @@
   {
     "company": "Practo",
     "ats": "greenhouse",
+    "slug": "practo",
+    "domain": "practo.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Practo",
+    "ats": "lever",
     "slug": "practo",
     "domain": "practo.com",
     "hub": "Bengaluru"
@@ -3164,6 +4207,13 @@
     "hub": "Bengaluru"
   },
   {
+    "company": "Rapido",
+    "ats": "lever",
+    "slug": "rapido",
+    "domain": "rapido.bike",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Raycast",
     "ats": "greenhouse",
     "slug": "raycast",
@@ -3189,6 +4239,13 @@
     "ats": "ashby",
     "slug": "recraft",
     "domain": "recraft.ai",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Recursion Pharmaceuticals",
+    "ats": "greenhouse",
+    "slug": "recursion",
+    "domain": "recursion.com",
     "hub": "Remote / Global"
   },
   {
@@ -3234,6 +4291,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Remote.com",
+    "ats": "greenhouse",
+    "slug": "remote",
+    "domain": "remote.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Render",
     "ats": "ashby",
     "slug": "render",
@@ -3245,6 +4309,20 @@
     "ats": "ashby",
     "slug": "repeato",
     "domain": "repeato.app",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Replicate",
+    "ats": "greenhouse",
+    "slug": "replicate",
+    "domain": "replicate.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Replicate",
+    "ats": "ashby",
+    "slug": "replicate",
+    "domain": "replicate.com",
     "hub": "Remote / Global"
   },
   {
@@ -3281,6 +4359,13 @@
     "slug": "retool",
     "domain": "retool.com",
     "hub": "Internal Apps / Remote"
+  },
+  {
+    "company": "Reverie Language Tech",
+    "ats": "lever",
+    "slug": "reverie",
+    "domain": "reverieinc.com",
+    "hub": "Bengaluru / Mumbai"
   },
   {
     "company": "Revolut",
@@ -3360,6 +4445,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Route Mobile",
+    "ats": "smartrecruiters",
+    "slug": "routemobile",
+    "domain": "routemobile.com",
+    "hub": "Mumbai"
+  },
+  {
     "company": "Rubrik",
     "ats": "greenhouse",
     "slug": "rubrik",
@@ -3379,6 +4471,13 @@
     "slug": "runpod",
     "domain": "runpod.io",
     "hub": "Remote / GPU Cloud"
+  },
+  {
+    "company": "Runway",
+    "ats": "ashby",
+    "slug": "runwayml",
+    "domain": "runwayml.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "Runway ML",
@@ -3409,6 +4508,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Sarvam AI",
+    "ats": "ashby",
+    "slug": "sarvamai",
+    "domain": "sarvam.ai",
+    "hub": "Bengaluru / Chennai"
+  },
+  {
     "company": "Sauce Labs",
     "ats": "greenhouse",
     "slug": "saucelabs",
@@ -3437,6 +4543,20 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Scenario",
+    "ats": "ashby",
+    "slug": "scenario",
+    "domain": "scenario.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Schrodinger",
+    "ats": "greenhouse",
+    "slug": "schrodinger",
+    "domain": "schrodinger.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Scopely",
     "ats": "greenhouse",
     "slug": "scopely",
@@ -3449,6 +4569,13 @@
     "slug": "screenstudio",
     "domain": "screen.studio",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Scripbox",
+    "ats": "lever",
+    "slug": "scripbox",
+    "domain": "scripbox.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Scrut Automation",
@@ -3514,11 +4641,25 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Senseforth.ai",
+    "ats": "smartrecruiters",
+    "slug": "senseforth",
+    "domain": "senseforth.ai",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Sentry",
     "ats": "ashby",
     "slug": "sentry",
     "domain": "sentry.io",
     "hub": "Remote / Developer Tooling"
+  },
+  {
+    "company": "Sentry",
+    "ats": "greenhouse",
+    "slug": "sentry",
+    "domain": "sentry.io",
+    "hub": "Remote / Global"
   },
   {
     "company": "ServiceNow India",
@@ -3532,6 +4673,20 @@
     "ats": "greenhouse",
     "slug": "shadowfax",
     "domain": "shadowfax.in",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Shadowfax",
+    "ats": "lever",
+    "slug": "shadowfax",
+    "domain": "shadowfax.in",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "ShareChat",
+    "ats": "lever",
+    "slug": "sharechat",
+    "domain": "sharechat.com",
     "hub": "Bengaluru"
   },
   {
@@ -3560,6 +4715,13 @@
     "ats": "ashby",
     "slug": "shortwave",
     "domain": "shortwave.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Sierra",
+    "ats": "ashby",
+    "slug": "sierra",
+    "domain": "sierra.ai",
     "hub": "Remote / Global"
   },
   {
@@ -3598,8 +4760,22 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Skydio",
+    "ats": "greenhouse",
+    "slug": "skydio",
+    "domain": "skydio.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "slice",
     "ats": "greenhouse",
+    "slug": "slice",
+    "domain": "sliceit.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Slice",
+    "ats": "lever",
     "slug": "slice",
     "domain": "sliceit.com",
     "hub": "Bengaluru"
@@ -3610,6 +4786,13 @@
     "slug": "slimai",
     "domain": "slim.ai",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "Smallcase",
+    "ats": "lever",
+    "slug": "smallcase",
+    "domain": "smallcase.com",
+    "hub": "Bengaluru"
   },
   {
     "company": "Smartlook",
@@ -3689,6 +4872,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Soundverse",
+    "ats": "ashby",
+    "slug": "soundverse",
+    "domain": "soundverse.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Sourcegraph",
     "ats": "greenhouse",
     "slug": "sourcegraph",
@@ -3707,6 +4897,20 @@
     "ats": "greenhouse",
     "slug": "speechify",
     "domain": "speechify.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Spinny",
+    "ats": "lever",
+    "slug": "spinny",
+    "domain": "spinny.com",
+    "hub": "Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Splice",
+    "ats": "greenhouse",
+    "slug": "splice",
+    "domain": "splice.com",
     "hub": "Remote / Global"
   },
   {
@@ -3729,6 +4933,20 @@
     "slug": "spotify",
     "domain": "spotify.com",
     "hub": "Mumbai / Remote"
+  },
+  {
+    "company": "Spring Health",
+    "ats": "greenhouse",
+    "slug": "springhealth",
+    "domain": "springhealth.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Sprinklr India",
+    "ats": "greenhouse",
+    "slug": "sprinklr",
+    "domain": "sprinklr.com",
+    "hub": "Gurgaon / Bengaluru"
   },
   {
     "company": "Sprinto",
@@ -3808,6 +5026,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Sterlite Technologies (STL)",
+    "ats": "smartrecruiters",
+    "slug": "stl",
+    "domain": "stl.tech",
+    "hub": "Pune / Gurgaon"
+  },
+  {
     "company": "Storj",
     "ats": "greenhouse",
     "slug": "storj",
@@ -3857,10 +5082,31 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Subex",
+    "ats": "smartrecruiters",
+    "slug": "subex",
+    "domain": "subex.com",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "Substack",
     "ats": "lever",
     "slug": "substack",
     "domain": "substack.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Sumo Logic",
+    "ats": "greenhouse",
+    "slug": "sumologic",
+    "domain": "sumologic.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Suno",
+    "ats": "ashby",
+    "slug": "suno",
+    "domain": "suno.com",
     "hub": "Remote / Global"
   },
   {
@@ -3955,11 +5201,32 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Talkspace",
+    "ats": "greenhouse",
+    "slug": "talkspace",
+    "domain": "talkspace.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Tanla Platforms",
+    "ats": "smartrecruiters",
+    "slug": "tanla",
+    "domain": "tanla.com",
+    "hub": "Hyderabad / Bengaluru"
+  },
+  {
     "company": "Tata 1mg",
     "ats": "greenhouse",
     "slug": "1mg",
     "domain": "1mg.com",
     "hub": "Gurgaon / Noida"
+  },
+  {
+    "company": "Tata 1mg",
+    "ats": "lever",
+    "slug": "tata1mg",
+    "domain": "1mg.com",
+    "hub": "Gurgaon / Delhi NCR"
   },
   {
     "company": "Tavus",
@@ -3976,6 +5243,13 @@
     "hub": "Pune / Mumbai"
   },
   {
+    "company": "Tejas Networks",
+    "ats": "smartrecruiters",
+    "slug": "tejasnetworks",
+    "domain": "tejasnetworks.com",
+    "hub": "Bengaluru / Gurgaon"
+  },
+  {
     "company": "Teleport",
     "ats": "greenhouse",
     "slug": "teleport",
@@ -3988,6 +5262,13 @@
     "slug": "temporal",
     "domain": "temporal.io",
     "hub": "Remote / Microservices"
+  },
+  {
+    "company": "Tempus",
+    "ats": "greenhouse",
+    "slug": "tempus",
+    "domain": "tempus.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "Teradata India",
@@ -4018,6 +5299,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Thirty Madison",
+    "ats": "greenhouse",
+    "slug": "thirtymadison",
+    "domain": "thirtymadison.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Thoropass (Laika)",
     "ats": "greenhouse",
     "slug": "thoropass",
@@ -4030,6 +5318,13 @@
     "slug": "thoughtworks",
     "domain": "thoughtworks.com",
     "hub": "Pune / Bengaluru / Hyderabad / Chennai"
+  },
+  {
+    "company": "Tickertape",
+    "ats": "lever",
+    "slug": "tickertape",
+    "domain": "tickertape.in",
+    "hub": "Bengaluru"
   },
   {
     "company": "Tiger Analytics",
@@ -4074,6 +5369,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Together AI",
+    "ats": "greenhouse",
+    "slug": "togetherai",
+    "domain": "together.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Tome",
     "ats": "ashby",
     "slug": "tome",
@@ -4081,10 +5383,24 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Tonal",
+    "ats": "greenhouse",
+    "slug": "tonal",
+    "domain": "tonal.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Toplyne",
     "ats": "ashby",
     "slug": "toplyne",
     "domain": "toplyne.io",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Torc Robotics",
+    "ats": "smartrecruiters",
+    "slug": "torcrobotics",
+    "domain": "torc.ai",
     "hub": "Remote / Global"
   },
   {
@@ -4207,11 +5523,39 @@
     "hub": "Gurgaon / Remote"
   },
   {
+    "company": "Udio",
+    "ats": "ashby",
+    "slug": "udio",
+    "domain": "udio.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Unacademy",
     "ats": "greenhouse",
     "slug": "unacademy",
     "domain": "unacademy.com",
     "hub": "Bengaluru"
+  },
+  {
+    "company": "Unacademy",
+    "ats": "lever",
+    "slug": "unacademy",
+    "domain": "unacademy.com",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Uni Cards",
+    "ats": "lever",
+    "slug": "unicards",
+    "domain": "uni.cards",
+    "hub": "Bengaluru"
+  },
+  {
+    "company": "Uniphore",
+    "ats": "greenhouse",
+    "slug": "uniphore",
+    "domain": "uniphore.com",
+    "hub": "Chennai / Bengaluru"
   },
   {
     "company": "Uniswap Labs",
@@ -4242,6 +5586,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Upstox",
+    "ats": "greenhouse",
+    "slug": "upstox",
+    "domain": "upstox.com",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
     "company": "Uptycs",
     "ats": "greenhouse",
     "slug": "uptycs",
@@ -4254,6 +5605,20 @@
     "slug": "urbancompany",
     "domain": "urbancompany.com",
     "hub": "Gurgaon / Bengaluru / Remote India"
+  },
+  {
+    "company": "Urban Company",
+    "ats": "lever",
+    "slug": "urbancompany",
+    "domain": "urbancompany.com",
+    "hub": "Gurgaon / Bengaluru"
+  },
+  {
+    "company": "Valo Health",
+    "ats": "greenhouse",
+    "slug": "valohealth",
+    "domain": "valohealth.com",
+    "hub": "Remote / Global"
   },
   {
     "company": "Vanta",
@@ -4274,6 +5639,13 @@
     "ats": "greenhouse",
     "slug": "vastdata",
     "domain": "vastdata.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Veed.io",
+    "ats": "ashby",
+    "slug": "veedio",
+    "domain": "veed.io",
     "hub": "Remote / Global"
   },
   {
@@ -4319,6 +5691,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Waabi",
+    "ats": "lever",
+    "slug": "waabi",
+    "domain": "waabi.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Waldo",
     "ats": "ashby",
     "slug": "waldo",
@@ -4354,6 +5733,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Wayve",
+    "ats": "ashby",
+    "slug": "wayve",
+    "domain": "wayve.ai",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "WazirX",
     "ats": "lever",
     "slug": "wazirx",
@@ -4373,6 +5759,13 @@
     "slug": "weaviate",
     "domain": "weaviate.io",
     "hub": "Remote / Vector Search"
+  },
+  {
+    "company": "WebEngage",
+    "ats": "lever",
+    "slug": "webengage",
+    "domain": "webengage.com",
+    "hub": "Mumbai / Bengaluru"
   },
   {
     "company": "Webflow",
@@ -4417,11 +5810,25 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Wingify",
+    "ats": "lever",
+    "slug": "wingify",
+    "domain": "wingify.com",
+    "hub": "Delhi / Pune / Remote"
+  },
+  {
     "company": "Winglang",
     "ats": "ashby",
     "slug": "monada",
     "domain": "winglang.io",
     "hub": "Remote / Global"
+  },
+  {
+    "company": "WinZO",
+    "ats": "lever",
+    "slug": "winzo",
+    "domain": "winzogames.com",
+    "hub": "Delhi NCR / Bengaluru"
   },
   {
     "company": "WinZO Games",
@@ -4435,6 +5842,13 @@
     "ats": "greenhouse",
     "slug": "transferwise",
     "domain": "wise.com",
+    "hub": "Remote / Global"
+  },
+  {
+    "company": "Withings",
+    "ats": "greenhouse",
+    "slug": "withings",
+    "domain": "withings.com",
     "hub": "Remote / Global"
   },
   {
@@ -4473,6 +5887,13 @@
     "hub": "Remote / Global"
   },
   {
+    "company": "Yellow.ai",
+    "ats": "lever",
+    "slug": "yellowai",
+    "domain": "yellow.ai",
+    "hub": "Bengaluru"
+  },
+  {
     "company": "YesWeHack",
     "ats": "greenhouse",
     "slug": "yeswehack",
@@ -4501,6 +5922,13 @@
     "hub": "Automation / 100% Remote"
   },
   {
+    "company": "Zendesk",
+    "ats": "smartrecruiters",
+    "slug": "zendesk",
+    "domain": "zendesk.com",
+    "hub": "Remote / Global"
+  },
+  {
     "company": "Zensar Tech",
     "ats": "greenhouse",
     "slug": "zensar",
@@ -4513,6 +5941,27 @@
     "slug": "zepto",
     "domain": "zeptonow.com",
     "hub": "Bengaluru / Mumbai"
+  },
+  {
+    "company": "Zepto",
+    "ats": "lever",
+    "slug": "zepto",
+    "domain": "zeptonow.com",
+    "hub": "Mumbai / Bengaluru"
+  },
+  {
+    "company": "Zerodha",
+    "ats": "lever",
+    "slug": "zerodha",
+    "domain": "zerodha.com",
+    "hub": "Bengaluru / Remote"
+  },
+  {
+    "company": "Zerodha Tech",
+    "ats": "greenhouse",
+    "slug": "zerodhatech",
+    "domain": "zerodha.tech",
+    "hub": "Bengaluru / Remote"
   },
   {
     "company": "Zesty",
@@ -4534,6 +5983,13 @@
     "slug": "zomato",
     "domain": "zomato.com",
     "hub": "Gurgaon / Bengaluru / Remote India"
+  },
+  {
+    "company": "Zomato",
+    "ats": "lever",
+    "slug": "zomato",
+    "domain": "zomato.com",
+    "hub": "Gurgaon / Delhi NCR"
   },
   {
     "company": "ZoomInfo",

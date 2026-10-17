@@ -109,7 +109,7 @@ class InstantJobSearchRequest(BaseModel):
     location: Optional[str] = "All India (Remote & Nationwide)"
     domain: Optional[str] = ""
     candidate: Optional[CandidateProfile] = None
-    limit: Optional[int] = 5
+    limit: Optional[int] = 10
     source: Optional[str] = "all"
     exclude_job_ids: Optional[List[str]] = []
     offset: Optional[int] = 0
@@ -163,7 +163,7 @@ async def execute_fresh_batch_discovery(
     source: str = "all",
     exclude_ids: Optional[List[str]] = None,
     offset: int = 0,
-    target_count: int = 5,
+    target_count: int = 10,
     experience_level: str = "all",
     work_mode: str = "remote_included",
     open_to_relocation: bool = True,
@@ -171,11 +171,11 @@ async def execute_fresh_batch_discovery(
     skills: Optional[List[str]] = None,
 ) -> List[Dict[str, Any]]:
     """
-    Guarantees 5 fresh un-seen jobs per click:
-    - If source == 'all': 3 Career Page + 2 LinkedIn
-    - If source == 'career_page': 5 Career Page
-    - If source == 'linkedin': 5 LinkedIn
-    - Filters by Experience / Seniority Level ('entry', 'intermediate', 'senior', 'lead', 'manager', 'all').
+    Guarantees 10 fresh un-seen jobs per click:
+    - If source == 'all': 5 Career Page + 5 LinkedIn
+    - If source == 'career_page': 10 Career Page
+    - If source == 'linkedin': 10 LinkedIn
+    - Filters by Experience / Seniority Level ('entry', 'intermediate', 'senior', 'lead', 'manager', 'director', 'all').
     - Filters by Work Mode ('remote_included', 'remote_only', 'hybrid', 'onsite').
     - Boosts & cascades based on Skills and Relocation preference.
     - Strictly filters out all previously discovered / seen jobs.
@@ -236,9 +236,9 @@ async def execute_fresh_batch_discovery(
             final_jobs = []
 
     else:
-        # "all" source: Exactly 3 Career Page + 2 LinkedIn = 5 Jobs
-        target_career = 3
-        target_linkedin = 2
+        # "all" source: Exactly 5 Career Page + 5 LinkedIn = 10 Jobs
+        target_career = max(1, target_count // 2)
+        target_linkedin = target_count - target_career
 
         task_career = asyncio.wait_for(
             asyncio.to_thread(
@@ -247,20 +247,20 @@ async def execute_fresh_batch_discovery(
                 location=location,
                 consulting_domain=domain,
                 candidate=cand,
-                limit=target_career + 3,
+                limit=target_career + 5,
                 exclude_ids=all_exclude,
                 experience_level=experience_level,
                 work_mode=work_mode,
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=3.0
+            timeout=3.5
         )
         task_linkedin = asyncio.wait_for(
             asyncio.to_thread(
                 find_matching_jobs,
                 candidate=cand,
-                max_jobs=target_linkedin + 3,
+                max_jobs=target_linkedin + 5,
                 reference_role=query or domain,
                 location_override=location,
                 exclude_ids=all_exclude,
@@ -280,7 +280,7 @@ async def execute_fresh_batch_discovery(
         selected_career = c_list[:target_career]
         selected_linkedin = l_list[:target_linkedin]
 
-        # Balance to target_count (5) if any source has shortfall
+        # Balance to target_count (10) if any source has shortfall
         shortfall_li = target_linkedin - len(selected_linkedin)
         if shortfall_li > 0:
             selected_career.extend(c_list[target_career : target_career + shortfall_li])
@@ -336,10 +336,12 @@ async def execute_fresh_batch_discovery(
             except Exception:
                 pass
 
-    # Record to DB with batch tracking
-    if cand.email and final_jobs and "preview" not in cand.email.lower() and not cand.email.startswith("visitor"):
+    # Record to DB with batch tracking - unconditionally auto-save every discovered job to SQLite
+    if final_jobs:
+        record_email = cand.email if (cand.email and cand.email.strip() and "preview" not in cand.email.lower() and not cand.email.startswith("visitor")) else "candidate@drc.com"
+        record_name = cand.name if (cand.name and cand.name.strip() and "preview" not in cand.name.lower()) else "Candidate"
         try:
-            db_record_discovered_jobs(cand.email, cand.name or "Candidate", final_jobs)
+            db_record_discovered_jobs(record_email, record_name, final_jobs)
         except Exception as err:
             print(f"[api_server] DB save notice: {err}")
 
@@ -349,7 +351,7 @@ async def execute_fresh_batch_discovery(
 @app.post("/api/jobs/search")
 async def instant_search_endpoint(req: InstantJobSearchRequest):
     """
-    Sub-20ms instant job discovery with 5-fresh-job allocation and duplicate guard.
+    Sub-20ms instant job discovery with 10-fresh-job allocation and duplicate guard.
     """
     try:
         job_dicts = await execute_fresh_batch_discovery(
@@ -360,7 +362,7 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
             source=req.source or "all",
             exclude_ids=req.exclude_job_ids,
             offset=req.offset or 0,
-            target_count=req.limit or 5,
+            target_count=req.limit or 10,
             experience_level=req.experience_level or "all",
             work_mode=req.work_mode or "remote_included",
             open_to_relocation=req.open_to_relocation if req.open_to_relocation is not None else True,

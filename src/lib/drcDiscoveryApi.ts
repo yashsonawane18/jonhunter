@@ -237,7 +237,7 @@ export async function searchInstantJobs(
   location: string = 'All India (Remote & Nationwide)',
   domain: string = '',
   candidate?: CandidateSearchPayload | null,
-  limit: number = 5,
+  limit: number = 10,
   source: string = 'all',
   excludeJobIds: string[] = [],
   offset: number = 0,

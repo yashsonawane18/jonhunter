@@ -87,6 +87,8 @@ class CandidateProfile(BaseModel):
     work_mode: Optional[str] = Field(default="remote_included", description="Preference: remote_included, remote_only, hybrid, onsite")
     open_to_relocation: Optional[bool] = Field(default=True, description="Open to relocating to top metro hubs")
     notice_period: Optional[str] = Field(default="Immediate", description="Notice period: Immediate, 15_days, 30_days, 60_90_days")
+    system_design_skills: List[str] = Field(default_factory=list, description="Extracted System Design & Architectural Skills")
+    architectural_focus: Optional[str] = Field(default="", description="High-Level Architecture & Systems Specialization")
 
 
 class CandidateApplication(BaseModel):

@@ -27,7 +27,7 @@ except ImportError:
     from job_engine.india_locations import normalize_location
     from job_engine.consulting_matcher import extract_consulting_competencies
 
-# Expanded 450+ Canonical Tech, Cloud, Data, and Consulting Skills Dictionary
+# Expanded 550+ Canonical Tech, Cloud, Data, System Design, and Consulting Skills Dictionary
 CANONICAL_SKILL_DICTIONARY = [
     # Programming Languages
     "Python", "Java", "JavaScript", "TypeScript", "C#", ".NET", ".NET Core", "C++", "C", "Go", "Golang",
@@ -35,6 +35,27 @@ CANONICAL_SKILL_DICTIONARY = [
     # Backend & Microservices Frameworks
     "FastAPI", "Django", "Flask", "Spring Boot", "Hibernate", "Node.js", "Express.js", "NestJS",
     "ASP.NET Core", "Entity Framework", "REST API", "GraphQL", "gRPC", "Microservices", "Kafka", "RabbitMQ", "Celery",
+    # System Design & Enterprise Distributed Systems
+    "System Design", "High-Level Design (HLD)", "Low-Level Design (LLD)", "Distributed Systems", "System Architecture",
+    "Microservices Architecture", "High Availability", "Fault Tolerance", "Scalability",
+    "Horizontal Scaling", "Vertical Scaling", "Load Balancing", "Reverse Proxy", "API Gateway",
+    "Rate Limiting", "Consistent Hashing", "Database Sharding", "Database Partitioning",
+    "Read Replicas", "Database Replication", "CAP Theorem", "PACELC Theorem", "Eventual Consistency",
+    "Strong Consistency", "ACID", "BASE Transactions", "Distributed Transactions", "Two-Phase Commit (2PC)",
+    "Saga Pattern", "CQRS", "Event Sourcing", "Event-Driven Architecture", "Domain-Driven Design (DDD)",
+    "Message Queues", "Distributed Caching", "Cache Invalidation", "Write-Through Cache",
+    "Cache-Aside", "Redis Cluster", "Memcached", "Disaster Recovery", "Multi-Region Deployment",
+    "Geo-Replication", "Circuit Breaker", "Bulkhead Pattern", "Service Mesh", "Istio",
+    "Distributed Tracing", "OpenTelemetry", "Jaeger", "Idempotency", "Consensus Algorithms",
+    "Raft", "Paxos", "Distributed Locking", "Zookeeper", "Data Modeling", "Schema Design",
+    "Change Data Capture (CDC)", "Debezium", "Zero-Downtime Deployment", "Blue-Green Deployment",
+    "Canary Releases", "Performance Profiling", "Latency Optimization", "Throughput Optimization",
+    "Capacity Planning", "Backpressure", "Asynchronous Processing", "Batch Processing",
+    "Stream Processing", "Enterprise Architecture", "Cloud Native", "12-Factor App",
+    # Engineering Leadership, VP & Director Roles
+    "Director of Engineering", "Engineering Director", "VP of Engineering", "Head of Engineering",
+    "Chief Technology Officer (CTO)", "Technical Director", "Principal Architect", "Enterprise Architect",
+    "Staff Software Engineer", "Principal Software Engineer", "Engineering Manager", "Technical Lead",
     # Frontend Frameworks & Web
     "React", "React.js", "Next.js", "Angular", "Vue.js", "Redux", "Tailwind CSS", "Bootstrap",
     "Webpack", "Vite", "HTML", "CSS", "SASS", "Responsive Design",
@@ -84,9 +105,83 @@ SKILL_SYNONYMS = {
     "gen ai": "Generative AI",
     "llms": "LLM",
     "rag pipeline": "RAG",
+    "hld": "High-Level Design (HLD)",
+    "lld": "Low-Level Design (LLD)",
+    "system design": "System Design",
+    "distributed systems": "Distributed Systems",
+    "microservices": "Microservices",
+    "sharding": "Database Sharding",
+    "load balancer": "Load Balancing",
+    "load balancing": "Load Balancing",
+    "api gateway": "API Gateway",
+    "event-driven": "Event-Driven Architecture",
+    "event driven": "Event-Driven Architecture",
+    "event sourcing": "Event Sourcing",
+    "cqrs": "CQRS",
+    "saga": "Saga Pattern",
+    "cap": "CAP Theorem",
+    "high availability": "High Availability",
+    "fault tolerance": "Fault Tolerance",
+    "circuit breaker": "Circuit Breaker",
+    "rate limiting": "Rate Limiting",
+    "caching": "Distributed Caching",
+    "service mesh": "Service Mesh",
+    "ddd": "Domain-Driven Design (DDD)",
+    "blue green": "Blue-Green Deployment",
+    "canary": "Canary Releases",
+    "director of engineering": "Director of Engineering",
+    "vp of engineering": "VP of Engineering",
+    "head of engineering": "Head of Engineering",
+    "cto": "Chief Technology Officer (CTO)",
+    "staff engineer": "Staff Software Engineer",
+    "principal engineer": "Principal Software Engineer",
+    "principal architect": "Principal Architect",
+    "solution architect": "Solution Architecture",
+}
+
+SYSTEM_DESIGN_KEYWORDS = {
+    "High-Level Design (HLD)", "Low-Level Design (LLD)", "Distributed Systems", "System Architecture",
+    "Microservices Architecture", "High Availability", "Fault Tolerance", "Scalability",
+    "Horizontal Scaling", "Load Balancing", "API Gateway", "Rate Limiting", "Consistent Hashing",
+    "Database Sharding", "Database Partitioning", "Read Replicas", "CAP Theorem", "PACELC Theorem",
+    "Eventual Consistency", "ACID", "Distributed Transactions", "Saga Pattern", "CQRS",
+    "Event Sourcing", "Event-Driven Architecture", "Domain-Driven Design (DDD)", "Distributed Caching",
+    "Cache Invalidation", "Disaster Recovery", "Multi-Region Deployment", "Circuit Breaker",
+    "Service Mesh", "Distributed Tracing", "Idempotency", "Consensus Algorithms", "Distributed Locking",
+    "Data Modeling", "Change Data Capture (CDC)", "Zero-Downtime Deployment", "Capacity Planning",
+    "Backpressure", "Enterprise Architecture", "Cloud Native", "Solution Architecture", "System Design"
 }
 
 DOMAINS_TAXONOMY = [
+    (
+        "Distributed Systems & Enterprise Architecture",
+        [
+            "system design", "hld", "lld", "distributed systems", "high availability", "scalability",
+            "sharding", "microservices architecture", "fault tolerance", "event-driven", "cqrs",
+            "event sourcing", "saga pattern", "solution architect", "enterprise architect", "principal architect",
+            "cap theorem", "load balancing", "distributed caching", "service mesh"
+        ],
+        [
+            "Principal Software Engineer", "Staff Software Engineer", "Solutions Architect",
+            "Enterprise Architect", "Principal Architect", "Director of Engineering"
+        ],
+        "Solutions Architect",
+        "Distributed Systems & Cloud Architecture"
+    ),
+    (
+        "Engineering Leadership, VP & Director",
+        [
+            "director of engineering", "vp of engineering", "engineering director", "head of engineering",
+            "chief technology officer", "cto", "engineering manager", "technical director", "director of technology",
+            "vp engineering", "head of technology", "senior engineering manager"
+        ],
+        [
+            "Director of Engineering", "Engineering Director", "VP of Engineering",
+            "Head of Engineering", "Engineering Manager", "Chief Technology Officer (CTO)"
+        ],
+        "Director of Engineering",
+        "Engineering Leadership & Strategic Execution"
+    ),
     (
         "Java Backend & Microservices Architecture",
         ["java", "spring boot", "spring mvc", "hibernate", "jpa", "microservices", "j2ee", "jvm", "kafka", "maven", "gradle", "core java"],
@@ -353,7 +448,7 @@ def extract_skills(raw_text: str) -> List[str]:
     if not extracted:
         extracted = ["Python", "FastAPI", "SQL", "Git", "Cloud Architecture"]
 
-    return extracted[:20]
+    return extracted[:30]
 
 
 def parse_resume_deterministic(file_input: Union[str, Path, bytes]) -> CandidateProfile:
@@ -409,17 +504,45 @@ def parse_resume_deterministic(file_input: Union[str, Path, bytes]) -> Candidate
             best_roles = target_roles
             best_search_role = canonical_search_role
 
-    # Infer suggested seniority
-    if exp_val <= 2.0:
-        suggested_seniority = "entry"
-    elif exp_val <= 5.0:
-        suggested_seniority = "intermediate"
-    elif exp_val <= 8.0:
-        suggested_seniority = "senior"
-    else:
-        suggested_seniority = "lead"
+    # Extract System Design & Architectural competencies
+    sys_design_found = [s for s in skills if s in SYSTEM_DESIGN_KEYWORDS]
+    for syn, canonical in SKILL_SYNONYMS.items():
+        if canonical in SYSTEM_DESIGN_KEYWORDS and syn in text_lower and canonical not in sys_design_found:
+            sys_design_found.append(canonical)
 
-    summary = f"{cand_name} is an experienced {best_domain} specialist with {exp_str} experience across {', '.join(skills[:5])}."
+    if any(k in text_lower for k in ["hld", "lld", "system design", "distributed systems", "scalability", "high availability"]):
+        if "System Design" not in sys_design_found:
+            sys_design_found.insert(0, "System Design")
+        if "Distributed Systems" not in sys_design_found and any(d in text_lower for d in ["distributed", "cluster", "microservices"]):
+            sys_design_found.append("Distributed Systems")
+
+    if sys_design_found:
+        architectural_focus = f"Distributed Systems & High-Scale Architecture ({', '.join(sys_design_found[:4])})"
+    else:
+        architectural_focus = f"Enterprise {best_domain}"
+
+    # Advanced Seniority & Executive Leadership Detection
+    is_director_or_exec = any(k in text_lower for k in [
+        "director of engineering", "engineering director", "vp of engineering", "vice president",
+        "head of engineering", "chief technology officer", "cto", "director of technology", "technical director"
+    ])
+    is_staff_or_principal = any(k in text_lower for k in [
+        "principal engineer", "principal architect", "staff engineer", "staff software",
+        "chief architect", "lead architect", "engineering manager"
+    ])
+
+    if is_director_or_exec or (exp_val >= 12.0 and any(k in text_lower for k in ["director", "head", "vp", "leader"])):
+        suggested_seniority = "director"
+    elif is_staff_or_principal or exp_val >= 8.5:
+        suggested_seniority = "lead"
+    elif exp_val >= 5.0:
+        suggested_seniority = "senior"
+    elif exp_val >= 2.0:
+        suggested_seniority = "intermediate"
+    else:
+        suggested_seniority = "entry"
+
+    summary = f"{cand_name} is an experienced {best_domain} specialist ({suggested_seniority.upper()} tier) with {exp_str} experience across {', '.join(skills[:5])}."
 
     return CandidateProfile(
         name=cand_name,
@@ -438,4 +561,6 @@ def parse_resume_deterministic(file_input: Union[str, Path, bytes]) -> Candidate
         reference_role=best_roles[0] if best_roles else best_domain,
         suggested_seniority=suggested_seniority,
         recommended_search_role=best_search_role or (best_roles[0] if best_roles else "Software Engineer"),
+        system_design_skills=sys_design_found,
+        architectural_focus=architectural_focus,
     )

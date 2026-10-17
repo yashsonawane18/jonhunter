@@ -310,6 +310,54 @@ def test_company_registry_expansion():
 
     print("  ✅ All legacy company entries preserved with 100% backward compatibility")
 
+def test_resume_parser_system_design_and_seniority():
+    print("\n--- 7. Testing System Design & Seniority Resume Parser ---")
+    from deterministic_parser import parse_resume_deterministic
+    sample_text = (
+        "Jane Doe\n"
+        "Email: jane.doe@example.com\n"
+        "Director of Engineering | 15 Years of Experience\n"
+        "Expertise: High-Level Design (HLD), Low-Level Design (LLD), Distributed Systems, "
+        "Microservices Architecture, High Availability, Database Sharding, CAP Theorem, "
+        "Load Balancing, Distributed Caching, Kafka, Kubernetes, AWS, Team Leadership."
+    )
+    prof = parse_resume_deterministic(sample_text)
+    print(f"  Parsed Seniority: {prof.suggested_seniority}")
+    print(f"  Primary Domain: {prof.primary_domain}")
+    print(f"  Architectural Focus: {prof.architectural_focus}")
+    print(f"  System Design Skills: {prof.system_design_skills}")
+
+    assert prof.suggested_seniority == "director", f"Expected 'director', got {prof.suggested_seniority}"
+    assert "Distributed Systems" in prof.primary_domain or "Engineering Leadership" in prof.primary_domain or "Architecture" in prof.primary_domain
+    assert len(prof.system_design_skills) >= 4, f"Expected >= 4 system design skills, got {prof.system_design_skills}"
+    print("  ✅ Resume parser successfully extracted System Design skills & Director-level seniority")
+
+def test_instant_search_ten_jobs_allocation():
+    print("\n--- 8. Testing 10-Job Search Allocation & Verification ---")
+    import asyncio
+    from api_server import execute_fresh_batch_discovery
+
+    async def run_search():
+        jobs = await execute_fresh_batch_discovery(
+            query="Software Engineer",
+            location="All India (Remote & Nationwide)",
+            domain="Software Engineering",
+            candidate=None,
+            target_count=10,
+        )
+        return jobs
+
+    jobs = asyncio.run(run_search())
+    print(f"  Total Jobs Returned in Batch: {len(jobs)} (Expected: 10)")
+    assert len(jobs) == 10, f"Expected 10 jobs in search batch, got {len(jobs)}"
+    
+    # Check that jobs were recorded into database
+    from db_store import db_get_all_discovered_jobs
+    all_discovered = db_get_all_discovered_jobs(limit=20)
+    print(f"  Total Jobs in Discovered Database: {len(all_discovered)}")
+    assert len(all_discovered) > 0, "No jobs recorded to database!"
+    print("  ✅ 10-job search allocation & auto-save to database verified!")
+
 if __name__ == "__main__":
     try:
         test_database_performance()
@@ -318,6 +366,8 @@ if __name__ == "__main__":
         test_keyword_precision_per_source_type()
         test_company_registry_expansion()
         test_cache_warmer_and_instant_search()
+        test_resume_parser_system_design_and_seniority()
+        test_instant_search_ten_jobs_allocation()
         print("\n=======================================================")
         print("🎉 ALL TESTS & BENCHMARKS COMPLETED SUCCESSFULLY! (100% PASS)")
         print("=======================================================\n")

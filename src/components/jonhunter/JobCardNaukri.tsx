@@ -149,23 +149,14 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
             </div>
           )}
 
-          {/* Save / Bookmark Button with clear label */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleStar?.(job);
-            }}
-            aria-label={isSaved ? 'Saved to collection' : 'Save job'}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-              isSaved
-                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
-                : `${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-zinc-300 hover:text-white`
-            }`}
+          {/* Automatically Saved Status Indicator */}
+          <div
+            className="px-2.5 py-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+            title="Automatically saved to your opportunities collection"
           >
-            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-amber-400 text-amber-400' : 'text-zinc-400'}`} />
-            <span>{isSaved ? 'Saved' : 'Save'}</span>
-          </button>
+            <Bookmark className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
+            <span>Auto-Saved</span>
+          </div>
         </div>
       </div>
 
@@ -296,23 +287,6 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
 
         {/* Clear, High-Contrast Action Buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
-          {/* Quick Save toggle button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleStar?.(job);
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer flex items-center gap-1.5 ${
-              isSaved
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                : `${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-zinc-200 hover:text-white`
-            }`}
-          >
-            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-amber-400 text-amber-400' : 'text-zinc-400'}`} />
-            <span>{isSaved ? 'Saved' : 'Save'}</span>
-          </button>
-
           {/* View Details - Visible Secondary Button */}
           <button
             type="button"
