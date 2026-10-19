@@ -612,3 +612,124 @@ export async function searchCareerPages(
   throw lastError || new Error('Career pages search failed: Unable to reach Job Discovery Engine.');
 }
 
+export interface CandidateDataPlan {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  location: string;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
+  other_website_url?: string;
+  work_authorization: boolean;
+  requires_sponsorship: boolean;
+  notice_period: string;
+  earliest_start_date?: string;
+  open_to_relocation: boolean;
+  expected_salary?: string;
+  current_salary?: string;
+  currency?: string;
+  eeo_gender?: string;
+  eeo_race?: string;
+  eeo_veteran?: string;
+  eeo_disability?: string;
+  custom_answers?: Record<string, string>;
+  summary_note?: string;
+}
+
+export interface AutoApplyJobResult {
+  job_id: string;
+  company: string;
+  job_title: string;
+  status: 'SUCCESS' | 'FALLBACK_REQUIRED' | 'FAILED' | 'ALREADY_APPLIED';
+  mode: 'DIRECT_ATS_API' | 'STEALTH_BROWSER' | 'SKIP' | 'HYBRID';
+  message: string;
+  confirmation_id?: string;
+  applied_at: string;
+  duration_ms: number;
+}
+
+export interface AutoApplyBatchStatus {
+  batch_id: string;
+  total: number;
+  completed: number;
+  successful: number;
+  failed: number;
+  status: 'PROCESSING' | 'COMPLETED' | 'ERROR';
+  results: AutoApplyJobResult[];
+  started_at: string;
+  finished_at?: string;
+}
+
+/**
+ * Submits automated job application batch to Career Pages (Greenhouse, Lever, Ashby, etc.)
+ */
+export async function submitCareerAutoApplyBatch(
+  candidate: CandidateDataPlan,
+  targets: {
+    id: string;
+    job_title: string;
+    company: string;
+    application_url: string;
+    ats_provider?: string;
+    location?: string;
+  }[],
+  resumeFile?: File
+): Promise<{ success: boolean; batch_id: string; total: number; message: string }> {
+  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/career-pages/auto-apply`);
+  let lastError: Error | null = null;
+
+  const formData = new FormData();
+  formData.append('candidate_data', JSON.stringify(candidate));
+  formData.append('targets', JSON.stringify(targets));
+  if (resumeFile) {
+    formData.append('resume', resumeFile);
+  }
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData,
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+      const errText = await res.text();
+      lastError = new Error(`Auto-apply submission failed: ${errText || res.statusText}`);
+    } catch (e: any) {
+      lastError = e;
+    }
+  }
+
+  throw lastError || new Error('Auto-apply failed: Unable to connect to application worker.');
+}
+
+/**
+ * Polls live execution status of an active Auto-Apply batch.
+ */
+export async function fetchCareerAutoApplyStatus(batchId: string): Promise<AutoApplyBatchStatus> {
+  const endpoints = getJobEngineCandidates().map(
+    (base) => `${base}/api/career-pages/auto-apply/status/${encodeURIComponent(batchId)}`
+  );
+  let lastError: Error | null = null;
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.batch) return data.batch;
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
+  }
+
+  throw lastError || new Error(`Failed to load auto-apply status for ${batchId}`);
+}
+
+

@@ -11,12 +11,16 @@ Port: 5055 (by default)
 
 import os
 import sys
+import json
 import asyncio
 import threading
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, BackgroundTasks
+import time
+import uuid
+
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -654,6 +658,75 @@ async def search_career_pages_endpoint(req: CareerPagesSearchRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Career pages search error: {str(e)}")
+
+
+@app.post("/api/career-pages/auto-apply")
+async def start_career_auto_apply(
+    background_tasks: BackgroundTasks,
+    candidate_data: str = Form(...),
+    targets: str = Form(...),
+    resume: Optional[UploadFile] = File(None),
+):
+    """
+    Submits automated job applications across selected Career Pages jobs using
+    the Hybrid State Machine (Direct Native ATS API + Playwright Stealth Fallback).
+    """
+    try:
+        from career_auto_apply import (
+            CandidateDataPlan,
+            AutoApplyTarget,
+            execute_batch_auto_apply,
+        )
+
+        cand_dict = json.loads(candidate_data)
+        candidate = CandidateDataPlan(**cand_dict)
+        targets_list = [AutoApplyTarget(**t) for t in json.loads(targets)]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid payload format: {str(e)}")
+
+    if not targets_list:
+        raise HTTPException(status_code=400, detail="No jobs provided for auto-apply.")
+
+    batch_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+    resume_bytes = None
+    resume_filename = "resume.pdf"
+    temp_path = None
+
+    if resume:
+        resume_bytes = await resume.read()
+        resume_filename = resume.filename or "resume.pdf"
+        tmp_dir = PROJECT_ROOT / "temp_resumes"
+        tmp_dir.mkdir(exist_ok=True)
+        temp_path = str(tmp_dir / f"{batch_id}_{resume_filename}")
+        with open(temp_path, "wb") as f:
+            f.write(resume_bytes)
+
+    background_tasks.add_task(
+        execute_batch_auto_apply,
+        batch_id=batch_id,
+        targets=targets_list,
+        candidate=candidate,
+        resume_bytes=resume_bytes,
+        resume_filename=resume_filename,
+        temp_resume_path=temp_path,
+    )
+
+    return {
+        "success": True,
+        "batch_id": batch_id,
+        "total": len(targets_list),
+        "message": f"Auto-apply pipeline started for {len(targets_list)} jobs.",
+    }
+
+
+@app.get("/api/career-pages/auto-apply/status/{batch_id}")
+async def get_career_auto_apply_status(batch_id: str):
+    """Returns live batch progress and individual job execution details."""
+    from career_auto_apply import ACTIVE_BATCHES
+    batch = ACTIVE_BATCHES.get(batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch ID not found")
+    return {"success": True, "batch": batch}
 
 
 def run():

@@ -18,6 +18,8 @@ import {
   Award,
   ChevronRight,
   Database,
+  CheckSquare,
+  Square,
   SlidersHorizontal,
   X,
   FileText,
@@ -29,10 +31,14 @@ import {
   DiscoveredJobItem,
   CareerPageStats,
   CareerCompany,
+  CandidateDataPlan,
   fetchCareerPageStats,
   fetchCareerCompanies,
   searchCareerPages,
+  submitCareerAutoApplyBatch,
 } from '../lib/drcDiscoveryApi';
+import { CareerDataPlanModal } from './career/CareerDataPlanModal';
+import { CareerAutoApplyDrawer } from './career/CareerAutoApplyDrawer';
 
 interface CareerPagesViewProps {
   onSelectJobForDetail?: (job: any) => void;
@@ -95,6 +101,93 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [searchExecutionTime, setSearchExecutionTime] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
+
+  // Multi-Selection State for Auto-Apply
+  const [selectedJobIds, setSelectedJobIds] = useState<Set<string>>(new Set());
+
+  // Data Plan & Auto-Apply Modal State
+  const [showDataPlanModal, setShowDataPlanModal] = useState<boolean>(false);
+  const [savedDataPlan, setSavedDataPlan] = useState<CandidateDataPlan | null>(() => {
+    try {
+      const saved = localStorage.getItem('drc_candidate_data_plan_v1');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [uploadedResumeFiles, setUploadedResumeFiles] = useState<File[]>([]);
+
+  // Execution Drawer State
+  const [showAutoApplyDrawer, setShowAutoApplyDrawer] = useState<boolean>(false);
+  const [activeBatchId, setActiveBatchId] = useState<string | null>(null);
+  const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
+
+  const toggleJobSelection = (jobId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedJobIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(jobId)) {
+        next.delete(jobId);
+      } else {
+        next.add(jobId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAllMatching = () => {
+    if (selectedJobIds.size === jobs.length) {
+      setSelectedJobIds(new Set());
+    } else {
+      setSelectedJobIds(new Set(jobs.map((j) => j.id)));
+    }
+  };
+
+  const handleSelectGradeA = () => {
+    const gradeAIds = jobs
+      .filter((j) => (j.fit_grade === 'Grade A' || (j.match_score && j.match_score >= 85)))
+      .map((j) => j.id);
+    setSelectedJobIds(new Set(gradeAIds));
+    toast.info(`Selected ${gradeAIds.length} Grade A requisitions`);
+  };
+
+  const handleStartAutoApplyBatch = async (overrideTargets?: any[]) => {
+    const targetJobs = overrideTargets || jobs.filter((j) => selectedJobIds.has(j.id));
+    if (targetJobs.length === 0) {
+      toast.warning('Please select at least 1 job to auto-apply.');
+      return;
+    }
+
+    if (!savedDataPlan || !savedDataPlan.email) {
+      toast.info('Please configure your Candidate Data Plan & CV first.');
+      setShowDataPlanModal(true);
+      return;
+    }
+
+    const targets = targetJobs.map((j) => ({
+      id: j.id,
+      job_title: j.job_title,
+      company: j.company,
+      application_url: j.application_url,
+      ats_provider: j.ats_provider,
+      location: j.location,
+    }));
+
+    setIsSubmittingBatch(true);
+    try {
+      const primaryFile = uploadedResumeFiles.length > 0 ? uploadedResumeFiles[0] : undefined;
+      const res = await submitCareerAutoApplyBatch(savedDataPlan, targets, primaryFile);
+      if (res.success && res.batch_id) {
+        setActiveBatchId(res.batch_id);
+        setShowAutoApplyDrawer(true);
+        toast.success(`Dispatched automated application pipeline for ${targets.length} jobs!`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to start auto-apply batch.');
+    } finally {
+      setIsSubmittingBatch(false);
+    }
+  };
 
   // Load stats and company list on mount
   useEffect(() => {
@@ -213,7 +306,23 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowDataPlanModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#1e2d27] hover:bg-[#253932] text-[#3ecf8e] border border-[#3ecf8e]/40 transition-colors shadow-sm"
+            >
+              <FileText className="w-4 h-4 text-[#3ecf8e]" />
+              <span>Configure Data Plan &amp; CV</span>
+              {savedDataPlan?.email ? (
+                <span className="w-2 h-2 rounded-full bg-[#3ecf8e]" />
+              ) : (
+                <span className="px-1.5 py-0.2 rounded text-[9px] bg-amber-950 text-amber-400 font-mono border border-amber-500/30">
+                  Required
+                </span>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => setShowCompanyDirectory(true)}
@@ -539,8 +648,8 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
       </div>
 
       {/* 3. Search Results Header & Telemetry */}
-      <div className="flex items-center justify-between px-1 text-xs text-[#898989]">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 text-xs text-[#898989]">
+        <div className="flex flex-wrap items-center gap-2">
           <span>Results:</span>
           <strong className="text-[#fafafa] font-mono">{jobs.length} Direct ATS Openings</strong>
           {searchExecutionTime !== null && (
@@ -551,9 +660,36 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
           )}
         </div>
 
-        <div className="text-[11px] font-mono text-[#898989] hidden md:block">
-          SOURCE: <strong className="text-[#fafafa]">Native ATS Canonical Endpoints</strong>
-        </div>
+        {/* Batch Selection Controls */}
+        {jobs.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSelectAllMatching}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#1a1a1a] hover:bg-[#222] text-[#fafafa] border border-[#2e2e2e] transition-colors flex items-center gap-1.5"
+            >
+              <CheckSquare className="w-3.5 h-3.5 text-[#3ecf8e]" />
+              <span>{selectedJobIds.size === jobs.length ? 'Deselect All' : `Select All (${jobs.length})`}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleSelectGradeA}
+              className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#1e2722] hover:bg-[#253932] text-[#3ecf8e] border border-[#3ecf8e]/30 transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Select Grade A</span>
+            </button>
+            {selectedJobIds.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedJobIds(new Set())}
+                className="text-[11px] text-[#898989] hover:text-rose-400 underline transition-colors"
+              >
+                Clear ({selectedJobIds.size})
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 4. Jobs Cards Feed */}
@@ -592,6 +728,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
         <div className="grid grid-cols-1 gap-3.5">
           {jobs.map((job) => {
             const isStarred = savedJobIds.has(job.id);
+            const isSelected = selectedJobIds.has(job.id);
             const fitGrade = job.fit_grade || (job.match_score >= 85 ? 'Grade A' : job.match_score >= 70 ? 'Grade B' : 'Grade C');
             const gradeColor =
               fitGrade === 'Grade A'
@@ -615,12 +752,30 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
             return (
               <div
                 key={job.id}
-                className="group relative p-4 sm:p-5 rounded-[16px] bg-[#141414] hover:bg-[#181818] border border-[#262626] hover:border-[#3ecf8e]/40 transition-all duration-200 shadow-sm"
+                className={`group relative p-4 sm:p-5 rounded-[16px] transition-all duration-200 shadow-sm border ${
+                  isSelected
+                    ? 'bg-[#15231c] border-[#3ecf8e]/70 ring-1 ring-[#3ecf8e]/30'
+                    : 'bg-[#141414] hover:bg-[#181818] border-[#262626] hover:border-[#3ecf8e]/40'
+                }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   {/* Job Details Left */}
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
+                      {/* Checkbox button */}
+                      <button
+                        type="button"
+                        onClick={(e) => toggleJobSelection(job.id, e)}
+                        className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#3ecf8e] text-[#121212] border-[#3ecf8e]'
+                            : 'bg-[#1c1c1c] text-[#898989] hover:text-[#fafafa] border-[#2e2e2e]'
+                        }`}
+                        title={isSelected ? 'Deselect Job' : 'Select for Auto-Apply'}
+                      >
+                        <CheckSquare className="w-3.5 h-3.5" />
+                      </button>
+
                       <span className="font-semibold text-xs text-[#fafafa] flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                         {job.company}
@@ -698,15 +853,27 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
 
                   {/* Actions Right */}
                   <div className="flex sm:flex-col items-center sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#222]">
-                    <a
-                      href={job.application_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#3ecf8e] hover:bg-[#34b27b] text-[#121212] transition-colors shadow-sm"
-                    >
-                      <span>Apply on ATS</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={() => handleStartAutoApplyBatch([job])}
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#1e2722] hover:bg-[#253932] text-[#3ecf8e] border border-[#3ecf8e]/30 transition-colors shadow-sm cursor-pointer"
+                        title="Auto-Apply directly using your Data Plan"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-current" />
+                        <span>Auto-Apply</span>
+                      </button>
+
+                      <a
+                        href={job.application_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#3ecf8e] hover:bg-[#34b27b] text-[#121212] transition-colors shadow-sm"
+                      >
+                        <span>Apply on ATS</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
 
                     <div className="flex items-center gap-1">
                       {onSelectJobForApplication && (
@@ -864,6 +1031,76 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 6. Floating Multi-Select Auto-Apply Action Dock */}
+      {selectedJobIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-2xl p-4 rounded-2xl bg-[#141414]/95 backdrop-blur-md border border-[#3ecf8e]/60 shadow-2xl flex flex-wrap items-center justify-between gap-3 animate-in slide-in-from-bottom duration-200">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#3ecf8e] text-[#121212] font-mono">
+              {selectedJobIds.size} Selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowDataPlanModal(true)}
+              className="text-xs text-[#b4b4b4] hover:text-[#fafafa] flex items-center gap-1.5 underline cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#3ecf8e]" />
+              <span>{savedDataPlan?.email ? 'Data Plan Ready' : 'Configure Data Plan & CV'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedJobIds(new Set())}
+              className="px-3 py-1.5 text-xs text-[#898989] hover:text-[#fafafa] cursor-pointer"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={() => handleStartAutoApplyBatch()}
+              disabled={isSubmittingBatch}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-[#3ecf8e] hover:bg-[#34b27b] text-[#121212] transition-colors shadow-lg disabled:opacity-50 cursor-pointer"
+            >
+              {isSubmittingBatch ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Submitting Applications...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Auto-Apply ({selectedJobIds.size} Jobs)</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Candidate Data Plan & Multi-Upload Hub Modal */}
+      {showDataPlanModal && (
+        <CareerDataPlanModal
+          isOpen={showDataPlanModal}
+          onClose={() => setShowDataPlanModal(false)}
+          onSaveDataPlan={(plan, files) => {
+            setSavedDataPlan(plan);
+            setUploadedResumeFiles(files);
+          }}
+          initialPlan={savedDataPlan || undefined}
+        />
+      )}
+
+      {/* 8. Live Application Execution Drawer */}
+      {showAutoApplyDrawer && (
+        <CareerAutoApplyDrawer
+          isOpen={showAutoApplyDrawer}
+          onClose={() => setShowAutoApplyDrawer(false)}
+          batchId={activeBatchId}
+          totalSelected={selectedJobIds.size || 1}
+        />
       )}
     </div>
   );
