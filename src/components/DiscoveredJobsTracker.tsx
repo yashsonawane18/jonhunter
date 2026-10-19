@@ -54,6 +54,7 @@ import { useUser } from '../contexts/UserContext';
 import { JobDetailModal, JobDetailData } from './JobDetailModal';
 import { ApplicationFlowModal } from './application/ApplicationFlowModal';
 import { ErrorBoundary } from './ErrorBoundary';
+import { CareerPagesView } from './CareerPagesView';
 import {
   CandidateParsedProfile,
   parseCandidateResume,
@@ -231,11 +232,27 @@ export const DiscoveredJobsTracker: React.FC = () => {
     }
   });
 
-  // View Navigation: 'current_batch' (5 Fresh Jobs) vs 'saved_history' (All Discovered & Saved Requisitions)
-  const [activeView, setActiveView] = useState<'current_batch' | 'saved_history'>('current_batch');
+  // View Navigation: 'current_batch' (5 Fresh Jobs) vs 'saved_history' (All Discovered & Saved Requisitions) vs 'career_pages' (859+ Direct ATS Boards)
+  const [activeView, setActiveView] = useState<'current_batch' | 'saved_history' | 'career_pages'>('current_batch');
   const [historyFilter, setHistoryFilter] = useState<'all' | 'saved' | 'applied' | 'not_applied'>('all');
   const [historySearchQuery, setHistorySearchQuery] = useState<string>('');
   const [historySourceFilter, setHistorySourceFilter] = useState<'all' | 'career_page' | 'linkedin'>('all');
+
+  // Deep link listener for #career-pages
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.location.hash === '#career-pages' || window.location.search.includes('career')) {
+        setActiveView('career_pages');
+      }
+      const handleHashChange = () => {
+        if (window.location.hash === '#career-pages') {
+          setActiveView('career_pages');
+        }
+      };
+      window.addEventListener('hashchange', handleHashChange);
+      return () => window.removeEventListener('hashchange', handleHashChange);
+    }
+  }, []);
 
   const candidateEmail = resumeProfile?.email || user?.email || 'candidate@drc.com';
   const candidateName = resumeProfile?.name || user?.name || 'Candidate';
@@ -987,6 +1004,28 @@ export const DiscoveredJobsTracker: React.FC = () => {
               </span>
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveView('career_pages')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors ${
+              activeView === 'career_pages'
+                ? 'bg-[#3ecf8e] text-[#121212] border border-[#3ecf8e]'
+                : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] hover:bg-[#242424] border border-[#2e2e2e]'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Corporate Career Pages</span>
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono border ${
+                activeView === 'career_pages'
+                  ? 'bg-[#121212] text-[#3ecf8e] border-[#121212]'
+                  : 'bg-[#242424] text-[#3ecf8e] border-[#3ecf8e]/30'
+              }`}
+            >
+              859+ Boards
+            </span>
+          </button>
         </div>
 
         <div className="flex items-center gap-3 px-2 text-xs text-[#898989]">
@@ -1459,6 +1498,17 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-[#898989]" />
                   <span>LinkedIn (5 Jobs)</span>
+                </button>
+
+                {/* 859+ Full Explorer Switch */}
+                <button
+                  type="button"
+                  onClick={() => setActiveView('career_pages')}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium text-[#3ecf8e] bg-[#1e2722] hover:bg-[#253932] border border-[#3ecf8e]/30 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Open Dedicated 859-Employer ATS Career Explorer"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
+                  <span>859+ Career Boards Explorer &rarr;</span>
                 </button>
               </div>
 
@@ -2200,6 +2250,60 @@ export const DiscoveredJobsTracker: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* VIEW 3: CORPORATE CAREER PAGES JOB EXPLORER (859+ DIRECT ATS BOARDS) */}
+      {activeView === 'career_pages' && (
+        <CareerPagesView
+          onSelectJobForDetail={(job) => {
+            setSelectedJobForDetail({
+              id: job.id,
+              title: job.job_title,
+              company: job.company,
+              location: job.location,
+              jobType: job.job_type,
+              salary: job.salary,
+              experience: job.experience_required,
+              description: job.job_description,
+              skills: job.key_skills,
+              applicationUrl: job.application_url,
+              matchScore: job.match_score,
+              ats_score: job.ats_score,
+              matched_skills: job.matched_skills || [],
+              missing_skills: job.missing_skills || [],
+              experience_fit_text: job.experience_match || '',
+              connections: job.connections || [],
+              discoveredAt: job.discovered_at || '',
+            });
+          }}
+          onSelectJobForApplication={(job) => {
+            setSelectedJobForApplication({
+              id: job.id,
+              title: job.job_title,
+              company: job.company,
+              location: job.location,
+              salary: job.salary,
+              skills: job.key_skills,
+              description: job.job_description,
+              experience: job.experience_required,
+              applicationUrl: job.application_url,
+            });
+          }}
+          onSaveJob={(job) => {
+            setAllDiscoveredJobs((prev) => {
+              if (prev.some((j) => j.id === job.id)) return prev;
+              const next = [job, ...prev];
+              try {
+                localStorage.setItem('drc_discovered_all_jobs_v2', JSON.stringify(next));
+              } catch (e) {
+                console.warn('LocalStorage save error:', e);
+              }
+              return next;
+            });
+            handleToggleStar(job.id);
+          }}
+          savedJobIds={savedJobIds}
+        />
       )}
 
       {/* Job Detail Modal */}

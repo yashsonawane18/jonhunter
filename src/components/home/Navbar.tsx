@@ -243,6 +243,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               LIVE
             </span>
           </a>
+
+          {/* 🏢 859+ Career Boards ATS Pill */}
+          <a
+            href="/discover#career-pages"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.hash = '#career-pages';
+              navigateTo('discover');
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium tracking-[-0.007em] border border-[#2e2e2e] bg-[#141414] text-[#b4b4b4] hover:border-[#3ecf8e]/50 hover:text-[#fafafa] transition-colors"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]" />
+            <span>Career Pages</span>
+            <span className="text-[10px] px-1 py-0.2 rounded bg-[#1e2722] text-[#3ecf8e] font-mono border border-[#3ecf8e]/30">
+              859 ATS
+            </span>
+          </a>
         </div>
 
         {/* Right Actions */}
@@ -313,6 +330,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Discover Jobs Engine</span>
             </span>
             <span className="text-[10px] font-mono text-[#3ecf8e]">LIVE</span>
+          </a>
+          <a
+            href="/discover#career-pages"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.hash = '#career-pages';
+              navigateTo('discover');
+            }}
+            className="text-sm px-2 py-1.5 rounded flex items-center justify-between border border-[#2e2e2e] text-[#b4b4b4]"
+          >
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#3ecf8e]" />
+              <span>859+ Corporate Career Boards</span>
+            </span>
+            <span className="text-[10px] font-mono text-[#3ecf8e]">859 ATS</span>
           </a>
           <a
             href="#pricing"

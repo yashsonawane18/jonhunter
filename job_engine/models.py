@@ -59,6 +59,10 @@ class JobPosting(BaseModel):
     connections: List[ConnectionRecord] = Field(default_factory=list, description="HR / Hiring Team contacts")
     discovered_at: Optional[str] = Field(default="", description="Timestamp when job was discovered")
     posted_time: Optional[str] = Field(default="⚡ Posted < 24h", description="Recency tier: < 24h, < 48h, < 7d")
+    fit_grade: Optional[str] = Field(default="Grade A", description="Fit Grade: Grade A, Grade B, Grade C")
+    archetype: Optional[str] = Field(default="Engineering", description="Role Archetype: e.g. Agentic / Automation, AI / ML, Backend")
+    match_reasons: List[str] = Field(default_factory=list, description="Top positive fit reasons")
+    ats_provider: Optional[str] = Field(default="Corporate ATS", description="ATS Provider: Greenhouse, Lever, Ashby, SmartRecruiters")
 
 
 class CandidateProfile(BaseModel):
