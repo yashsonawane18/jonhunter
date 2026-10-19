@@ -3897,3 +3897,236 @@ html {
 }
 /*# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsic3R5bGVzL2F1dGguY3NzIl0sCiAgInNvdXJjZXNDb250ZW50IjogWyI6cm9vdCB7XG4gIC0tam9icmlnaHQtdGVhbDogIzAwZDRhYTtcbiAgLS1qb2JyaWdodC10ZWFsLWxpZ2h0OiAjMjZlNGM3O1xuICAtLWpvYnJpZ2h0LXRlYWwtZGFyazogIzAwYjg5NDtcbiAgLS1qb2JyaWdodC1taW50OiAjN2ZmZmQ0O1xuICAtLWpvYnJpZ2h0LWdyYWRpZW50OiBsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjMDBkNGFhIDAlLCAjMjZlNGM3IDUwJSwgIzdmZmZkNCAxMDAlKTtcbiAgLS1qb2JyaWdodC10ZXh0LWRhcms6ICMxYTFhMWE7XG4gIC0tam9icmlnaHQtdGV4dC1saWdodDogIzY2NjY2NjtcbiAgLS1qb2JyaWdodC1ibGFjazogIzAwMDAwMDtcbn1cblxuLmF1dGgtZ3JhZGllbnQge1xuICBiYWNrZ3JvdW5kOiB2YXIoLS1qb2JyaWdodC1ncmFkaWVudCk7XG59XG5cbi8qIENoZWNrYm94IHN0eWxpbmcgZm9yIGJyYW5kIGNvbG9ycyAqL1xuLmJyYW5kLWNoZWNrYm94IHtcbiAgYm9yZGVyLWNvbG9yOiAjZDFkNWRiICFpbXBvcnRhbnQ7XG4gIGJhY2tncm91bmQtY29sb3I6IHRyYW5zcGFyZW50ICFpbXBvcnRhbnQ7XG59XG5cbi5icmFuZC1jaGVja2JveFtkYXRhLXN0YXRlPVwiY2hlY2tlZFwiXSB7XG4gIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWpvYnJpZ2h0LXRlYWwpICFpbXBvcnRhbnQ7XG4gIGJvcmRlci1jb2xvcjogdmFyKC0tam9icmlnaHQtdGVhbCkgIWltcG9ydGFudDtcbn1cblxuLmJyYW5kLWNoZWNrYm94W2RhdGEtc3RhdGU9XCJjaGVja2VkXCJdOmhvdmVyIHtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tam9icmlnaHQtdGVhbC1kYXJrKSAhaW1wb3J0YW50O1xuICBib3JkZXItY29sb3I6IHZhcigtLWpvYnJpZ2h0LXRlYWwtZGFyaykgIWltcG9ydGFudDtcbn1cblxuLyogVXRpbGl0eSBjbGFzc2VzICovXG4uam9icmlnaHQtdGVhbCB7XG4gIGNvbG9yOiB2YXIoLS1qb2JyaWdodC10ZWFsKTtcbn1cblxuLmJnLWpvYnJpZ2h0LXRlYWwge1xuICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1qb2JyaWdodC10ZWFsKTtcbn1cblxuLmJnLWpvYnJpZ2h0LXRlYWw6aG92ZXIge1xuICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1qb2JyaWdodC10ZWFsLWRhcmspO1xufVxuXG4uYm9yZGVyLWpvYnJpZ2h0LXRlYWwge1xuICBib3JkZXItY29sb3I6IHZhcigtLWpvYnJpZ2h0LXRlYWwpO1xufVxuXG4udGV4dC1qb2JyaWdodC10ZWFsIHtcbiAgY29sb3I6IHZhcigtLWpvYnJpZ2h0LXRlYWwpO1xufSJdLAogICJtYXBwaW5ncyI6ICI7QUFBQTtBQUNFLG1CQUFpQjtBQUNqQix5QkFBdUI7QUFDdkIsd0JBQXNCO0FBQ3RCLG1CQUFpQjtBQUNqQjtBQUFBLElBQXFCO0FBQUEsTUFBZ0IsTUFBTTtBQUFBLE1BQUUsUUFBUSxFQUFFO0FBQUEsTUFBRSxRQUFRLEdBQUc7QUFBQSxNQUFFLFFBQVE7QUFDOUUsd0JBQXNCO0FBQ3RCLHlCQUF1QjtBQUN2QixvQkFBa0I7QUFDcEI7QUFFQSxDQUFDO0FBQ0MsY0FBWSxJQUFJO0FBQ2xCO0FBR0EsQ0FBQztBQUNDLGdCQUFjO0FBQ2Qsb0JBQWtCO0FBQ3BCO0FBRUEsQ0FMQyxjQUtjLENBQUM7QUFDZCxvQkFBa0IsSUFBSTtBQUN0QixnQkFBYyxJQUFJO0FBQ3BCO0FBRUEsQ0FWQyxjQVVjLENBQUMsbUJBQXFCO0FBQ25DLG9CQUFrQixJQUFJO0FBQ3RCLGdCQUFjLElBQUk7QUFDcEI7QUFHQSxDQUFDO0FBQ0MsU0FBTyxJQUFJO0FBQ2I7QUFFQSxDQUFDO0FBQ0Msb0JBQWtCLElBQUk7QUFDeEI7QUFFQSxDQUpDLGdCQUlnQjtBQUNmLG9CQUFrQixJQUFJO0FBQ3hCO0FBRUEsQ0FBQztBQUNDLGdCQUFjLElBQUk7QUFDcEI7QUFFQSxDQUFDO0FBQ0MsU0FBTyxJQUFJO0FBQ2I7IiwKICAibmFtZXMiOiBbXQp9Cg== */
 body.exclusive-opening-request .mt-5.space-y-4 > div:nth-child(-n+2) { display: none !important; }
+
+/* ==========================================================================
+   Supabase Design System — Style Tokens & Components
+   Midnight code editor with phosphor green caret — a single chromatic pulse on a sea of charcoal.
+   ========================================================================== */
+:root {
+  /* Colors */
+  --color-phosphor-green: #3ecf8e;
+  --color-mint-pulse: #00c573;
+  --color-forest-depth: #1f4b37;
+  --color-midnight-emerald: #006239;
+  --color-snow: #fafafa;
+  --color-silver-mist: #b4b4b4;
+  --color-smoke: #898989;
+  --color-graphite: #4d4d4d;
+  --color-slate: #393939;
+  --color-charcoal: #2e2e2e;
+  --color-ash: #242424;
+  --color-obsidian: #121212;
+
+  /* Typography */
+  --font-circular: 'Circular', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-source-code-pro: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Type Scale */
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --tracking-caption: -0.084px;
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.43;
+  --tracking-body-sm: -0.098px;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --tracking-body: -0.112px;
+  --text-subheading: 18px;
+  --leading-subheading: 1.38;
+  --tracking-subheading: -0.126px;
+  --text-heading-sm: 24px;
+  --leading-heading-sm: 1.33;
+  --tracking-heading-sm: -0.168px;
+  --text-heading: 36px;
+  --leading-heading: 1.2;
+  --tracking-heading: -0.252px;
+  --text-display: 72px;
+  --leading-display: 1;
+  --tracking-display: -0.504px;
+
+  /* Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  /* Spacing */
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+
+  /* Border Radii */
+  --radius-tags: 9999px;
+  --radius-cards: 16px;
+  --radius-inputs: 8px;
+  --radius-buttons: 9999px;
+
+  /* Surfaces */
+  --surface-obsidian-canvas: #121212;
+  --surface-ash-card: #242424;
+  --surface-charcoal-border: #2e2e2e;
+}
+
+html, body {
+  background-color: #121212 !important;
+  color: #fafafa !important;
+  font-family: var(--font-circular);
+  letter-spacing: -0.007em;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: #3ecf8e !important;
+  color: #121212 !important;
+}
+
+/* Supabase Utility Classes */
+.bg-obsidian {
+  background-color: #121212 !important;
+}
+
+.bg-ash {
+  background-color: #242424 !important;
+}
+
+.bg-charcoal {
+  background-color: #2e2e2e !important;
+}
+
+.border-charcoal {
+  border-color: #2e2e2e !important;
+}
+
+.border-slate {
+  border-color: #393939 !important;
+}
+
+.border-graphite {
+  border-color: #4d4d4d !important;
+}
+
+.text-snow {
+  color: #fafafa !important;
+}
+
+.text-silver-mist {
+  color: #b4b4b4 !important;
+}
+
+.text-smoke {
+  color: #898989 !important;
+}
+
+.text-phosphor-green {
+  color: #3ecf8e !important;
+}
+
+.text-mint-pulse {
+  color: #00c573 !important;
+}
+
+.bg-phosphor-green {
+  background-color: #3ecf8e !important;
+}
+
+/* Supabase Component Primitives */
+.supabase-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3ecf8e !important;
+  color: #fafafa !important;
+  border: 1px solid #3ecf8e !important;
+  border-radius: 9999px !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.43 !important;
+  padding: 8px 18px !important;
+  letter-spacing: -0.007em !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.supabase-pill-primary:hover {
+  background-color: #00c573 !important;
+  border-color: #1f4b37 !important;
+}
+
+.supabase-pill-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent !important;
+  color: #fafafa !important;
+  border: 1px solid #393939 !important;
+  border-radius: 9999px !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1.43 !important;
+  padding: 8px 18px !important;
+  letter-spacing: -0.007em !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.supabase-pill-ghost:hover {
+  border-color: #4d4d4d !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.supabase-card {
+  background-color: #121212 !important;
+  border: 1px solid #2e2e2e !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.supabase-card:hover {
+  border-color: #4d4d4d !important;
+}
+
+.supabase-card-elevated {
+  background-color: #242424 !important;
+  border: 1px solid #2e2e2e !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+.supabase-input {
+  background-color: #121212 !important;
+  border: 1px solid #393939 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  color: #fafafa !important;
+  font-size: 14px !important;
+  letter-spacing: -0.007em !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.supabase-input::placeholder {
+  color: #898989 !important;
+}
+
+.supabase-input:focus {
+  border-color: #3ecf8e !important;
+}
+
+.supabase-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px !important;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  background-color: #242424 !important;
+  border: 1px solid #2e2e2e !important;
+  color: #b4b4b4 !important;
+  letter-spacing: -0.007em !important;
+}

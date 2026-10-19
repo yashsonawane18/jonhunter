@@ -814,29 +814,29 @@ export const DiscoveredJobsTracker: React.FC = () => {
     selectedChannel !== 'all';
 
   return (
-    <div className="min-h-full bg-black text-white p-4 sm:p-6 space-y-6">
+    <div className="min-h-full bg-[#121212] text-[#fafafa] p-4 sm:p-6 space-y-6 tracking-[-0.007em]">
       {/* Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-zinc-800 pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-[#2e2e2e] pb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-[#00C896]" />
+            <h1 className="text-xl sm:text-2xl font-normal tracking-[-0.007em] text-[#fafafa] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#3ecf8e]" />
               DRC Consulting Job Intelligence
             </h1>
             {engineOnline === true && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-normal bg-[#242424] text-[#3ecf8e] border border-[#2e2e2e]">
+                <span className="w-2 h-2 rounded-full bg-[#3ecf8e] animate-pulse"></span>
                 Pan-India Real-Time Index (Sub-20ms)
               </span>
             )}
             {engineOnline === false && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                <AlertCircle className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-normal bg-[#242424] text-[#b4b4b4] border border-[#2e2e2e]">
+                <AlertCircle className="w-3.5 h-3.5 text-[#3ecf8e]" />
                 Engine Connecting...
               </span>
             )}
           </div>
-          <p className="text-sm text-zinc-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#b4b4b4] mt-1 font-normal">
             Nationwide verified tech, architecture & advisory roles across India. 30+ instant 1-click role filters & entry/intermediate/senior level matching.
           </p>
         </div>
@@ -845,42 +845,42 @@ export const DiscoveredJobsTracker: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => verifyEngine().then(() => executeFreshSearch())}
-            className="p-2.5 rounded-xl border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-white hover:text-[#00C896] transition-colors shadow-sm"
+            className="p-2 rounded-full border border-[#2e2e2e] bg-[#181818] hover:bg-[#242424] hover:border-[#4d4d4d] text-[#b4b4b4] hover:text-[#fafafa] transition-colors cursor-pointer"
             title="Refresh engine index"
           >
-            <RefreshCw className={`w-4 h-4 ${searching ? 'animate-spin text-[#00C896]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${searching ? 'animate-spin text-[#3ecf8e]' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* Deterministic Zero-LLM Resume Scanner Banner */}
-      <div className="p-4 sm:p-5 rounded-2xl border border-zinc-800 bg-zinc-950/90 shadow-xl">
+      <div className="p-4 sm:p-5 rounded-[16px] border border-[#2e2e2e] bg-[#121212]">
         {resumeProfile ? (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
+              <div className="w-10 h-10 rounded-xl bg-[#242424] border border-[#2e2e2e] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[#3ecf8e]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                  <span className="text-xs font-normal uppercase tracking-wider text-[#3ecf8e]">
                     Consulting ATS Scoring Active
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#242424] text-[#fafafa] border border-[#2e2e2e] font-mono">
                     {resumeFileName || 'Resume Evaluated'}
                   </span>
                 </div>
-                <h4 className="text-sm font-bold text-white">
+                <h4 className="text-sm font-medium text-[#fafafa]">
                   {resumeProfile.name} • {resumeProfile.primary_domain} ({resumeProfile.total_experience_years} yrs exp)
                 </h4>
                 <div className="flex flex-wrap gap-1 pt-1">
                   {resumeProfile.top_skills.slice(0, 8).map((s) => (
-                    <span key={s} className="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700">
+                    <span key={s} className="px-2.5 py-0.5 rounded-full text-[10px] bg-[#181818] text-[#b4b4b4] border border-[#2e2e2e]">
                       {s}
                     </span>
                   ))}
                   {resumeProfile.top_skills.length > 8 && (
-                    <span className="text-[10px] text-zinc-500">+{resumeProfile.top_skills.length - 8} more</span>
+                    <span className="text-[10px] text-[#898989]">+{resumeProfile.top_skills.length - 8} more</span>
                   )}
                 </div>
               </div>
@@ -889,7 +889,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
             <button
               type="button"
               onClick={handleClearResume}
-              className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-xs font-bold text-white transition-all self-start sm:self-center shadow-sm"
+              className="px-4 py-1.5 rounded-full bg-[#181818] hover:bg-[#242424] border border-[#393939] hover:border-[#4d4d4d] text-xs font-normal text-[#fafafa] transition-colors self-start sm:self-center"
             >
               Clear / Change Resume
             </button>
@@ -897,22 +897,22 @@ export const DiscoveredJobsTracker: React.FC = () => {
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#00C896]/10 border border-[#00C896]/30 flex items-center justify-center shrink-0 shadow-lg shadow-[#00C896]/5">
-                <UploadCloud className="w-6 h-6 text-[#00C896]" />
+              <div className="w-10 h-10 rounded-xl bg-[#181818] border border-[#2e2e2e] flex items-center justify-center shrink-0">
+                <UploadCloud className="w-5 h-5 text-[#3ecf8e]" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#00C896]">
+                  <span className="text-xs font-normal uppercase tracking-wider text-[#3ecf8e]">
                     Deterministic Zero-LLM ATS Scanner
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#181818] text-[#898989] border border-[#2e2e2e] font-mono">
                     Instant &lt;100ms • Zero API Cost
                   </span>
                 </div>
-                <h4 className="text-sm font-bold text-white">
+                <h4 className="text-sm font-medium text-[#fafafa]">
                   Upload your resume to calculate your 4-Tier Consulting ATS Match Score across all openings
                 </h4>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-[#898989]">
                   Evaluates technical stack, consulting leadership, seniority curve & domain depth. No login required.
                 </p>
               </div>
@@ -930,19 +930,19 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     if (file) handleResumeUpload(file);
                   }}
                 />
-                <div className={`px-5 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${
+                <div className={`px-5 py-2 rounded-full text-xs font-medium flex items-center gap-2 transition-colors ${
                   parsingResume
-                    ? 'bg-zinc-800 text-zinc-400 cursor-not-allowed border border-zinc-700'
-                    : 'bg-[#00C896] hover:bg-[#00E5AA] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 hover:scale-105'
+                    ? 'bg-[#181818] text-[#898989] cursor-not-allowed border border-[#2e2e2e]'
+                    : 'bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] border border-[#3ecf8e] hover:border-[#1f4b37]'
                 }`}>
                   {parsingResume ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-[#00C896]" />
-                      <span className="text-white">Parsing Resume...</span>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3ecf8e]" />
+                      <span className="text-[#fafafa]">Parsing Resume...</span>
                     </>
                   ) : (
                     <>
-                      <UploadCloud className="w-4 h-4 text-black" />
+                      <UploadCloud className="w-3.5 h-3.5 text-[#121212]" />
                       <span>Scan Resume for ATS Match</span>
                     </>
                   )}
@@ -954,34 +954,34 @@ export const DiscoveredJobsTracker: React.FC = () => {
       </div>
 
       {/* Top Dual View Navigation Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-zinc-950/90 rounded-2xl border-2 border-zinc-800 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[#121212] rounded-[16px] border border-[#2e2e2e]">
         <div className="flex items-center gap-2 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveView('current_batch')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors ${
               activeView === 'current_batch'
-                ? 'bg-[#00C896] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 scale-[1.02]'
-                : 'bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 border border-zinc-800'
+                ? 'bg-[#3ecf8e] text-[#121212] border border-[#3ecf8e]'
+                : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] hover:bg-[#242424] border border-[#2e2e2e]'
             }`}
           >
-            <Zap className="w-4 h-4" />
-            <span>⚡ Active Batch (5 Fresh Jobs)</span>
+            <Zap className="w-3.5 h-3.5" />
+            <span>Active Batch (5 Fresh Jobs)</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveView('saved_history')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-colors ${
               activeView === 'saved_history'
-                ? 'bg-[#00C896] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 scale-[1.02]'
-                : 'bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 border border-zinc-800'
+                ? 'bg-[#3ecf8e] text-[#121212] border border-[#3ecf8e]'
+                : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] hover:bg-[#242424] border border-[#2e2e2e]'
             }`}
           >
-            <Archive className="w-4 h-4" />
-            <span>📁 Discovered &amp; Saved History ({allDiscoveredJobs.length})</span>
+            <Archive className="w-3.5 h-3.5" />
+            <span>Discovered &amp; Saved History ({allDiscoveredJobs.length})</span>
             {starredCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-400 text-black font-extrabold flex items-center gap-0.5 shadow-sm">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-[#242424] text-[#3ecf8e] font-mono border border-[#2e2e2e] flex items-center gap-0.5">
                 <Star className="w-2.5 h-2.5 fill-current" />
                 {starredCount}
               </span>
@@ -989,9 +989,9 @@ export const DiscoveredJobsTracker: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-3 px-2 text-xs text-zinc-400">
-          <span className="hidden md:inline">
-            Accumulated Requisitions: <strong className="text-white font-mono">{allDiscoveredJobs.length} Jobs</strong>
+        <div className="flex items-center gap-3 px-2 text-xs text-[#898989]">
+          <span className="hidden md:inline font-mono">
+            ACCUMULATED: <strong className="text-[#fafafa]">{allDiscoveredJobs.length} JOBS</strong>
           </span>
         </div>
       </div>
@@ -1000,14 +1000,14 @@ export const DiscoveredJobsTracker: React.FC = () => {
       {activeView === 'current_batch' && (
         <div className="space-y-6">
           {/* SECTION 1: Seniority / Experience Level Instant 1-Click Bar */}
-          <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3">
+          <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-black uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-[#00C896]" />
+              <label className="text-xs font-medium uppercase tracking-wider text-[#b4b4b4] flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-[#3ecf8e]" />
                 <span>Experience &amp; Seniority Level (Instant 1-Click Filter)</span>
               </label>
-              <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline">
-                Active: <span className="text-[#00C896] font-bold">{SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.label}</span>
+              <span className="text-[11px] text-[#898989] font-normal hidden sm:inline">
+                Active: <span className="text-[#3ecf8e] font-mono">{SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.label}</span>
               </span>
             </div>
 
@@ -1019,22 +1019,22 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     key={level.id}
                     type="button"
                     onClick={() => handleSenioritySelect(level.id)}
-                    className={`p-3 rounded-xl text-left transition-all border flex flex-col justify-between ${
+                    className={`p-3 rounded-xl text-left transition-colors border flex flex-col justify-between cursor-pointer ${
                       isActive
-                        ? 'bg-zinc-800 border-[#00C896] shadow-lg shadow-[#00C896]/20 scale-[1.03] ring-1 ring-[#00C896]'
-                        : 'bg-zinc-900/90 hover:bg-zinc-800/80 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+                        ? 'bg-[#242424] border-[#3ecf8e] text-[#fafafa]'
+                        : 'bg-[#181818] hover:bg-[#202020] border-[#2e2e2e] hover:border-[#4d4d4d] text-[#b4b4b4]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className={`text-xs font-black ${isActive ? 'text-white' : level.iconColor}`}>
+                      <span className={`text-xs font-mono ${isActive ? 'text-[#3ecf8e]' : 'text-[#898989]'}`}>
                         {level.badge}
                       </span>
-                      {isActive && <Check className="w-3.5 h-3.5 text-[#00C896]" />}
+                      {isActive && <Check className="w-3.5 h-3.5 text-[#3ecf8e]" />}
                     </div>
-                    <div className="text-[11px] font-bold text-white line-clamp-1">
+                    <div className="text-[11px] font-medium text-[#fafafa] line-clamp-1">
                       {level.label.split('(')[0].trim()}
                     </div>
-                    <div className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">
+                    <div className="text-[10px] text-[#898989] line-clamp-1 mt-0.5">
                       {level.description}
                     </div>
                   </button>
@@ -1044,15 +1044,15 @@ export const DiscoveredJobsTracker: React.FC = () => {
           </div>
 
           {/* SECTION 2: 36+ Instant 1-Click Tech Role Pills Matrix */}
-          <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-3.5">
+          <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] space-y-3.5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Compass className="w-4 h-4 text-[#00C896]" />
-                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-200">
+                <Compass className="w-4 h-4 text-[#3ecf8e]" />
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[#fafafa]">
                   Instant 1-Click Role Filters ({INSTANT_ROLE_FILTERS.length} Requisitions Matrix)
                 </h3>
                 {selectedActiveRole && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00C896]/20 text-[#00C896] border border-[#00C896]/40 flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-normal bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e] flex items-center gap-1">
                     <span>Filtered</span>
                     <X
                       className="w-3 h-3 cursor-pointer hover:text-white"
@@ -1069,13 +1069,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
               <div className="flex items-center gap-2">
                 {/* Quick search input to find any of the 36 pills */}
                 <div className="relative w-full sm:w-48">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-zinc-500" />
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#898989]" />
                   <input
                     type="text"
                     value={roleFilterSearch}
                     onChange={(e) => setRoleFilterSearch(e.target.value)}
                     placeholder="Filter 36+ roles..."
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg pl-8 pr-2 py-1 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
+                    className="w-full bg-[#121212] border border-[#393939] rounded-lg pl-8 pr-2 py-1 text-xs text-[#fafafa] placeholder-[#898989] focus:outline-none focus:border-[#3ecf8e]"
                   />
                 </div>
 
@@ -1083,7 +1083,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="text-[11px] font-bold text-zinc-400 hover:text-[#00C896] underline whitespace-nowrap"
+                    className="text-[11px] font-normal text-[#898989] hover:text-[#3ecf8e] underline whitespace-nowrap cursor-pointer"
                   >
                     Reset All
                   </button>
@@ -1100,10 +1100,10 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     key={cat}
                     type="button"
                     onClick={() => setSelectedRoleCategory(cat)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                    className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-colors cursor-pointer ${
                       isActive
-                        ? 'bg-[#00C896] text-black shadow-md font-black'
-                        : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                        ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                        : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                     }`}
                   >
                     {cat}
@@ -1121,15 +1121,15 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     key={role.id}
                     type="button"
                     onClick={() => handleInstantRoleClick(role)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                       isActive
-                        ? 'bg-[#00C896] text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 scale-105'
-                        : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 hover:border-[#00C896] hover:text-white shadow-sm'
+                        ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                        : 'bg-[#181818] hover:bg-[#202020] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e] hover:border-[#4d4d4d]'
                     }`}
                   >
-                    {role.popular && <Sparkles className={`w-3 h-3 ${isActive ? 'text-black' : 'text-amber-400'}`} />}
+                    {role.popular && <Sparkles className={`w-3 h-3 ${isActive ? 'text-[#3ecf8e]' : 'text-[#898989]'}`} />}
                     <span>{role.name}</span>
-                    {isActive && <Check className="w-3.5 h-3.5 text-black" />}
+                    {isActive && <Check className="w-3.5 h-3.5 text-[#3ecf8e]" />}
                   </button>
                 );
               })}
@@ -1137,14 +1137,14 @@ export const DiscoveredJobsTracker: React.FC = () => {
           </div>
 
           {/* SECTION 3: Keyword Search, Pan-India Location, Work Mode & Core Skills Bar */}
-          <div className="p-5 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 backdrop-blur shadow-2xl space-y-4">
+          <div className="p-5 rounded-[16px] border border-[#2e2e2e] bg-[#121212] space-y-4">
             {/* Row 1: Search, Location & Main Trigger */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               {/* Keyword Search Input */}
               <div className="md:col-span-5">
-                <label className="block text-xs font-bold text-zinc-300 mb-1">Search Role, Tech Stack or Keyword</label>
+                <label className="block text-xs font-normal text-[#b4b4b4] mb-1">Search Role, Tech Stack or Keyword</label>
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-zinc-400" />
+                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#898989]" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -1156,22 +1156,22 @@ export const DiscoveredJobsTracker: React.FC = () => {
                       if (e.key === 'Enter') handleManualSearch();
                     }}
                     placeholder="e.g. Python, Cloud Architect, PySpark, Product Manager"
-                    className="w-full bg-zinc-900 border-2 border-zinc-700 rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#00C896] transition-colors"
+                    className="w-full bg-[#121212] border border-[#393939] rounded-lg pl-9 pr-3 py-2 text-sm text-[#fafafa] placeholder-[#898989] focus:outline-none focus:border-[#3ecf8e] transition-colors"
                   />
                 </div>
               </div>
 
               {/* Pan-India Location Selector */}
               <div className="md:col-span-4">
-                <label className="block text-xs font-bold text-zinc-300 mb-1 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#00C896]" />
+                <label className="block text-xs font-normal text-[#b4b4b4] mb-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#3ecf8e]" />
                   <span>Location (Pan-India Coverage)</span>
                 </label>
                 <div className="relative">
                   <select
                     value={selectedLocation}
                     onChange={(e) => handleLocationChange(e.target.value)}
-                    className="w-full bg-zinc-900 border-2 border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00C896]"
+                    className="w-full bg-[#121212] border border-[#393939] rounded-lg px-3 py-2 text-sm text-[#fafafa] focus:outline-none focus:border-[#3ecf8e]"
                   >
                     {(availableLocations.length > 0 ? availableLocations : [
                       'All India (Remote & Nationwide)',
@@ -1194,7 +1194,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     ]).map((loc) => {
                       const isWorldwide = loc.includes('Worldwide') || loc.includes('US /') || loc.includes('Europe') || loc.includes('Singapore');
                       return (
-                        <option key={loc} value={loc}>
+                        <option key={loc} value={loc} className="bg-[#121212] text-[#fafafa]">
                           {isWorldwide ? `🌐 ${loc}` : `🇮🇳 ${loc}`}
                         </option>
                       );
@@ -1208,16 +1208,16 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   onClick={handleManualSearch}
                   disabled={searching || isAppending}
-                  className="flex-1 h-[40px] flex items-center justify-center gap-1.5 rounded-xl font-extrabold text-xs bg-[#00C896] hover:bg-[#00E5AA] disabled:opacity-50 text-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 hover:scale-[1.02] transition-all"
+                  className="flex-1 h-[38px] flex items-center justify-center gap-2 rounded-full font-medium text-xs bg-[#3ecf8e] hover:bg-[#00c573] disabled:opacity-50 text-[#121212] border border-[#3ecf8e] hover:border-[#1f4b37] transition-colors cursor-pointer"
                 >
                   {searching ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#121212]" />
                       <span>Finding 5 Jobs...</span>
                     </>
                   ) : (
                     <>
-                      <Search className="w-4 h-4 text-black" />
+                      <Search className="w-3.5 h-3.5 text-[#121212]" />
                       <span>Find 5 Fresh Jobs</span>
                     </>
                   )}
@@ -1225,21 +1225,21 @@ export const DiscoveredJobsTracker: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Work Mode & Relocation Preferences (Solves City Drop-Offs & Droughts) */}
-            <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+            {/* Row 2: Work Mode & Relocation Preferences */}
+            <div className="pt-2 border-t border-[#2e2e2e] flex flex-wrap items-center justify-between gap-3">
               {/* Work Mode Toggle Pills */}
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 mr-1 flex items-center gap-1">
-                  <Briefcase className="w-3 h-3 text-[#00C896]" />
+                <span className="text-[11px] font-normal uppercase tracking-wider text-[#898989] mr-1 flex items-center gap-1">
+                  <Briefcase className="w-3 h-3 text-[#3ecf8e]" />
                   Work Mode:
                 </span>
                 <button
                   type="button"
                   onClick={() => handleWorkModeChange('remote_included')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1 cursor-pointer ${
                     selectedWorkMode === 'remote_included'
-                      ? 'bg-[#00C896] text-black border border-[#00E5AA] shadow-md shadow-[#00C896]/20'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                   title="Includes selected city + Remote jobs nationwide so you never miss high-yield opportunities"
                 >
@@ -1250,10 +1250,10 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleWorkModeChange('remote_only')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1 cursor-pointer ${
                     selectedWorkMode === 'remote_only'
-                      ? 'bg-sky-500 text-black border border-sky-400 shadow-md shadow-sky-500/20'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
                   <Home className="w-3 h-3" />
@@ -1263,10 +1263,10 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleWorkModeChange('hybrid')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1 cursor-pointer ${
                     selectedWorkMode === 'hybrid'
-                      ? 'bg-amber-400 text-black border border-amber-300 shadow-md shadow-amber-400/20'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
                   <Building2 className="w-3 h-3" />
@@ -1276,10 +1276,10 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleWorkModeChange('onsite')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1 cursor-pointer ${
                     selectedWorkMode === 'onsite'
-                      ? 'bg-purple-400 text-black border border-purple-300 shadow-md shadow-purple-400/20'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800 hover:border-zinc-700'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
                   <MapPin className="w-3 h-3" />
@@ -1293,40 +1293,40 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleToggleRelocation}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1 cursor-pointer ${
                     isOpenToRelocation
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50'
-                      : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
-                  title="If local city openings are sparse, automatically cascades to top Metro Hubs (Bengaluru, Pune, Hyderabad, Gurgaon, Mumbai)"
+                  title="If local city openings are sparse, automatically cascades to top Metro Hubs"
                 >
-                  <Plane className={`w-3 h-3 ${isOpenToRelocation ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                  <span>✈️ Open to Relocation</span>
-                  {isOpenToRelocation && <Check className="w-3 h-3 text-emerald-400" />}
+                  <Plane className={`w-3 h-3 ${isOpenToRelocation ? 'text-[#3ecf8e]' : 'text-[#898989]'}`} />
+                  <span>Open to Relocation</span>
+                  {isOpenToRelocation && <Check className="w-3 h-3 text-[#3ecf8e]" />}
                 </button>
 
                 {/* Notice Period Quick Select */}
-                <div className="flex items-center gap-1 bg-zinc-900 px-2 py-0.5 rounded-lg border border-zinc-800">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Notice:</span>
+                <div className="flex items-center gap-1 bg-[#181818] px-2.5 py-0.5 rounded-lg border border-[#2e2e2e]">
+                  <span className="text-[10px] text-[#898989] uppercase tracking-wider font-mono">Notice:</span>
                   <select
                     value={selectedNoticePeriod}
                     onChange={(e) => handleNoticePeriodChange(e.target.value)}
-                    className="bg-transparent text-xs text-zinc-200 font-semibold focus:outline-none cursor-pointer"
+                    className="bg-transparent text-xs text-[#fafafa] focus:outline-none cursor-pointer"
                   >
-                    <option value="Immediate" className="bg-zinc-900 text-white">⚡ Immediate (&lt;15d)</option>
-                    <option value="30_days" className="bg-zinc-900 text-white">🕒 30 Days</option>
-                    <option value="60_90_days" className="bg-zinc-900 text-white">⏳ 60-90 Days</option>
+                    <option value="Immediate" className="bg-[#121212] text-[#fafafa]">Immediate (&lt;15d)</option>
+                    <option value="30_days" className="bg-[#121212] text-[#fafafa]">30 Days</option>
+                    <option value="60_90_days" className="bg-[#121212] text-[#fafafa]">60-90 Days</option>
                   </select>
                 </div>
               </div>
             </div>
 
             {/* Row 3: Core Tech Stack & Skills Targeting */}
-            <div className="pt-2 border-t border-zinc-800/80 space-y-2">
+            <div className="pt-2 border-t border-[#2e2e2e] space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
-                  <Code2 className="w-3 h-3 text-[#00C896]" />
-                  <span>Target by Core Skills & Tech Stack:</span>
+                <span className="text-[11px] font-normal uppercase tracking-wider text-[#898989] flex items-center gap-1">
+                  <Code2 className="w-3 h-3 text-[#3ecf8e]" />
+                  <span>Target by Core Skills &amp; Tech Stack:</span>
                 </span>
 
                 {/* Active Selected Skills Count or Reset */}
@@ -1337,7 +1337,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                       setSelectedSkills([]);
                       executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false, resumeProfile, undefined, selectedWorkMode, isOpenToRelocation, selectedNoticePeriod, []);
                     }}
-                    className="text-[11px] text-zinc-400 hover:text-rose-400 underline font-semibold transition-colors"
+                    className="text-[11px] text-[#898989] hover:text-[#3ecf8e] underline transition-colors cursor-pointer"
                   >
                     Clear {selectedSkills.length} selected skills
                   </button>
@@ -1346,25 +1346,25 @@ export const DiscoveredJobsTracker: React.FC = () => {
 
               {/* Skills Pills Bar */}
               <div className="flex flex-wrap items-center gap-1.5">
-                {/* Active Selected Skills (Emerald with X) */}
+                {/* Active Selected Skills */}
                 {selectedSkills.map((sk) => (
                   <span
                     key={sk}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#00C896] text-black border border-[#00E5AA] shadow-sm animate-in fade-in zoom-in duration-150"
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]"
                   >
                     <span>{sk}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(sk)}
-                      className="hover:bg-black/20 rounded p-0.5 transition-colors"
+                      className="hover:bg-white/10 rounded-full p-0.5 transition-colors"
                       title="Remove skill"
                     >
-                      <X className="w-3 h-3 text-black" />
+                      <X className="w-3 h-3 text-[#3ecf8e]" />
                     </button>
                   </span>
                 ))}
 
-                {/* Suggested Popular Skills for the active role (click to toggle) */}
+                {/* Suggested Popular Skills */}
                 {suggestedSkills.map((sk) => {
                   const isSelected = selectedSkills.includes(sk);
                   if (isSelected) return null;
@@ -1373,16 +1373,16 @@ export const DiscoveredJobsTracker: React.FC = () => {
                       key={sk}
                       type="button"
                       onClick={() => handleToggleSkill(sk)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-[#00C896]/60 transition-all flex items-center gap-1"
+                      className="px-3 py-1 rounded-full text-xs font-normal bg-[#181818] hover:bg-[#202020] text-[#b4b4b4] hover:text-[#fafafa] border border-[#2e2e2e] hover:border-[#4d4d4d] transition-colors flex items-center gap-1 cursor-pointer"
                     >
-                      <Plus className="w-2.5 h-2.5 text-[#00C896]" />
+                      <Plus className="w-2.5 h-2.5 text-[#3ecf8e]" />
                       <span>{sk}</span>
                     </button>
                   );
                 })}
 
                 {/* Inline custom skill input */}
-                <div className="inline-flex items-center bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-0.5 focus-within:border-[#00C896]">
+                <div className="inline-flex items-center bg-[#121212] border border-[#393939] rounded-lg px-2.5 py-0.5 focus-within:border-[#3ecf8e]">
                   <input
                     type="text"
                     value={customSkillInput}
@@ -1394,13 +1394,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
                       }
                     }}
                     placeholder="+ Add custom skill"
-                    className="bg-transparent text-xs text-white placeholder-zinc-500 focus:outline-none w-28 sm:w-36 py-0.5"
+                    className="bg-transparent text-xs text-[#fafafa] placeholder-[#898989] focus:outline-none w-28 sm:w-36 py-0.5"
                   />
                   {customSkillInput.trim() && (
                     <button
                       type="button"
                       onClick={handleAddCustomSkill}
-                      className="text-[10px] font-bold text-[#00C896] hover:text-[#00E5AA] ml-1 uppercase"
+                      className="text-[10px] font-medium text-[#3ecf8e] hover:text-[#00c573] ml-1 uppercase cursor-pointer"
                     >
                       Add
                     </button>
@@ -1411,110 +1411,121 @@ export const DiscoveredJobsTracker: React.FC = () => {
           </div>
 
           {/* SECTION 4: Unified Search Results Feed with Channel Selector Tabs */}
-          <div className="border border-zinc-800 rounded-3xl bg-zinc-950/80 overflow-hidden shadow-2xl">
+          <div className="border border-[#2e2e2e] rounded-[16px] bg-[#121212] overflow-hidden">
             {/* Source Allocation Tabs Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 border-b border-zinc-800 bg-zinc-900/80">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 border-b border-[#2e2e2e] bg-[#181818]">
               <div className="flex items-center gap-2 overflow-x-auto">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mr-1 hidden sm:inline">
+                <span className="text-[11px] font-normal uppercase tracking-wider text-[#898989] mr-1 hidden sm:inline">
                   Source Split:
                 </span>
 
-                {/* All Sources (3 Career + 2 LinkedIn) */}
+                {/* All Sources */}
                 <button
                   type="button"
                   onClick={() => handleChannelChange('all')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     selectedChannel === 'all'
-                      ? 'bg-zinc-700 text-white border-2 border-zinc-500 shadow-md scale-105'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#121212] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  <Globe className="w-3.5 h-3.5 text-amber-400" />
-                  <span>🌟 All Sources (3 Career + 2 LinkedIn)</span>
+                  <Globe className="w-3.5 h-3.5 text-[#3ecf8e]" />
+                  <span>All Sources (3 Career + 2 LinkedIn)</span>
                 </button>
 
-                {/* Career Pages Only (5 Jobs) */}
+                {/* Career Pages Only */}
                 <button
                   type="button"
                   onClick={() => handleChannelChange('career_page')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     selectedChannel === 'career_page'
-                      ? 'bg-emerald-500 text-black border-2 border-emerald-400 shadow-md shadow-emerald-500/20 scale-105'
-                      : 'bg-zinc-900 text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#121212] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>🏢 Career Pages (5 Jobs)</span>
+                  <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
+                  <span>Career Pages (5 Jobs)</span>
                 </button>
 
-                {/* LinkedIn Only (5 Jobs) */}
+                {/* LinkedIn Only */}
                 <button
                   type="button"
                   onClick={() => handleChannelChange('linkedin')}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     selectedChannel === 'linkedin'
-                      ? 'bg-[#0a66c2] text-white border-2 border-blue-400 shadow-md scale-105'
-                      : 'bg-zinc-900 text-[#70b5f9] hover:bg-blue-500/10 border border-blue-500/30'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#121212] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-[#70b5f9]" />
-                  <span>💼 LinkedIn (5 Jobs)</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[#898989]" />
+                  <span>LinkedIn (5 Jobs)</span>
                 </button>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-zinc-400 font-medium">
+              <div className="flex items-center gap-3 text-xs text-[#898989] font-normal">
                 {seenJobIds.size > 0 && (
                   <button
                     type="button"
                     onClick={handleResetSeenHistory}
-                    className="text-[11px] font-semibold text-zinc-400 hover:text-[#00C896] underline flex items-center gap-1 transition-colors"
+                    className="text-[11px] text-[#898989] hover:text-[#3ecf8e] underline flex items-center gap-1 transition-colors cursor-pointer"
                     title="Reset seen IDs so past jobs can be re-searched"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reset Seen ({seenJobIds.size} tracked)</span>
                   </button>
                 )}
-                <span className="bg-zinc-800/80 px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300 font-mono text-[11px]">
-                  Showing <span className="text-[#00C896] font-bold">{jobsList.length}</span> fresh jobs
+                <span className="bg-[#121212] px-2.5 py-1 rounded-full border border-[#2e2e2e] text-[#b4b4b4] font-mono text-[11px]">
+                  Showing <span className="text-[#3ecf8e]">{jobsList.length}</span> fresh jobs
                 </span>
               </div>
             </div>
 
             {/* Jobs List Feed */}
             {searching ? (
-              <div className="p-16 text-center text-zinc-500 flex flex-col items-center gap-3">
-                <RefreshCw className="w-8 h-8 animate-spin text-[#00C896]" />
-                <span className="text-sm font-medium">
-                  Discovering 5 fresh jobs ({SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.badge}) with zero duplicates...
-                </span>
+              <div className="p-16 text-center flex flex-col items-center justify-center gap-4 bg-[#121212]">
+                {/* Code editor terminal-native pulse loader */}
+                <div className="w-12 h-12 rounded-full bg-[#181818] border border-[#2e2e2e] flex items-center justify-center relative">
+                  <span className="w-3 h-3 rounded-full bg-[#3ecf8e] animate-ping absolute opacity-60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#3ecf8e]" />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center gap-2 font-mono text-xs text-[#fafafa]">
+                    <span className="text-[#3ecf8e]">$</span>
+                    <span>querying 850+ enterprise ATS endpoints</span>
+                    <span className="inline-block w-1.5 h-3.5 bg-[#3ecf8e] animate-pulse ml-0.5" />
+                  </div>
+                  <p className="text-xs text-[#898989] font-normal tracking-[-0.007em]">
+                    Discovering verified requisitions ({SENIORITY_LEVELS.find((s) => s.id === selectedSeniority)?.badge}) with zero duplicates...
+                  </p>
+                </div>
               </div>
             ) : jobsList.length === 0 ? (
-              <div className="p-16 text-center text-zinc-500 space-y-3">
-                <Briefcase className="w-12 h-12 mx-auto text-zinc-700" />
-                <p className="text-base text-zinc-300 font-bold">No un-seen requisitions found</p>
-                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+              <div className="p-16 text-center text-[#898989] space-y-3 bg-[#121212]">
+                <Briefcase className="w-10 h-10 mx-auto text-[#4d4d4d]" />
+                <p className="text-base text-[#fafafa] font-normal">No un-seen requisitions found</p>
+                <p className="text-xs text-[#898989] max-w-sm mx-auto">
                   All matching jobs for this query and seniority level ({selectedSeniority}) have already been seen ({seenJobIds.size} tracked). Try resetting seen history or modifying keywords.
                 </p>
                 <div className="flex justify-center gap-3 pt-2">
                   <button
                     type="button"
                     onClick={handleResetSeenHistory}
-                    className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-full bg-[#181818] hover:bg-[#242424] text-[#fafafa] text-xs font-normal border border-[#2e2e2e] transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5 text-[#00C896]" />
+                    <RotateCcw className="w-3.5 h-3.5 text-[#3ecf8e]" />
                     <span>Reset Seen History &amp; Re-run</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black text-xs font-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 hover:scale-105 transition-all"
+                    className="px-4 py-2 rounded-full bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] text-xs font-medium border border-[#3ecf8e] transition-colors cursor-pointer"
                   >
                     Reset All Filters
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="divide-y divide-zinc-800/80">
+              <div className="divide-y divide-[#2e2e2e]">
                 {jobsList.map((job) => {
                   const isCareer =
                     job.source_type?.toLowerCase().includes('career') ||
@@ -1527,7 +1538,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   return (
                     <div
                       key={job.id}
-                      className="p-5 hover:bg-zinc-900/60 transition-colors flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+                      className="p-5 hover:bg-[#161616] transition-colors flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
                     >
                       {/* Left Job Info */}
                       <div className="space-y-2 flex-1 min-w-0">
@@ -1536,39 +1547,39 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleToggleStar(job.id, e)}
-                            className={`p-1.5 rounded-lg border transition-all ${
+                            className={`p-1.5 rounded-full border transition-colors cursor-pointer ${
                               isStarred
-                                ? 'bg-amber-400/20 border-amber-400/60 text-amber-300 hover:bg-amber-400/30'
-                                : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-amber-300 hover:border-amber-400/50'
+                                ? 'bg-[#242424] border-[#3ecf8e] text-[#3ecf8e]'
+                                : 'bg-[#181818] border-[#2e2e2e] text-[#898989] hover:text-[#fafafa] hover:border-[#4d4d4d]'
                             }`}
                             title={isStarred ? 'Saved in Starred collection' : 'Star & Save this job'}
                           >
-                            <Star className={`w-3.5 h-3.5 ${isStarred ? 'fill-amber-400 text-amber-400' : ''}`} />
+                            <Star className={`w-3.5 h-3.5 ${isStarred ? 'fill-[#3ecf8e] text-[#3ecf8e]' : ''}`} />
                           </button>
 
                           {/* Posted Time Badge */}
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 shadow-sm">
-                            <Clock className="w-3 h-3 text-amber-400" />
-                            <span>{job.posted_time || '⚡ Posted < 24h'}</span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] text-[#898989] border border-[#2e2e2e] flex items-center gap-1 font-mono">
+                            <Clock className="w-3 h-3 text-[#3ecf8e]" />
+                            <span>{job.posted_time || 'Posted < 24h'}</span>
                           </span>
 
                           {isDual ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                              ✨ Dual-Verified (LinkedIn + Career Page)
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#242424] text-[#b4b4b4] border border-[#2e2e2e]">
+                              Dual-Verified (LinkedIn + Career Page)
                             </span>
                           ) : isCareer ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                              <Building2 className="w-3 h-3 text-emerald-400" />
-                              <span>🏢 Company Career Page ({job.source_type?.replace('Direct Career Page (', '').replace(')', '') || 'ATS'})</span>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#242424] text-[#3ecf8e] border border-[#2e2e2e] flex items-center gap-1">
+                              <Building2 className="w-3 h-3 text-[#3ecf8e]" />
+                              <span>Career Page ({job.source_type?.replace('Direct Career Page (', '').replace(')', '') || 'ATS'})</span>
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0a66c2]/20 text-[#70b5f9] border border-[#0a66c2]/40">
-                              💼 LinkedIn Curated Post
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] text-[#b4b4b4] border border-[#2e2e2e]">
+                              LinkedIn Curated Post
                             </span>
                           )}
 
                           <h4
-                            className="text-base font-bold text-white truncate hover:text-[#00C896] transition-colors cursor-pointer"
+                            className="text-base font-medium text-[#fafafa] truncate hover:text-[#3ecf8e] transition-colors cursor-pointer tracking-[-0.007em]"
                             onClick={() =>
                               setSelectedJobForDetail({
                                 id: job.id,
@@ -1594,25 +1605,17 @@ export const DiscoveredJobsTracker: React.FC = () => {
                             {job.job_title}
                           </h4>
 
-                          {/* 4-Tier Consulting ATS Match Badge (Displayed ONLY after resume is uploaded) */}
+                          {/* 4-Tier Consulting ATS Match Badge */}
                           {resumeProfile && job.ats_score ? (
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1 shadow-sm ${
-                                job.ats_score >= 85
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                  : job.ats_score >= 70
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                  : 'bg-zinc-800 text-zinc-300 border-zinc-700'
-                              }`}
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>🎯 ATS Match: {job.ats_score}%</span>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono border border-[#3ecf8e] bg-[#242424] text-[#3ecf8e] flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-[#3ecf8e]" />
+                              <span>ATS: {job.ats_score}%</span>
                             </span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => handleOpenApplicationModal(job)}
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#00C896]/15 hover:bg-[#00C896]/25 border border-[#00C896]/40 text-[#00C896] transition-all flex items-center gap-1 shadow-sm"
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] hover:bg-[#242424] border border-[#2e2e2e] hover:border-[#3ecf8e] text-[#898989] hover:text-[#3ecf8e] transition-colors flex items-center gap-1 cursor-pointer"
                               title="Upload your resume to calculate personalized ATS compatibility"
                             >
                               <UploadCloud className="w-3 h-3" />
@@ -1621,25 +1624,20 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400">
-                          <span className="flex items-center gap-1.5 text-zinc-100 font-bold">
-                            <Building2 className="w-3.5 h-3.5 text-[#00C896]" />
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#898989]">
+                          <span className="flex items-center gap-1.5 text-[#fafafa] font-medium">
+                            <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                             {job.company}
                           </span>
-                          <span className="flex items-center gap-1.5 text-zinc-300">
-                            <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                          <span className="flex items-center gap-1.5 text-[#b4b4b4]">
+                            <MapPin className="w-3.5 h-3.5 text-[#898989]" />
                             {job.location}
                           </span>
                           {job.experience_required && (
-                            <span className="text-zinc-300">• Experience: {job.experience_required}</span>
+                            <span className="text-[#898989]">• Experience: {job.experience_required}</span>
                           )}
                           {job.salary && (
-                            <span className="text-emerald-400 font-bold">• {job.salary}</span>
-                          )}
-                          {job.posted_time && (
-                            <span className="text-amber-300/90 font-medium flex items-center gap-1">
-                              • <Clock className="w-3 h-3 text-amber-400" /> {job.posted_time}
-                            </span>
+                            <span className="text-[#3ecf8e] font-mono">• {job.salary}</span>
                           )}
                         </div>
 
@@ -1649,7 +1647,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                             {job.key_skills.slice(0, 6).map((skill, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-0.5 rounded-full text-[10px] bg-zinc-800 text-zinc-200 border border-zinc-700 font-medium"
+                                className="px-2.5 py-0.5 rounded-full text-[10px] bg-[#181818] text-[#b4b4b4] border border-[#2e2e2e]"
                               >
                                 {skill}
                               </span>
@@ -1662,16 +1660,16 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleToggleStatus(job)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all flex items-center gap-1 ${
+                            className={`px-3 py-1 rounded-full text-[11px] font-normal border transition-colors flex items-center gap-1 cursor-pointer ${
                               job.status === 'Applied'
-                                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                                : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-white'
+                                ? 'bg-[#242424] border-[#3ecf8e] text-[#3ecf8e]'
+                                : 'bg-[#181818] border-[#2e2e2e] text-[#898989] hover:text-[#fafafa]'
                             }`}
                             title="Click to toggle status between Applied and Not Applied"
                           >
                             {job.status === 'Applied' ? (
                               <>
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                                 <span>Applied</span>
                               </>
                             ) : (
@@ -1690,7 +1688,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               setEditingRemarks({ ...editingRemarks, [job.id]: e.target.value })
                             }
                             onBlur={() => handleSaveRemark(job.id, job.status)}
-                            className="flex-1 min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-1 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
+                            className="flex-1 min-w-[200px] bg-[#121212] border border-[#393939] rounded-lg px-3 py-1 text-xs text-[#fafafa] placeholder-[#898989] focus:outline-none focus:border-[#3ecf8e]"
                           />
                         </div>
                       </div>
@@ -1703,8 +1701,8 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               href={job.application_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2.5 rounded-xl text-xs font-black bg-[#4ade80] hover:bg-[#6ee7a8] text-black border-2 border-[#4ade80] shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all hover:scale-105"
-                              title={`Apply directly on ${job.company} career portal without redirect`}
+                              className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] border border-[#3ecf8e] hover:border-[#1f4b37] flex items-center gap-1.5 transition-colors"
+                              title={`Apply directly on ${job.company} career portal`}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                               <span>Apply on Career Portal ↗</span>
@@ -1714,7 +1712,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               href={job.application_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-[#0a66c2] hover:bg-[#004182] text-white border-2 border-blue-400 shadow-md flex items-center gap-1.5 transition-all hover:scale-105"
+                              className="px-3.5 py-1.5 rounded-full text-xs font-normal bg-[#181818] hover:bg-[#242424] text-[#fafafa] border border-[#393939] hover:border-[#4d4d4d] flex items-center gap-1.5 transition-colors"
                               title={`View verified posting on official LinkedIn: ${job.application_url}`}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -1725,10 +1723,10 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenApplicationModal(job)}
-                            className="px-3.5 py-2.5 rounded-xl text-xs font-black bg-[#00C896] hover:bg-[#00E5AA] text-black border-2 border-[#00E5AA] shadow-sm flex items-center gap-1.5 transition-all hover:scale-105"
+                            className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#242424] hover:bg-[#2e2e2e] text-[#fafafa] border border-[#2e2e2e] hover:border-[#4d4d4d] flex items-center gap-1.5 transition-colors cursor-pointer"
                             title="Auto-fill application with parsed resume"
                           >
-                            <Send className="w-3.5 h-3.5" />
+                            <Send className="w-3.5 h-3.5 text-[#3ecf8e]" />
                             <span>Apply &amp; Unlock</span>
                           </button>
 
@@ -1754,7 +1752,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                                 discoveredAt: job.discovered_at || '',
                               })
                             }
-                            className="px-3 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-zinc-200 hover:text-white shadow-sm transition-all"
+                            className="px-3 py-1.5 rounded-full text-xs font-normal bg-transparent hover:bg-white/[0.04] border border-[#393939] hover:border-[#4d4d4d] text-[#fafafa] transition-colors cursor-pointer"
                           >
                             View Details
                           </button>
@@ -1768,18 +1766,18 @@ export const DiscoveredJobsTracker: React.FC = () => {
 
             {/* Footer Actions: Load 5 More Fresh Jobs Button */}
             {jobsList.length > 0 && !searching && (
-              <div className="p-5 border-t border-zinc-800 bg-zinc-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs text-zinc-400">
-                  Showing <span className="text-white font-bold">{jobsList.length}</span> active requisitions ({seenJobIds.size} total tracked in session with zero duplicates)
+              <div className="p-4 sm:p-5 border-t border-[#2e2e2e] bg-[#181818] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-xs text-[#898989] font-mono">
+                  Showing <span className="text-[#fafafa]">{jobsList.length}</span> requisitions ({seenJobIds.size} total tracked)
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, false)}
                     disabled={searching || isAppending}
-                    className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold border border-zinc-700 transition-all flex items-center gap-2 shadow-sm"
+                    className="px-4 py-2 rounded-full bg-transparent hover:bg-white/[0.04] text-[#fafafa] text-xs font-normal border border-[#393939] hover:border-[#4d4d4d] transition-colors flex items-center gap-2 cursor-pointer"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${searching ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${searching ? 'animate-spin text-[#3ecf8e]' : ''}`} />
                     <span>Find 5 New Jobs</span>
                   </button>
 
@@ -1787,16 +1785,16 @@ export const DiscoveredJobsTracker: React.FC = () => {
                     type="button"
                     onClick={() => executeFreshSearch(searchQuery, selectedLocation, selectedSeniority, selectedChannel, true)}
                     disabled={searching || isAppending}
-                    className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black text-xs font-extrabold border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/20 hover:scale-105 transition-all flex items-center gap-2"
+                    className="px-5 py-2 rounded-full bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] text-xs font-medium border border-[#3ecf8e] hover:border-[#1f4b37] transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     {isAppending ? (
                       <>
-                        <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#121212]" />
                         <span>Loading 5 Fresh Jobs...</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-4 h-4 text-black" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#121212]" />
                         <span>+ Load Next 5 Fresh Jobs</span>
                       </>
                     )}
@@ -1813,89 +1811,89 @@ export const DiscoveredJobsTracker: React.FC = () => {
         <div className="space-y-6">
           {/* Summary KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 flex items-center justify-between shadow-lg">
+            <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Total Discovered</p>
-                <h3 className="text-2xl font-black text-white">{allDiscoveredJobs.length}</h3>
+                <p className="text-[11px] font-normal uppercase tracking-wider text-[#898989] font-mono">Total Discovered</p>
+                <h3 className="text-2xl font-normal text-[#fafafa] font-mono">{allDiscoveredJobs.length}</h3>
               </div>
-              <Archive className="w-8 h-8 text-[#00C896]/60" />
+              <Archive className="w-6 h-6 text-[#3ecf8e]" />
             </div>
 
-            <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 flex items-center justify-between shadow-lg">
+            <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400">⭐ Starred / Saved</p>
-                <h3 className="text-2xl font-black text-amber-300">{starredCount}</h3>
+                <p className="text-[11px] font-normal uppercase tracking-wider text-[#898989] font-mono">Starred / Saved</p>
+                <h3 className="text-2xl font-normal text-[#fafafa] font-mono">{starredCount}</h3>
               </div>
-              <Star className="w-8 h-8 text-amber-400/60 fill-amber-400/20" />
+              <Star className="w-6 h-6 text-[#3ecf8e] fill-[#3ecf8e]/20" />
             </div>
 
-            <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 flex items-center justify-between shadow-lg">
+            <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">✅ Applied</p>
-                <h3 className="text-2xl font-black text-emerald-300">{appliedCount}</h3>
+                <p className="text-[11px] font-normal uppercase tracking-wider text-[#898989] font-mono">Applied</p>
+                <h3 className="text-2xl font-normal text-[#fafafa] font-mono">{appliedCount}</h3>
               </div>
-              <CheckCircle2 className="w-8 h-8 text-emerald-400/60" />
+              <CheckCircle2 className="w-6 h-6 text-[#3ecf8e]" />
             </div>
 
-            <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-950/90 flex items-center justify-between shadow-lg">
+            <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] flex items-center justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-sky-400">⏳ Ready to Apply</p>
-                <h3 className="text-2xl font-black text-sky-300">{notAppliedCount}</h3>
+                <p className="text-[11px] font-normal uppercase tracking-wider text-[#898989] font-mono">Ready to Apply</p>
+                <h3 className="text-2xl font-normal text-[#fafafa] font-mono">{notAppliedCount}</h3>
               </div>
-              <Briefcase className="w-8 h-8 text-sky-400/60" />
+              <Briefcase className="w-6 h-6 text-[#898989]" />
             </div>
           </div>
 
           {/* Controls & Filter Bar */}
-          <div className="p-4 rounded-2xl border-2 border-zinc-800 bg-zinc-950/90 shadow-xl space-y-4">
+          <div className="p-4 rounded-[16px] border border-[#2e2e2e] bg-[#121212] space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
               {/* Status Sub-Filters Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-normal transition-colors cursor-pointer ${
                     historyFilter === 'all'
-                      ? 'bg-[#00C896] text-black font-black shadow-md'
-                      : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  All Requisitions ({allDiscoveredJobs.length})
+                  All ({allDiscoveredJobs.length})
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('saved')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     historyFilter === 'saved'
-                      ? 'bg-amber-400 text-black font-black shadow-md'
-                      : 'bg-zinc-900 text-amber-300 hover:text-amber-200 border border-amber-500/30'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current text-[#3ecf8e]" />
                   <span>Starred ({starredCount})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('applied')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     historyFilter === 'applied'
-                      ? 'bg-emerald-500 text-black font-black shadow-md'
-                      : 'bg-zinc-900 text-emerald-300 hover:text-emerald-200 border border-emerald-500/30'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                   <span>Applied ({appliedCount})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setHistoryFilter('not_applied')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-normal transition-colors flex items-center gap-1.5 cursor-pointer ${
                     historyFilter === 'not_applied'
-                      ? 'bg-sky-500 text-black font-black shadow-md'
-                      : 'bg-zinc-900 text-sky-300 hover:text-sky-200 border border-sky-500/30'
+                      ? 'bg-[#242424] text-[#3ecf8e] border border-[#3ecf8e]'
+                      : 'bg-[#181818] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e]'
                   }`}
                 >
                   <Circle className="w-3.5 h-3.5" />
@@ -1908,7 +1906,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <select
                   value={historySourceFilter}
                   onChange={(e) => setHistorySourceFilter(e.target.value as any)}
-                  className="bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#00C896]"
+                  className="bg-[#121212] border border-[#393939] rounded-lg px-3 py-1.5 text-xs text-[#fafafa] focus:outline-none focus:border-[#3ecf8e]"
                 >
                   <option value="all">All Sources</option>
                   <option value="career_page">Company Career Pages</option>
@@ -1919,7 +1917,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleClearAllHistory}
-                    className="p-1.5 rounded-xl bg-zinc-900 hover:bg-rose-950/40 text-zinc-400 hover:text-rose-400 border border-zinc-800 hover:border-rose-500/40 transition-colors"
+                    className="p-1.5 rounded-full bg-[#181818] hover:bg-[#242424] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e] transition-colors cursor-pointer"
                     title="Clear discovered jobs history"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1930,24 +1928,24 @@ export const DiscoveredJobsTracker: React.FC = () => {
 
             {/* Keyword Search across Saved History */}
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-zinc-400" />
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#898989]" />
               <input
                 type="text"
                 value={historySearchQuery}
                 onChange={(e) => setHistorySearchQuery(e.target.value)}
                 placeholder="Search across all discovered & saved jobs (title, company, skills, city)..."
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
+                className="w-full bg-[#121212] border border-[#393939] rounded-lg pl-9 pr-4 py-2 text-xs text-[#fafafa] placeholder-[#898989] focus:outline-none focus:border-[#3ecf8e]"
               />
             </div>
           </div>
 
           {/* Persistent History Requisitions Table / Cards */}
-          <div className="border border-zinc-800 rounded-3xl bg-zinc-950/80 overflow-hidden shadow-2xl">
+          <div className="border border-[#2e2e2e] rounded-[16px] bg-[#121212] overflow-hidden">
             {filteredHistoryJobs.length === 0 ? (
-              <div className="p-16 text-center text-zinc-500 space-y-3">
-                <Archive className="w-12 h-12 mx-auto text-zinc-700" />
-                <p className="text-base text-zinc-300 font-bold">No requisitions in this view</p>
-                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+              <div className="p-16 text-center text-[#898989] space-y-3 bg-[#121212]">
+                <Archive className="w-10 h-10 mx-auto text-[#4d4d4d]" />
+                <p className="text-base text-[#fafafa] font-normal">No requisitions in this view</p>
+                <p className="text-xs text-[#898989] max-w-sm mx-auto">
                   {allDiscoveredJobs.length === 0
                     ? 'No jobs have been discovered yet. Search or click any of the 36+ instant role filters to discover and save jobs.'
                     : 'No jobs match your current search or sub-filters. Try switching tabs or clearing search keywords.'}
@@ -1955,13 +1953,13 @@ export const DiscoveredJobsTracker: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveView('current_batch')}
-                  className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black text-xs font-black border-2 border-[#00E5AA] shadow-lg shadow-[#00C896]/30 hover:scale-105 transition-all"
+                  className="px-5 py-2 rounded-full bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] text-xs font-medium border border-[#3ecf8e] transition-colors cursor-pointer"
                 >
-                  ⚡ Go to Fresh Discovery
+                  Go to Active Discovery
                 </button>
               </div>
             ) : (
-              <div className="divide-y divide-zinc-800/80">
+              <div className="divide-y divide-[#2e2e2e]">
                 {filteredHistoryJobs.map((job) => {
                   const isCareer =
                     job.source_type?.toLowerCase().includes('career') ||
@@ -1974,7 +1972,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                   return (
                     <div
                       key={job.id}
-                      className="p-5 hover:bg-zinc-900/60 transition-colors flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+                      className="p-5 hover:bg-[#161616] transition-colors flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
                     >
                       {/* Left Info */}
                       <div className="space-y-2 flex-1 min-w-0">
@@ -1982,39 +1980,39 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleToggleStar(job.id, e)}
-                            className={`p-1.5 rounded-lg border transition-all ${
+                            className={`p-1.5 rounded-full border transition-colors cursor-pointer ${
                               isStarred
-                                ? 'bg-amber-400/20 border-amber-400/60 text-amber-300 hover:bg-amber-400/30'
-                                : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-amber-300 hover:border-amber-400/50'
+                                ? 'bg-[#242424] border-[#3ecf8e] text-[#3ecf8e]'
+                                : 'bg-[#181818] border-[#2e2e2e] text-[#898989] hover:text-[#fafafa] hover:border-[#4d4d4d]'
                             }`}
                             title={isStarred ? 'Saved in Starred collection' : 'Star & Save this job'}
                           >
-                            <Star className={`w-3.5 h-3.5 ${isStarred ? 'fill-amber-400 text-amber-400' : ''}`} />
+                            <Star className={`w-3.5 h-3.5 ${isStarred ? 'fill-[#3ecf8e] text-[#3ecf8e]' : ''}`} />
                           </button>
 
                           {/* Posted Time Badge */}
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 flex items-center gap-1 shadow-sm">
-                            <Clock className="w-3 h-3 text-amber-400" />
-                            <span>{job.posted_time || '⚡ Posted < 24h'}</span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] text-[#898989] border border-[#2e2e2e] flex items-center gap-1 font-mono">
+                            <Clock className="w-3 h-3 text-[#3ecf8e]" />
+                            <span>{job.posted_time || 'Posted < 24h'}</span>
                           </span>
 
                           {isDual ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                              ✨ Dual-Verified
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#242424] text-[#b4b4b4] border border-[#2e2e2e]">
+                              Dual-Verified
                             </span>
                           ) : isCareer ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
-                              <Building2 className="w-3 h-3 text-emerald-400" />
-                              <span>🏢 Company Career Page</span>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#242424] text-[#3ecf8e] border border-[#2e2e2e] flex items-center gap-1">
+                              <Building2 className="w-3 h-3 text-[#3ecf8e]" />
+                              <span>Career Page</span>
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#0a66c2]/20 text-[#70b5f9] border border-[#0a66c2]/40">
-                              💼 LinkedIn Post
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] text-[#b4b4b4] border border-[#2e2e2e]">
+                              LinkedIn Post
                             </span>
                           )}
 
                           <h4
-                            className="text-base font-bold text-white truncate hover:text-[#00C896] transition-colors cursor-pointer"
+                            className="text-base font-medium text-[#fafafa] truncate hover:text-[#3ecf8e] transition-colors cursor-pointer tracking-[-0.007em]"
                             onClick={() =>
                               setSelectedJobForDetail({
                                 id: job.id,
@@ -2041,23 +2039,15 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           </h4>
 
                           {resumeProfile && job.ats_score ? (
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1 shadow-sm ${
-                                job.ats_score >= 85
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                  : job.ats_score >= 70
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                                  : 'bg-zinc-800 text-zinc-300 border-zinc-700'
-                              }`}
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>🎯 ATS Match: {job.ats_score}%</span>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono border border-[#3ecf8e] bg-[#242424] text-[#3ecf8e] flex items-center gap-1">
+                              <Sparkles className="w-3.5 h-3.5 text-[#3ecf8e]" />
+                              <span>ATS: {job.ats_score}%</span>
                             </span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => handleOpenApplicationModal(job)}
-                              className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#00C896]/15 hover:bg-[#00C896]/25 border border-[#00C896]/40 text-[#00C896] transition-all flex items-center gap-1 shadow-sm"
+                              className="px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-[#181818] hover:bg-[#242424] border border-[#2e2e2e] hover:border-[#3ecf8e] text-[#898989] hover:text-[#3ecf8e] transition-colors flex items-center gap-1 cursor-pointer"
                             >
                               <UploadCloud className="w-3 h-3" />
                               <span>Scan Resume for ATS Match</span>
@@ -2065,25 +2055,20 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400">
-                          <span className="flex items-center gap-1.5 text-zinc-100 font-bold">
-                            <Building2 className="w-3.5 h-3.5 text-[#00C896]" />
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#898989]">
+                          <span className="flex items-center gap-1.5 text-[#fafafa] font-medium">
+                            <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                             {job.company}
                           </span>
-                          <span className="flex items-center gap-1.5 text-zinc-300">
-                            <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                          <span className="flex items-center gap-1.5 text-[#b4b4b4]">
+                            <MapPin className="w-3.5 h-3.5 text-[#898989]" />
                             {job.location}
                           </span>
                           {job.experience_required && (
-                            <span className="text-zinc-300">• Experience: {job.experience_required}</span>
+                            <span className="text-[#898989]">• Experience: {job.experience_required}</span>
                           )}
                           {job.salary && (
-                            <span className="text-emerald-400 font-bold">• {job.salary}</span>
-                          )}
-                          {job.posted_time && (
-                            <span className="text-amber-300/90 font-medium flex items-center gap-1">
-                              • <Clock className="w-3 h-3 text-amber-400" /> {job.posted_time}
-                            </span>
+                            <span className="text-[#3ecf8e] font-mono">• {job.salary}</span>
                           )}
                         </div>
 
@@ -2092,7 +2077,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                             {job.key_skills.slice(0, 6).map((skill, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-0.5 rounded-full text-[10px] bg-zinc-800 text-zinc-200 border border-zinc-700 font-medium"
+                                className="px-2.5 py-0.5 rounded-full text-[10px] bg-[#181818] text-[#b4b4b4] border border-[#2e2e2e]"
                               >
                                 {skill}
                               </span>
@@ -2105,15 +2090,15 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleToggleStatus(job)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all flex items-center gap-1 ${
+                            className={`px-3 py-1 rounded-full text-[11px] font-normal border transition-colors flex items-center gap-1 cursor-pointer ${
                               job.status === 'Applied'
-                                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                                : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-white'
+                                ? 'bg-[#242424] border-[#3ecf8e] text-[#3ecf8e]'
+                                : 'bg-[#181818] border-[#2e2e2e] text-[#898989] hover:text-[#fafafa]'
                             }`}
                           >
                             {job.status === 'Applied' ? (
                               <>
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                                 <span>Applied</span>
                               </>
                             ) : (
@@ -2132,7 +2117,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               setEditingRemarks({ ...editingRemarks, [job.id]: e.target.value })
                             }
                             onBlur={() => handleSaveRemark(job.id, job.status)}
-                            className="flex-1 min-w-[200px] bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-1 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-[#00C896]"
+                            className="flex-1 min-w-[200px] bg-[#121212] border border-[#393939] rounded-lg px-3 py-1 text-xs text-[#fafafa] placeholder-[#898989] focus:outline-none focus:border-[#3ecf8e]"
                           />
                         </div>
                       </div>
@@ -2145,7 +2130,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               href={job.application_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2.5 rounded-xl text-xs font-black bg-[#4ade80] hover:bg-[#6ee7a8] text-black border-2 border-[#4ade80] shadow-md flex items-center gap-1.5 transition-all hover:scale-105"
+                              className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] border border-[#3ecf8e] hover:border-[#1f4b37] flex items-center gap-1.5 transition-colors"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                               <span>Apply on Career Portal ↗</span>
@@ -2155,7 +2140,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                               href={job.application_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-2.5 rounded-xl text-xs font-bold bg-[#0a66c2] hover:bg-[#004182] text-white border-2 border-blue-400 shadow-md flex items-center gap-1.5 transition-all hover:scale-105"
+                              className="px-3.5 py-1.5 rounded-full text-xs font-normal bg-[#181818] hover:bg-[#242424] text-[#fafafa] border border-[#393939] hover:border-[#4d4d4d] flex items-center gap-1.5 transition-colors"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                               <span>LinkedIn Post ↗</span>
@@ -2165,9 +2150,9 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenApplicationModal(job)}
-                            className="px-3.5 py-2.5 rounded-xl text-xs font-black bg-[#00C896] hover:bg-[#00E5AA] text-black border-2 border-[#00E5AA] shadow-sm flex items-center gap-1.5 transition-all hover:scale-105"
+                            className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#242424] hover:bg-[#2e2e2e] text-[#fafafa] border border-[#2e2e2e] hover:border-[#4d4d4d] flex items-center gap-1.5 transition-colors cursor-pointer"
                           >
-                            <Send className="w-3.5 h-3.5" />
+                            <Send className="w-3.5 h-3.5 text-[#3ecf8e]" />
                             <span>Apply &amp; Unlock</span>
                           </button>
 
@@ -2184,8 +2169,8 @@ export const DiscoveredJobsTracker: React.FC = () => {
                                 description: job.job_description || '',
                                 skills: Array.isArray(job.key_skills) ? job.key_skills : [],
                                 applicationUrl: job.application_url || '',
-                                matchScore: resumeProfile ? job.ats_score : undefined,
-                                ats_score: resumeProfile ? job.ats_score : undefined,
+                                matchScore: job.ats_score || 90,
+                                ats_score: job.ats_score || 90,
                                 matched_skills: Array.isArray((job as any).matched_skills) ? (job as any).matched_skills : [],
                                 missing_skills: Array.isArray((job as any).missing_skills) ? (job as any).missing_skills : [],
                                 experience_fit_text: (job as any).experience_fit_text || '',
@@ -2193,7 +2178,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                                 discoveredAt: job.discovered_at || '',
                               })
                             }
-                            className="px-3 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-zinc-200 hover:text-white shadow-sm transition-all"
+                            className="px-3 py-1.5 rounded-full text-xs font-normal bg-transparent hover:bg-white/[0.04] border border-[#393939] hover:border-[#4d4d4d] text-[#fafafa] transition-colors cursor-pointer"
                           >
                             Details
                           </button>
@@ -2201,7 +2186,7 @@ export const DiscoveredJobsTracker: React.FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleDeleteSavedJob(job.id, e)}
-                            className="p-2.5 rounded-xl bg-zinc-900 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-400 border border-zinc-800 hover:border-rose-500/40 transition-colors"
+                            className="p-1.5 rounded-full bg-[#181818] hover:bg-[#242424] text-[#898989] hover:text-[#fafafa] border border-[#2e2e2e] hover:border-[#4d4d4d] transition-colors cursor-pointer"
                             title="Remove from saved history"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

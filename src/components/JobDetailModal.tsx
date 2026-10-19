@@ -7,13 +7,10 @@ import {
   DollarSign,
   Clock3,
   ExternalLink,
-  CheckCircle2,
   Share2,
-  Sparkles,
   Send,
   Users,
   FileCheck,
-  AlertTriangle,
   Lock,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -60,7 +57,6 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   job,
   candidateProfile,
   onApply,
-  onUploadResumeClick,
 }) => {
   if (!isOpen || !job) return null;
 
@@ -77,64 +73,52 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl bg-[#111] border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="relative w-full max-w-3xl bg-[#121212] border border-[#2e2e2e] rounded-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="p-6 border-b border-zinc-800 bg-zinc-900/50 space-y-3">
+        <div className="p-6 border-b border-[#2e2e2e] bg-[#121212] space-y-3">
           <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#00C896]/15 border border-[#00C896]/30 text-[#00C896]">
-                  Verified Tech Job
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-normal bg-[#242424] border border-[#2e2e2e] text-[#3ecf8e]">
+                  Verified ATS Posting
                 </span>
                 {job.posted_time && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 flex items-center gap-1">
-                    <Clock3 className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-normal bg-[#181818] border border-[#2e2e2e] text-[#b4b4b4] flex items-center gap-1">
+                    <Clock3 className="w-3 h-3 text-[#3ecf8e]" />
                     <span>{job.posted_time}</span>
                   </span>
                 )}
                 {candidateProfile && job.ats_score ? (
-                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                    job.ats_score >= 85
-                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                      : job.ats_score >= 70
-                      ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                      : 'bg-zinc-800 border-zinc-700 text-zinc-300'
-                  }`}>
-                    🎯 ATS Score: {job.ats_score}%
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-normal border border-[#2e2e2e] bg-[#242424] text-[#3ecf8e]">
+                    ATS Score: {job.ats_score}%
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-zinc-800 border border-zinc-700 text-zinc-300">
-                    ⚡ Verified Active Requisition
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-normal bg-[#181818] border border-[#2e2e2e] text-[#898989]">
+                    Active Requisition
                   </span>
                 )}
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-white">{job.title}</h2>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-300">
-                <span className="flex items-center gap-1 font-bold text-white">
-                  <Building2 className="w-3.5 h-3.5 text-zinc-400" />
+              <h2 className="text-xl sm:text-2xl font-medium tracking-[-0.007em] text-[#fafafa]">{job.title}</h2>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#b4b4b4]">
+                <span className="flex items-center gap-1 font-medium text-[#fafafa]">
+                  <Building2 className="w-3.5 h-3.5 text-[#3ecf8e]" />
                   {job.company}
                 </span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                  {job.location || 'All India'}
+                  <MapPin className="w-3.5 h-3.5 text-[#898989]" />
+                  {job.location || 'All India (Remote & Nationwide)'}
                 </span>
                 {job.experience && (
                   <span className="flex items-center gap-1">
-                    <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
+                    <Briefcase className="w-3.5 h-3.5 text-[#898989]" />
                     {job.experience} Exp
                   </span>
                 )}
                 {job.salary && (
-                  <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                  <span className="flex items-center gap-1 text-[#3ecf8e] font-medium">
                     <DollarSign className="w-3.5 h-3.5" />
                     {job.salary}
-                  </span>
-                )}
-                {job.posted_time && (
-                  <span className="flex items-center gap-1 text-amber-300 font-medium">
-                    <Clock3 className="w-3.5 h-3.5 text-amber-400" />
-                    {job.posted_time}
                   </span>
                 )}
               </div>
@@ -143,7 +127,8 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition-colors shrink-0"
+              className="w-8 h-8 rounded-full bg-[#181818] hover:bg-[#242424] border border-[#2e2e2e] hover:border-[#4d4d4d] text-[#b4b4b4] hover:text-[#fafafa] flex items-center justify-center transition-colors shrink-0"
+              aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
@@ -151,83 +136,50 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm bg-[#121212]">
           {/* ATS Analysis Section */}
           {candidateProfile && job.ats_score ? (
-            <div className="p-4 rounded-2xl bg-zinc-900/90 border border-emerald-500/30 space-y-3 shadow-lg shadow-emerald-500/5">
+            <div className="p-4 rounded-[16px] bg-[#181818] border border-[#2e2e2e] space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm font-bold text-white">Real-Time ATS Resume Evaluation</span>
+                  <FileCheck className="w-4 h-4 text-[#3ecf8e]" />
+                  <span className="text-sm font-medium text-[#fafafa]">Real-Time ATS Resume Evaluation</span>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-sm">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#242424] border border-[#3ecf8e] text-[#3ecf8e] font-mono text-xs">
                   {job.ats_score}% Match
                 </span>
               </div>
               {job.experience_fit_text && (
-                <p className="text-xs text-zinc-300 font-medium">{job.experience_fit_text}</p>
+                <p className="text-xs text-[#b4b4b4] font-normal leading-relaxed">{job.experience_fit_text}</p>
               )}
               {Array.isArray(job.matched_skills) && job.matched_skills.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">
-                    ✓ Matched Skills ({job.matched_skills.length})
+                  <span className="text-[11px] font-normal text-[#3ecf8e] uppercase tracking-wider block">
+                    ✓ Matched Competencies ({job.matched_skills.length})
                   </span>
                   <div className="flex flex-wrap gap-1">
                     {job.matched_skills.map((s) => (
-                      <span key={s} className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      <span key={s} className="px-2.5 py-0.5 rounded-full text-xs font-normal bg-[#242424] text-[#fafafa] border border-[#2e2e2e]">
                         {s}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
-              {Array.isArray(job.missing_skills) && job.missing_skills.length > 0 && (
-                <div className="space-y-1">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">
-                    ⚠ Missing Keywords / Skills Gap ({job.missing_skills.length})
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {job.missing_skills.map((s) => (
-                      <span key={s} className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                        + {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-          ) : (
-            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#00C896]/10 border border-[#00C896]/20 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-[#00C896]" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">Want to see your live ATS Match Score?</h4>
-                  <p className="text-[11px] text-zinc-400">Upload your resume to check keyword gaps and ATS fit for this opening.</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onApply(job)}
-                className="px-4 py-2 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black text-xs font-black border-2 border-[#00E5AA] shadow-md shadow-[#00C896]/20 shrink-0 transition-all hover:scale-105"
-              >
-                Scan Resume
-              </button>
-            </div>
-          )}
+          ) : null}
 
           {/* Key Skills */}
           {Array.isArray(job.skills) && job.skills.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+              <h3 className="text-xs font-normal uppercase tracking-wider text-[#898989]">
                 Required Technical Stack & Skills
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {job.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-100"
+                    className="px-3 py-1 rounded-full bg-[#181818] border border-[#2e2e2e] text-xs font-normal text-[#fafafa]"
                   >
                     {skill}
                   </span>
@@ -238,41 +190,41 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
 
           {/* Job Description */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-              Full Job Description
+            <h3 className="text-xs font-normal uppercase tracking-wider text-[#898989]">
+              Requisition Description
             </h3>
-            <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-700 text-zinc-200 leading-relaxed whitespace-pre-line text-xs sm:text-sm font-sans">
+            <div className="p-4 rounded-[16px] bg-[#181818] border border-[#2e2e2e] text-[#b4b4b4] leading-relaxed whitespace-pre-line text-xs sm:text-sm font-sans">
               {job.description ||
-                `${job.title} at ${job.company}. Please review required technical skills and submit your resume directly.`}
+                `${job.title} at ${job.company}. Review the technical stack specifications above and submit your profile directly.`}
             </div>
           </div>
 
           {/* Hiring Team / Connections */}
           {Array.isArray(job.connections) && job.connections.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-[#00C896]" />
-                <span>Verified Talent Acquisition / Hiring Team</span>
+              <h3 className="text-xs font-normal uppercase tracking-wider text-[#898989] flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-[#3ecf8e]" />
+                <span>Verified Talent Acquisition / Hiring Contacts</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {job.connections.map((c, i) => (
                   <div
                     key={i}
-                    className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between"
+                    className="p-3 rounded-xl bg-[#181818] border border-[#2e2e2e] flex items-center justify-between"
                   >
                     <div>
-                      <p className="text-xs font-bold text-white">{c.name}</p>
-                      <p className="text-[11px] text-zinc-400">{c.title}</p>
+                      <p className="text-xs font-medium text-[#fafafa]">{c.name}</p>
+                      <p className="text-[11px] text-[#898989]">{c.title}</p>
                     </div>
                     {c.linkedin_url && (
                       <a
                         href={c.linkedin_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1 transition-colors shadow-sm"
+                        className="px-3 py-1 rounded-full bg-[#242424] hover:bg-[#2e2e2e] border border-[#2e2e2e] text-[#fafafa] text-xs font-normal flex items-center gap-1 transition-colors"
                       >
                         <span>LinkedIn</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3 text-[#3ecf8e]" />
                       </a>
                     )}
                   </div>
@@ -283,29 +235,29 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
         </div>
 
         {/* Footer / Action Bar */}
-        <div className="p-4 sm:p-6 border-t border-zinc-800 bg-zinc-900/95 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#2e2e2e] bg-[#121212] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleShare}
-              className="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-600 hover:border-zinc-400 text-white transition-colors shrink-0 shadow-sm"
+              className="p-2 rounded-full bg-[#181818] hover:bg-[#242424] border border-[#393939] hover:border-[#4d4d4d] text-[#fafafa] transition-colors shrink-0"
               title="Share Job Link"
             >
               <Share2 className="w-4 h-4" />
             </button>
-            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-[11px] text-zinc-300">
-              <Lock className="w-3.5 h-3.5 text-[#00C896] shrink-0" />
-              <span>Official LinkedIn Link unlocks upon submission</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#181818] border border-[#2e2e2e] text-[11px] text-[#898989]">
+              <Lock className="w-3 h-3 text-[#3ecf8e] shrink-0" />
+              <span>Official ATS application link verified</span>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => onApply(job)}
-            className="px-8 py-3 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-black font-black text-sm flex items-center justify-center gap-2 border-2 border-[#00E5AA] shadow-xl shadow-[#00C896]/30 hover:scale-105 transition-all"
+            className="px-6 py-2 rounded-full bg-[#3ecf8e] hover:bg-[#00c573] text-[#121212] font-medium text-xs sm:text-sm flex items-center justify-center gap-2 border border-[#3ecf8e] hover:border-[#1f4b37] transition-colors cursor-pointer"
           >
-            <Send className="w-4 h-4" />
-            <span>Apply Now & Unlock Link (0 Login)</span>
+            <Send className="w-3.5 h-3.5" />
+            <span>Apply Now (Zero Login Required)</span>
           </button>
         </div>
       </div>
