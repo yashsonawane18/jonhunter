@@ -11,8 +11,10 @@ import {
   X,
   FileCheck,
   Award,
+  Camera,
 } from 'lucide-react';
 import { AutoApplyBatchStatus, AutoApplyJobResult, fetchCareerAutoApplyStatus } from '../../lib/drcDiscoveryApi';
+import { CareerApplicationProofModal } from './CareerApplicationProofModal';
 
 interface CareerAutoApplyDrawerProps {
   isOpen: boolean;
@@ -29,6 +31,7 @@ export const CareerAutoApplyDrawer: React.FC<CareerAutoApplyDrawerProps> = ({
 }) => {
   const [batchStatus, setBatchStatus] = useState<AutoApplyBatchStatus | null>(null);
   const [pollingError, setPollingError] = useState<string | null>(null);
+  const [selectedProof, setSelectedProof] = useState<AutoApplyJobResult | null>(null);
 
   useEffect(() => {
     if (!isOpen || !batchId) return;
@@ -191,6 +194,16 @@ export const CareerAutoApplyDrawer: React.FC<CareerAutoApplyDrawerProps> = ({
                     <div className="text-[10px] text-[#898989] font-mono">
                       {res.duration_ms} ms
                     </div>
+                    {isSuccess && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProof(res)}
+                        className="mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-[#3ecf8e] border border-emerald-500/30 flex items-center gap-1 transition-colors ml-auto shadow-sm"
+                      >
+                        <Camera className="w-3 h-3" />
+                        <span>View Proof</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -199,7 +212,7 @@ export const CareerAutoApplyDrawer: React.FC<CareerAutoApplyDrawerProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#262626] bg-[#161616] flex items-center justify-between text-xs">
+        <div className="p-4 border-t border-[#262626] bg-[#161619] flex items-center justify-between text-xs">
           <span className="text-[#898989]">
             {isDone
               ? '✅ Batch completed. Saved to SQLite applied history.'
@@ -214,6 +227,13 @@ export const CareerAutoApplyDrawer: React.FC<CareerAutoApplyDrawerProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Real-Time Proof & Screenshot Modal */}
+      <CareerApplicationProofModal
+        isOpen={Boolean(selectedProof)}
+        onClose={() => setSelectedProof(null)}
+        proof={selectedProof}
+      />
     </div>
   );
 };

@@ -25,6 +25,7 @@ import {
   FileText,
   Send,
   Info,
+  Camera,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -39,6 +40,7 @@ import {
 } from '../lib/drcDiscoveryApi';
 import { CareerDataPlanModal } from './career/CareerDataPlanModal';
 import { CareerAutoApplyDrawer } from './career/CareerAutoApplyDrawer';
+import { CareerProofsHistoryModal } from './career/CareerProofsHistoryModal';
 
 interface CareerPagesViewProps {
   onSelectJobForDetail?: (job: any) => void;
@@ -121,6 +123,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
   const [showAutoApplyDrawer, setShowAutoApplyDrawer] = useState<boolean>(false);
   const [activeBatchId, setActiveBatchId] = useState<string | null>(null);
   const [isSubmittingBatch, setIsSubmittingBatch] = useState<boolean>(false);
+  const [showProofsHistoryModal, setShowProofsHistoryModal] = useState<boolean>(false);
 
   const toggleJobSelection = (jobId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -332,6 +335,19 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
               <span>Browse 859 Employers</span>
               <span className="px-1.5 py-0.5 rounded text-[10px] bg-[#242424] text-[#3ecf8e] font-mono border border-[#3ecf8e]/30">
                 Catalog
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowProofsHistoryModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#18231e] hover:bg-[#20322b] text-[#3ecf8e] border border-[#3ecf8e]/40 transition-colors shadow-sm"
+              title="View real-time screenshot proofs and audit records of your applied jobs"
+            >
+              <Camera className="w-4 h-4 text-[#3ecf8e]" />
+              <span>Application Proofs</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 font-mono border border-emerald-500/30">
+                Live Audit
               </span>
             </button>
           </div>
@@ -1100,6 +1116,15 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
           onClose={() => setShowAutoApplyDrawer(false)}
           batchId={activeBatchId}
           totalSelected={selectedJobIds.size || 1}
+        />
+      )}
+
+      {/* 9. Candidate Real-Time Application Proofs History Modal */}
+      {showProofsHistoryModal && (
+        <CareerProofsHistoryModal
+          isOpen={showProofsHistoryModal}
+          onClose={() => setShowProofsHistoryModal(false)}
+          candidateEmail={savedDataPlan?.email || ''}
         />
       )}
     </div>
