@@ -6,6 +6,7 @@ Enhanced with Semantic Query Expansion, Priority Location Ranking & Instant Seed
 """
 
 import time
+import gc
 import sqlite3
 import threading
 from typing import List, Dict, Any, Optional
@@ -139,7 +140,7 @@ def _fetch_gh(info: Dict[str, str]) -> List[Dict[str, Any]]:
                     "raw_location": loc_name or normalized_loc,
                     "application_url": apply_url,
                     "source_type": f"Direct Career Page (Greenhouse)",
-                    "job_description": j.get("content", f"{title} at {comp}"),
+                    "job_description": (j.get("content", "") or f"{title} at {comp}")[:250],
                     "discovered_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                 })
     except Exception:
@@ -175,7 +176,7 @@ def _fetch_lv(info: Dict[str, str]) -> List[Dict[str, Any]]:
                         "raw_location": loc or normalized_loc,
                         "application_url": apply_url,
                         "source_type": f"Direct Career Page (Lever)",
-                        "job_description": desc,
+                        "job_description": (desc or f"{title} at {comp}")[:250],
                         "discovered_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                     })
     except Exception:
@@ -208,7 +209,7 @@ def _fetch_ash(info: Dict[str, str]) -> List[Dict[str, Any]]:
                     "raw_location": loc or normalized_loc,
                     "application_url": apply_url,
                     "source_type": f"Direct Career Page (Ashby)",
-                    "job_description": j.get("descriptionHtml", f"{title} at {comp}"),
+                    "job_description": (j.get("descriptionHtml", "") or f"{title} at {comp}")[:250],
                     "discovered_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                 })
     except Exception:
@@ -236,7 +237,7 @@ def _fetch_sr(info: Dict[str, str]) -> List[Dict[str, Any]]:
                 normalized_loc = normalize_location(loc)
                 portal_url = f"https://jobs.smartrecruiters.com/{slug}/{job_id}"
                 apply_url = f"https://jobs.smartrecruiters.com/{slug}/{job_id}/apply"
-                desc = f"{title} at {comp}. Location: {loc}."
+                desc = f"{title} at {comp}. Location: {loc}."[:250]
                 
                 items.append({
                     "id": f"ATS-SR-{job_id[:12]}",
@@ -263,7 +264,7 @@ def warm_ats_cache():
     start_t = time.time()
     all_fetched = []
 
-    with ThreadPoolExecutor(max_workers=20) as pool:
+    with ThreadPoolExecutor(max_workers=5) as pool:
         futures = []
         for info in EXPANDED_ATS_REGISTRY:
             ats = info["ats"]
@@ -291,6 +292,8 @@ def warm_ats_cache():
 
     with _INDEX_LOCK:
         if all_fetched:
+            # Memory optimization: cap maximum in-memory cached requisitions to 3,500
+            all_fetched = all_fetched[:3500]
             for item in all_fetched:
                 title = item.get("job_title", "")
                 desc = item.get("job_description", "")
@@ -299,10 +302,11 @@ def warm_ats_cache():
                 item["_loc_lower"] = item.get("location", "").lower()
                 item["_raw_loc_lower"] = loc.lower()
                 item["_is_india"] = is_india_job(loc)
-                item["_search_text"] = f"{title} {desc[:400]}".lower()
+                item["_search_text"] = f"{title} {desc[:250]}".lower()
             _INDEXED_JOBS = all_fetched
         _LAST_SYNC_TIME = time.time()
 
+    gc.collect()
     elapsed = time.time() - start_t
     print(f"[ATSCacheWarmer] Successfully cached {len(_INDEXED_JOBS)} active Pan-India ATS jobs in {elapsed:.2f}s")
 

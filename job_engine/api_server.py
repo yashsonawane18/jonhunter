@@ -21,7 +21,7 @@ import time
 import uuid
 
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, BackgroundTasks
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
@@ -34,7 +34,7 @@ from parser import parse_resume
 from deterministic_parser import parse_resume_deterministic
 from consulting_matcher import calculate_consulting_match, extract_consulting_competencies
 from india_locations import INDIA_LOCATION_DROPDOWN_OPTIONS, normalize_location
-from ats_cache_warmer import warm_ats_cache, search_instant_jobs, infer_key_skills
+from ats_cache_warmer import warm_ats_cache, search_instant_jobs, infer_key_skills, _INDEXED_JOBS
 from job_matcher import find_matching_jobs
 from career_pages_engine import fetch_career_page_jobs
 from two_source_matcher import find_two_source_jobs
@@ -47,6 +47,8 @@ from db_store import (
     db_record_candidate_application,
     db_get_candidate_applications,
     db_get_recommended_jobs,
+    db_prune_old_jobs,
+    db_compact_database,
 )
 from ats_calculator import calculate_ats_score
 
@@ -64,11 +66,26 @@ app.add_middleware(
 init_db()
 
 
+def _run_periodic_pruning():
+    """Runs data retention pruning once at startup and every 24 hours thereafter."""
+    retention_days = int(os.getenv("DATA_RETENTION_DAYS", "15"))
+    while True:
+        try:
+            print(f"[Maintenance] Running automatic data retention prune ({retention_days} days)...")
+            res = db_prune_old_jobs(retention_days)
+            print(f"[Maintenance] Pruned {res.get('deleted_jobs', 0)} unapplied jobs, {res.get('deleted_batches', 0)} batches.")
+        except Exception as e:
+            print(f"[Maintenance] Pruning error: {e}")
+        time.sleep(86400)
+
+
 # Background initial warmup on startup
 @app.on_event("startup")
 async def startup_event():
     # Warm up ATS cache in background daemon thread
     threading.Thread(target=warm_ats_cache, daemon=True).start()
+    # Start periodic 15-day rolling data pruner daemon
+    threading.Thread(target=_run_periodic_pruning, daemon=True).start()
 
 
 @app.get("/")
@@ -80,6 +97,58 @@ async def root_endpoint():
         "docs": "/docs",
         "health": "/api/health"
     }
+
+
+@app.post("/api/admin/prune-data")
+async def prune_data_endpoint(days: int = Query(15, ge=1, le=365)):
+    """
+    Manually triggers data retention cleanup:
+    Deletes unapplied ephemeral search records older than specified days.
+    Preserves all saved and applied jobs.
+    """
+    try:
+        result = await asyncio.to_thread(db_prune_old_jobs, retention_days=days)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pruning failed: {str(e)}")
+
+
+@app.post("/api/admin/compact-db")
+async def compact_db_endpoint():
+    """Triggers SQLite VACUUM to reclaim disk pages."""
+    try:
+        result = await asyncio.to_thread(db_compact_database)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Compaction failed: {str(e)}")
+
+
+@app.get("/api/admin/memory-stats")
+async def memory_stats_endpoint():
+    """Returns container RSS memory metrics and headroom against Render's 512MB limit."""
+    try:
+        import psutil
+        process = psutil.Process(os.getpid())
+        mem_info = process.memory_info()
+        rss_mb = round(mem_info.rss / (1024 * 1024), 2)
+        vms_mb = round(mem_info.vms / (1024 * 1024), 2)
+        limit_mb = 512.0
+        headroom_pct = round(max(0.0, (1.0 - (rss_mb / limit_mb)) * 100), 1)
+        return {
+            "status": "HEALTHY",
+            "pid": os.getpid(),
+            "rss_mb": rss_mb,
+            "vms_mb": vms_mb,
+            "render_limit_mb": limit_mb,
+            "headroom_pct": headroom_pct,
+            "cached_jobs_in_ram": len(_INDEXED_JOBS),
+        }
+    except Exception as e:
+        return {
+            "status": "ONLINE",
+            "note": f"psutil check fallback: {str(e)}",
+            "cached_jobs_in_ram": len(_INDEXED_JOBS),
+        }
 
 
 @app.get("/api/health")
@@ -551,21 +620,26 @@ async def find_jobs_endpoint(req: JobSearchRequest):
 
 
 @app.get("/api/discovered-jobs")
-async def get_discovered_jobs_endpoint(candidate_email: str = Query(...)):
+async def get_discovered_jobs_endpoint(candidate_email: str = Query(...), limit: Optional[int] = Query(None, ge=1, le=1000)):
     """
-    Returns all past discovered jobs.
+    Returns past discovered jobs (supports optional limit to prevent oversized payloads).
     """
     if not candidate_email:
         raise HTTPException(status_code=400, detail="candidate_email is required")
 
     all_jobs = db_get_candidate_discovered_jobs(candidate_email)
+    total_count = len(all_jobs)
+    if limit is not None:
+        all_jobs = all_jobs[:limit]
+
     batches = db_get_candidate_batches(candidate_email)
     cand_name = all_jobs[0].get("candidate_name", "Candidate") if all_jobs else "Candidate"
 
     return {
         "candidate_email": candidate_email,
         "candidate_name": cand_name,
-        "total_jobs": len(all_jobs),
+        "total_jobs": total_count,
+        "returned_jobs": len(all_jobs),
         "total_batches": len(batches),
         "batches": batches,
         "all_jobs": all_jobs,
@@ -727,6 +801,44 @@ async def get_career_auto_apply_status(batch_id: str):
     if not batch:
         raise HTTPException(status_code=404, detail="Batch ID not found")
     return {"success": True, "batch": batch}
+
+
+PROOF_DIR = PROJECT_ROOT / "proof_screenshots"
+PROOF_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@app.get("/api/career-pages/proof/{filename}")
+async def get_career_proof_screenshot(filename: str):
+    """Serves the authentic Playwright visual screenshot proof for an applied job."""
+    safe_name = os.path.basename(filename)
+    proof_path = PROOF_DIR / safe_name
+    if not proof_path.exists() or not proof_path.is_file():
+        raise HTTPException(status_code=404, detail="Proof screenshot not found")
+    return FileResponse(str(proof_path), media_type="image/png")
+
+
+@app.get("/api/career-pages/proofs/candidate/{candidate_email}")
+async def get_candidate_application_proofs(candidate_email: str):
+    """Returns candidate's full audit trail of applied career jobs with proof screenshots."""
+    try:
+        from db_store import get_db_connection
+        with get_db_connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT id, job_id, job_title, company, candidate_name, candidate_email,
+                       candidate_phone, candidate_location, linkedin_url, resume_filename,
+                       applied_at, status, recruiter_notes, proof_screenshot_url, application_url
+                FROM candidate_applications
+                WHERE lower(candidate_email) = ?
+                ORDER BY applied_at DESC
+                """,
+                (candidate_email.lower().strip(),),
+            ).fetchall()
+            results = [dict(r) for r in rows]
+            return {"success": True, "count": len(results), "applications": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 def run():

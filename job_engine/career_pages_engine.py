@@ -11,6 +11,7 @@ Capability Metric:
 """
 
 import os
+import gc
 import re
 import html
 import time
@@ -545,36 +546,38 @@ def fetch_career_page_jobs(
     elif scope_filter == "remote":
         registry_subset = [c for c in registry_subset if c.get("is_remote", False)]
 
-    # 4. Live Crawl using ThreadPoolExecutor
+    # 4. Live Crawl using Container-Optimized ThreadPoolExecutor (max 8 workers)
     raw_results: List[Dict[str, Any]] = []
-    executor = ThreadPoolExecutor(max_workers=45)
-    futures = []
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = []
 
-    for info in registry_subset[:80]:  # Concurrently query top relevant employers
-        ats_type = info.get("ats", "").lower()
-        if ats_type == "greenhouse":
-            futures.append(executor.submit(fetch_greenhouse_jobs, info, clean_query))
-        elif ats_type == "lever":
-            futures.append(executor.submit(fetch_lever_jobs, info, clean_query))
-        elif ats_type == "ashby":
-            futures.append(executor.submit(fetch_ashby_jobs, info, clean_query))
-        elif ats_type == "smartrecruiters":
-            futures.append(executor.submit(fetch_smartrecruiters_jobs, info, clean_query))
+        for info in registry_subset[:30]:  # Concurrently query top 30 relevant employers
+            ats_type = info.get("ats", "").lower()
+            if ats_type == "greenhouse":
+                futures.append(executor.submit(fetch_greenhouse_jobs, info, clean_query))
+            elif ats_type == "lever":
+                futures.append(executor.submit(fetch_lever_jobs, info, clean_query))
+            elif ats_type == "ashby":
+                futures.append(executor.submit(fetch_ashby_jobs, info, clean_query))
+            elif ats_type == "smartrecruiters":
+                futures.append(executor.submit(fetch_smartrecruiters_jobs, info, clean_query))
 
-    for fut in as_completed(futures):
+        for fut in as_completed(futures):
+            try:
+                res = fut.result()
+                if res:
+                    raw_results.extend(res)
+                    if len(raw_results) >= max(max_jobs * 3, 35):
+                        break
+            except Exception:
+                pass
+
         try:
-            res = fut.result()
-            if res:
-                raw_results.extend(res)
-                if len(raw_results) >= max(max_jobs * 3, 35):
-                    break
+            executor.shutdown(wait=False, cancel_futures=True)
         except Exception:
             pass
 
-    try:
-        executor.shutdown(wait=False, cancel_futures=True)
-    except Exception:
-        pass
+    gc.collect()
 
     # Deduplicate raw crawl results
     seen_sigs = set()
