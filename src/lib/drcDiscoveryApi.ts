@@ -24,6 +24,7 @@ export function getJobEngineCandidates(): string[] {
   }
   if (!isLocal) {
     candidates.push('');
+    candidates.push('https://jonhunter-9pkh.onrender.com');
     candidates.push('http://127.0.0.1:5055');
   }
   return Array.from(new Set(candidates));
@@ -648,6 +649,11 @@ export interface AutoApplyJobResult {
   confirmation_id?: string;
   applied_at: string;
   duration_ms: number;
+  proof_screenshot_url?: string;
+  fields_filled?: string[];
+  proof_timestamp?: string;
+  target_url?: string;
+  page_title?: string;
 }
 
 export interface AutoApplyBatchStatus {
@@ -731,5 +737,29 @@ export async function fetchCareerAutoApplyStatus(batchId: string): Promise<AutoA
 
   throw lastError || new Error(`Failed to load auto-apply status for ${batchId}`);
 }
+
+/**
+ * Fetches the full list of applied jobs with proof screenshots and audit metadata.
+ */
+export async function fetchCandidateApplicationProofs(candidateEmail: string): Promise<any[]> {
+  const endpoints = getJobEngineCandidates().map(
+    (base) => `${base}/api/career-pages/proofs/candidate/${encodeURIComponent(candidateEmail)}`
+  );
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.applications && Array.isArray(data.applications)) {
+          return data.applications;
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+  return [];
+}
+
 
 

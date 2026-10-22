@@ -411,6 +411,8 @@ async def instant_search_endpoint(req: InstantJobSearchRequest):
 
 @app.post("/api/resume/parse-fast")
 @app.post("/api/parse-resume")
+@app.post("/api/resumes/parse")
+@app.post("/api/resume/parse")
 async def parse_resume_endpoint(file: UploadFile = File(...)):
     """
     High-Speed Deterministic Zero-LLM Resume Parser.
