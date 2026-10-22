@@ -680,10 +680,6 @@ def fetch_career_page_jobs(
             experience_match=ats_res.get("experience_fit_text", "Compatible Fit"),
             connections=connections,
             posted_time=recency,
-            fit_grade=fit_grade,
-            archetype=job_archetype,
-            match_reasons=reasons,
-            ats_provider=ats_prov,
         )
         final_postings.append(posting)
 
