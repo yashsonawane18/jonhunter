@@ -58,16 +58,14 @@ TECH_SYNONYMS_MAP = {
     "cybersecurity": ["cybersecurity", "cyber security", "infosec", "soc", "penetration testing", "cloud security", "appsec"],
     "security": ["cybersecurity", "cyber security", "infosec", "soc", "penetration testing", "cloud security", "appsec"],
     
-    "ui/ux": ["ui/ux", "ux designer", "ui designer", "product designer", "user experience"],
-    "mobile": ["android", "ios", "react native", "flutter", "swift", "kotlin", "mobile developer"],
+    "ui/ux": ["ui/ux", "ux designer", "ui designer", "product designer", "user experience", "visual designer", "interaction designer"],
+    "mobile": ["android", "ios", "mobile engineer", "mobile developer", "react native", "flutter", "swift", "kotlin"],
 
-    # Senior Leadership & Director Roles
-    "director": ["director", "senior director", "director of engineering", "engineering director", "head of engineering", "vp of engineering", "vp engineering"],
-    "director of engineering": ["director of engineering", "engineering director", "senior director of engineering", "head of engineering", "vp of engineering"],
-    "vp": ["vp", "vice president", "vp of engineering", "vp engineering", "head of engineering"],
-    "head of": ["head of", "head of engineering", "director of engineering", "vp of engineering"],
-    "chief architect": ["chief architect", "principal architect", "head of architecture", "enterprise architect"],
-    "engineering manager": ["engineering manager", "software engineering manager", "em", "lead engineering manager"],
+    "blockchain": ["blockchain", "web3", "smart contracts", "solidity", "ethereum", "defi", "nft", "crypto"],
+    "web3": ["web3", "blockchain", "smart contracts", "solidity", "ethereum", "defi", "nft", "crypto"],
+    "iot": ["iot", "internet of things", "embedded systems", "raspberry pi", "arduino", "sensor networks", "edge computing"],
+    "robotics": ["robotics", "automation", "robotic process automation", "rpa", "industrial automation", "mechatronics", "control systems"],
+    "game": ["game development", "unity", "unreal engine", "game designer", "game programmer", "game artist", "game developer"],
 }
 
 

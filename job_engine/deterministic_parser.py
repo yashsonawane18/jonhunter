@@ -15,8 +15,17 @@ try:
 except ImportError:
     HAVE_FITZ = False
 
-import pdfplumber
-from docx import Document
+try:
+    import pdfplumber
+    HAVE_PDFPLUMBER = True
+except ImportError:
+    HAVE_PDFPLUMBER = False
+
+try:
+    from docx import Document
+    HAVE_DOCX = True
+except ImportError:
+    HAVE_DOCX = False
 
 try:
     from models import CandidateProfile
@@ -294,6 +303,8 @@ def _extract_text_fitz(path: Path) -> str:
 
 def _extract_text_pdfplumber(path: Path) -> str:
     """Fallback pdfplumber extraction."""
+    if not HAVE_PDFPLUMBER:
+        return ""
     try:
         chunks = []
         with pdfplumber.open(path) as pdf:
@@ -313,23 +324,26 @@ def _extract_text_pdfplumber(path: Path) -> str:
 
 def _extract_text_docx(path: Path) -> str:
     """Extract text from .docx or .doc."""
-    try:
-        doc = Document(path)
-        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-        for table in doc.tables:
-            for row in table.rows:
-                row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
-                if row_text:
-                    paragraphs.append(row_text)
-        return "\n\n".join(paragraphs).strip()
-    except Exception:
-        # Fallback binary text search
+    if HAVE_DOCX:
         try:
-            raw = path.read_bytes()
-            words = re.findall(r'[a-zA-Z0-9@\.\-\+_]{2,}', raw.decode('latin-1', errors='ignore'))
-            return " ".join(words)
+            doc = Document(path)
+            paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+            for table in doc.tables:
+                for row in table.rows:
+                    row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
+                    if row_text:
+                        paragraphs.append(row_text)
+            return "\n\n".join(paragraphs).strip()
         except Exception:
-            return ""
+            pass
+
+    # Fallback binary text search
+    try:
+        raw = path.read_bytes()
+        words = re.findall(r'[a-zA-Z0-9@\.\-\+_]{2,}', raw.decode('latin-1', errors='ignore'))
+        return " ".join(words)
+    except Exception:
+        return ""
 
 
 def extract_raw_text(file_path: Union[str, Path]) -> str:

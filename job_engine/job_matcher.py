@@ -111,7 +111,7 @@ from india_locations import (
     PAN_INDIA_HUBS,
 )
 from query_expander import (
-    expand_job_search_query,
+    expand_job_search_query, 
     match_job_with_expanded_query,
 )
 

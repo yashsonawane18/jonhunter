@@ -6,6 +6,10 @@
       "destination": "https://jonhunter-9pkh.onrender.com/api/:path*"
     },
     {
+      "source": "/files/:path*",
+      "destination": "https://jonhunter-9pkh.onrender.com/files/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

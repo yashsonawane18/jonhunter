@@ -23,14 +23,14 @@ _INIT_LOCK = threading.Lock()
 
 
 def get_db_connection() -> sqlite3.Connection:
-    """Returns a SQLite connection with Row factory and high-performance PRAGMAs enabled."""
+    """Returns a SQLite connection with Row factory and container-optimized memory PRAGMAs."""
     conn = sqlite3.connect(str(DB_FILE), timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode = WAL;")
     conn.execute("PRAGMA synchronous = NORMAL;")
-    conn.execute("PRAGMA cache_size = -64000;")
-    conn.execute("PRAGMA temp_store = MEMORY;")
-    conn.execute("PRAGMA mmap_size = 268435456;")
+    conn.execute("PRAGMA cache_size = -8000;")       # 8 MB cache (down from 64MB)
+    conn.execute("PRAGMA temp_store = FILE;")        # Spill temp tables to disk instead of RAM
+    conn.execute("PRAGMA mmap_size = 16777216;")     # 16 MB mmap (down from 256MB)
     return conn
 
 
@@ -1118,6 +1118,75 @@ def db_get_verified_linkedin_jobs(
                         break
 
         return results[:limit]
+
+
+def db_prune_old_jobs(retention_days: int = 15) -> Dict[str, Any]:
+    """
+    Deletes unapplied ephemeral job search records older than retention_days.
+    Strictly preserves all applied/saved jobs and jobs with user remarks.
+    Also cleans up empty discovery batches and runs incremental optimize.
+    """
+    days = max(1, int(retention_days))
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # 1. Prune unapplied ephemeral jobs older than retention threshold
+        cursor.execute("""
+            DELETE FROM discovered_jobs 
+            WHERE status = 'Not Applied'
+              AND (remarks IS NULL OR remarks = '')
+              AND discovered_at <= datetime('now', '-' || ? || ' days');
+        """, (days,))
+        deleted_jobs = cursor.rowcount
+
+        # 2. Prune empty batches older than retention threshold
+        cursor.execute("""
+            DELETE FROM discovery_batches
+            WHERE batch_number NOT IN (SELECT DISTINCT batch_number FROM discovered_jobs)
+              AND created_at <= datetime('now', '-' || ? || ' days');
+        """, (days,))
+        deleted_batches = cursor.rowcount
+
+        conn.commit()
+        
+        # 3. Clean up cached job descriptions that are orphaned
+        try:
+            cursor.execute("""
+                DELETE FROM cached_job_descriptions
+                WHERE job_id NOT IN (SELECT id FROM discovered_jobs);
+            """)
+            deleted_cached_jds = cursor.rowcount
+            conn.commit()
+        except Exception:
+            deleted_cached_jds = 0
+
+        # Run sqlite optimize
+        try:
+            conn.execute("PRAGMA optimize;")
+        except Exception:
+            pass
+
+        return {
+            "success": True,
+            "retention_days": days,
+            "deleted_jobs": deleted_jobs,
+            "deleted_batches": deleted_batches,
+            "deleted_cached_jds": deleted_cached_jds,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+
+def db_compact_database() -> Dict[str, Any]:
+    """Performs a full SQLite VACUUM to reclaim disk space and defragment database."""
+    try:
+        raw_conn = sqlite3.connect(str(DB_FILE), timeout=60.0)
+        raw_conn.isolation_level = None
+        raw_conn.execute("VACUUM;")
+        raw_conn.close()
+        return {"success": True, "message": "Database VACUUM completed successfully."}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 
 
 

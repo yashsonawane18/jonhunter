@@ -11,13 +11,17 @@ Port: 5055 (by default)
 
 import os
 import sys
+import json
 import asyncio
 import threading
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, BackgroundTasks
-from fastapi.responses import JSONResponse, StreamingResponse
+import time
+import uuid
+
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, BackgroundTasks
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel
@@ -30,7 +34,7 @@ from parser import parse_resume
 from deterministic_parser import parse_resume_deterministic
 from consulting_matcher import calculate_consulting_match, extract_consulting_competencies
 from india_locations import INDIA_LOCATION_DROPDOWN_OPTIONS, normalize_location
-from ats_cache_warmer import warm_ats_cache, search_instant_jobs, infer_key_skills
+from ats_cache_warmer import warm_ats_cache, search_instant_jobs, infer_key_skills, _INDEXED_JOBS
 from job_matcher import find_matching_jobs
 from career_pages_engine import fetch_career_page_jobs
 from two_source_matcher import find_two_source_jobs
@@ -44,7 +48,8 @@ from db_store import (
     db_record_candidate_application,
     db_get_candidate_applications,
     db_get_recommended_jobs,
-    db_get_verified_linkedin_jobs,
+    db_prune_old_jobs,
+    db_compact_database,
 )
 from ats_calculator import calculate_ats_score
 
@@ -62,11 +67,26 @@ app.add_middleware(
 init_db()
 
 
+def _run_periodic_pruning():
+    """Runs data retention pruning once at startup and every 24 hours thereafter."""
+    retention_days = int(os.getenv("DATA_RETENTION_DAYS", "15"))
+    while True:
+        try:
+            print(f"[Maintenance] Running automatic data retention prune ({retention_days} days)...")
+            res = db_prune_old_jobs(retention_days)
+            print(f"[Maintenance] Pruned {res.get('deleted_jobs', 0)} unapplied jobs, {res.get('deleted_batches', 0)} batches.")
+        except Exception as e:
+            print(f"[Maintenance] Pruning error: {e}")
+        time.sleep(86400)
+
+
 # Background initial warmup on startup
 @app.on_event("startup")
 async def startup_event():
     # Warm up ATS cache in background daemon thread
     threading.Thread(target=warm_ats_cache, daemon=True).start()
+    # Start periodic 15-day rolling data pruner daemon
+    threading.Thread(target=_run_periodic_pruning, daemon=True).start()
 
 
 @app.get("/")
@@ -78,6 +98,58 @@ async def root_endpoint():
         "docs": "/docs",
         "health": "/api/health"
     }
+
+
+@app.post("/api/admin/prune-data")
+async def prune_data_endpoint(days: int = Query(15, ge=1, le=365)):
+    """
+    Manually triggers data retention cleanup:
+    Deletes unapplied ephemeral search records older than specified days.
+    Preserves all saved and applied jobs.
+    """
+    try:
+        result = await asyncio.to_thread(db_prune_old_jobs, retention_days=days)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pruning failed: {str(e)}")
+
+
+@app.post("/api/admin/compact-db")
+async def compact_db_endpoint():
+    """Triggers SQLite VACUUM to reclaim disk pages."""
+    try:
+        result = await asyncio.to_thread(db_compact_database)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Compaction failed: {str(e)}")
+
+
+@app.get("/api/admin/memory-stats")
+async def memory_stats_endpoint():
+    """Returns container RSS memory metrics and headroom against Render's 512MB limit."""
+    try:
+        import psutil
+        process = psutil.Process(os.getpid())
+        mem_info = process.memory_info()
+        rss_mb = round(mem_info.rss / (1024 * 1024), 2)
+        vms_mb = round(mem_info.vms / (1024 * 1024), 2)
+        limit_mb = 512.0
+        headroom_pct = round(max(0.0, (1.0 - (rss_mb / limit_mb)) * 100), 1)
+        return {
+            "status": "HEALTHY",
+            "pid": os.getpid(),
+            "rss_mb": rss_mb,
+            "vms_mb": vms_mb,
+            "render_limit_mb": limit_mb,
+            "headroom_pct": headroom_pct,
+            "cached_jobs_in_ram": len(_INDEXED_JOBS),
+        }
+    except Exception as e:
+        return {
+            "status": "ONLINE",
+            "note": f"psutil check fallback: {str(e)}",
+            "cached_jobs_in_ram": len(_INDEXED_JOBS),
+        }
 
 
 @app.get("/api/health")
@@ -482,6 +554,8 @@ async def get_career_top_matches_endpoint(query: Optional[str] = "Software Engin
 
 @app.post("/api/resume/parse-fast")
 @app.post("/api/parse-resume")
+@app.post("/api/resumes/parse")
+@app.post("/api/resume/parse")
 async def parse_resume_endpoint(file: UploadFile = File(...)):
     """
     High-Speed Deterministic Zero-LLM Resume Parser.
@@ -691,26 +765,28 @@ async def find_jobs_endpoint(req: JobSearchRequest):
 
 
 @app.get("/api/discovered-jobs")
-async def get_discovered_jobs_endpoint(candidate_email: Optional[str] = Query(None)):
+async def get_discovered_jobs_endpoint(candidate_email: str = Query(...), limit: Optional[int] = Query(None, ge=1, le=1000)):
     """
-    Returns all past discovered jobs.
-    If candidate_email is 'all', None, or returns 0 records, returns all 1000+ jobs ordered latest to oldest.
+    Returns past discovered jobs (supports optional limit to prevent oversized payloads).
     """
     all_jobs = []
     clean_email = (candidate_email or "").strip().lower()
     if clean_email and clean_email not in ("all", "undefined", "null", "guest_consulting@drc.internal"):
         all_jobs = db_get_candidate_discovered_jobs(clean_email)
 
-    if not all_jobs:
-        all_jobs = db_get_all_discovered_jobs(limit=1500)
+    all_jobs = db_get_candidate_discovered_jobs(candidate_email)
+    total_count = len(all_jobs)
+    if limit is not None:
+        all_jobs = all_jobs[:limit]
 
-    batches = db_get_candidate_batches(clean_email) if clean_email and clean_email != "all" else []
+    batches = db_get_candidate_batches(candidate_email)
     cand_name = all_jobs[0].get("candidate_name", "Candidate") if all_jobs else "Candidate"
 
     return {
         "candidate_email": candidate_email or "all",
         "candidate_name": cand_name,
-        "total_jobs": len(all_jobs),
+        "total_jobs": total_count,
+        "returned_jobs": len(all_jobs),
         "total_batches": len(batches),
         "batches": batches,
         "all_jobs": all_jobs,
@@ -740,6 +816,176 @@ async def update_job_status_endpoint(req: UpdateJobStatusRequest):
         "new_status": req.status,
         "remarks": req.remarks or "",
     }
+
+
+class CareerPagesSearchRequest(BaseModel):
+    model_config = {"extra": "allow"}
+    query: Optional[str] = "Software Engineer"
+    location: Optional[str] = "All India (Remote & Nationwide)"
+    ats_provider: Optional[str] = "all"
+    archetype: Optional[str] = "all"
+    min_grade: Optional[str] = "all"
+    scope: Optional[str] = "all"
+    limit: Optional[int] = 15
+    candidate: Optional[Any] = None
+
+
+@app.get("/api/career-pages/companies")
+async def get_career_companies_endpoint():
+    """Returns the verified 859-employer catalog for the Career Pages explorer."""
+    try:
+        from career_pages_engine import get_all_career_companies
+        companies = await asyncio.to_thread(get_all_career_companies)
+        return {"success": True, "count": len(companies), "companies": companies}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/career-pages/stats")
+async def get_career_stats_endpoint():
+    """Returns verified capacity metrics matching DRC Job Assistant specification."""
+    try:
+        from career_pages_engine import get_career_page_stats
+        stats = await asyncio.to_thread(get_career_page_stats)
+        return {"success": True, "stats": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/career-pages/search")
+async def search_career_pages_endpoint(req: CareerPagesSearchRequest):
+    """
+    Dedicated Corporate Career Pages Search:
+    Dispatches parallel searches across 859 real employer ATS APIs (Greenhouse, Lever, Ashby, SmartRecruiters).
+    Returns Grade A / Grade B scored jobs, role archetypes, and guaranteed 1-click ATS application links.
+    """
+    try:
+        from career_pages_engine import fetch_career_page_jobs
+        jobs = await asyncio.to_thread(
+            fetch_career_page_jobs,
+            query=req.query or "Software Engineer",
+            location_preference=req.location or "Remote",
+            max_jobs=req.limit or 15,
+            candidate=req.candidate,
+            ats_provider_filter=req.ats_provider or "all",
+            archetype_filter=req.archetype or "all",
+            min_grade=req.min_grade or "all",
+            scope_filter=req.scope or "all",
+        )
+        return {
+            "success": True,
+            "count": len(jobs),
+            "jobs": [j.model_dump() for j in jobs],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Career pages search error: {str(e)}")
+
+
+@app.post("/api/career-pages/auto-apply")
+async def start_career_auto_apply(
+    background_tasks: BackgroundTasks,
+    candidate_data: str = Form(...),
+    targets: str = Form(...),
+    resume: Optional[UploadFile] = File(None),
+):
+    """
+    Submits automated job applications across selected Career Pages jobs using
+    the Hybrid State Machine (Direct Native ATS API + Playwright Stealth Fallback).
+    """
+    try:
+        from career_auto_apply import (
+            CandidateDataPlan,
+            AutoApplyTarget,
+            execute_batch_auto_apply,
+        )
+
+        cand_dict = json.loads(candidate_data)
+        candidate = CandidateDataPlan(**cand_dict)
+        targets_list = [AutoApplyTarget(**t) for t in json.loads(targets)]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid payload format: {str(e)}")
+
+    if not targets_list:
+        raise HTTPException(status_code=400, detail="No jobs provided for auto-apply.")
+
+    batch_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+    resume_bytes = None
+    resume_filename = "resume.pdf"
+    temp_path = None
+
+    if resume:
+        resume_bytes = await resume.read()
+        resume_filename = resume.filename or "resume.pdf"
+        tmp_dir = PROJECT_ROOT / "temp_resumes"
+        tmp_dir.mkdir(exist_ok=True)
+        temp_path = str(tmp_dir / f"{batch_id}_{resume_filename}")
+        with open(temp_path, "wb") as f:
+            f.write(resume_bytes)
+
+    background_tasks.add_task(
+        execute_batch_auto_apply,
+        batch_id=batch_id,
+        targets=targets_list,
+        candidate=candidate,
+        resume_bytes=resume_bytes,
+        resume_filename=resume_filename,
+        temp_resume_path=temp_path,
+    )
+
+    return {
+        "success": True,
+        "batch_id": batch_id,
+        "total": len(targets_list),
+        "message": f"Auto-apply pipeline started for {len(targets_list)} jobs.",
+    }
+
+
+@app.get("/api/career-pages/auto-apply/status/{batch_id}")
+async def get_career_auto_apply_status(batch_id: str):
+    """Returns live batch progress and individual job execution details."""
+    from career_auto_apply import ACTIVE_BATCHES
+    batch = ACTIVE_BATCHES.get(batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch ID not found")
+    return {"success": True, "batch": batch}
+
+
+PROOF_DIR = PROJECT_ROOT / "proof_screenshots"
+PROOF_DIR.mkdir(parents=True, exist_ok=True)
+
+
+@app.get("/api/career-pages/proof/{filename}")
+async def get_career_proof_screenshot(filename: str):
+    """Serves the authentic Playwright visual screenshot proof for an applied job."""
+    safe_name = os.path.basename(filename)
+    proof_path = PROOF_DIR / safe_name
+    if not proof_path.exists() or not proof_path.is_file():
+        raise HTTPException(status_code=404, detail="Proof screenshot not found")
+    return FileResponse(str(proof_path), media_type="image/png")
+
+
+@app.get("/api/career-pages/proofs/candidate/{candidate_email}")
+async def get_candidate_application_proofs(candidate_email: str):
+    """Returns candidate's full audit trail of applied career jobs with proof screenshots."""
+    try:
+        from db_store import get_db_connection
+        with get_db_connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT id, job_id, job_title, company, candidate_name, candidate_email,
+                       candidate_phone, candidate_location, linkedin_url, resume_filename,
+                       applied_at, status, recruiter_notes, proof_screenshot_url, application_url
+                FROM candidate_applications
+                WHERE lower(candidate_email) = ?
+                ORDER BY applied_at DESC
+                """,
+                (candidate_email.lower().strip(),),
+            ).fetchall()
+            results = [dict(r) for r in rows]
+            return {"success": True, "count": len(results), "applications": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 def run():

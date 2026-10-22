@@ -110,310 +110,269 @@ export const Navbar: React.FC<NavbarProps> = ({
     return `${window.location.origin}${pathByScreen[screen]}`;
   };
 
-
-  const handleQAtoBAClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigateTo('bapo');
-  };
-
-  const handleAICourseClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigateTo('ai-course');
-  };
-
   const showBackButton = currentView === 'bapo' || currentView === 'ai-course' || currentView === 'career-audit';
 
-  const linkClass = (view: 'home' | 'pricing' | 'login' | 'bapo' | 'ai-course' | 'career-audit' | 'discover') =>
-    `text-sm font-normal uppercase tracking-widest transition-all duration-300 ${
-      currentView === view ? 'text-neon-green' : 'text-gray-400 hover:text-white'
-    }`;
-
   return (
-    <>
-      <style>{`
-        @keyframes float-gentle {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-4px);
-          }
-        }
-        @keyframes circular-spin-glow {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-        @keyframes pulse-ring {
-          0%, 100% {
-            opacity: 0.4;
-            transform: scale(0.95);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-        }
-        .discover-jobs-floating-pill {
-          animation: float-gentle 3.5s ease-in-out infinite;
-          display: inline-flex;
-        }
-        .discover-jobs-halo {
-          animation: circular-spin-glow 5s linear infinite;
-        }
-        .discover-jobs-underline-glow {
-          animation: pulse-ring 2.5s ease-in-out infinite;
-        }
-      `}</style>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled || currentView
-            ? 'bg-black/90 backdrop-blur-md border-b border-white/10 py-3'
-            : 'bg-transparent py-5'
-        }`}
-      >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 justify-between items-center gap-3">
-          {/* Logo */}
-          <div className="flex min-w-0 items-center gap-3">
-            {showBackButton && (
-              <button
-                type="button"
-                onClick={handleHomeClick}
-                aria-label="Back to home"
-                className="text-gray-400 hover:text-white transition-all p-2 rounded-full border border-white/10 bg-white/5"
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 h-16 transition-colors duration-200 border-b ${
+        scrolled || currentView
+          ? 'bg-[#121212]/95 backdrop-blur border-[#2e2e2e]'
+          : 'bg-[#121212] border-[#2e2e2e]'
+      }`}
+    >
+      <div className="max-w-[1200px] h-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3">
+          {showBackButton && (
+            <button
+              type="button"
+              onClick={handleHomeClick}
+              aria-label="Back to home"
+              className="text-[#b4b4b4] hover:text-[#fafafa] transition-colors p-1.5 rounded-full border border-[#2e2e2e] bg-[#242424]"
+            >
+              <ArrowLeft size={16} />
+            </button>
+          )}
+          <a
+            href="#"
+            onClick={handleHomeClick}
+            className="flex items-center gap-2.5 group"
+          >
+            {/* Supabase style phosphor green geometric emblem */}
+            <div className="w-7 h-7 rounded-lg bg-[#121212] border border-[#2e2e2e] flex items-center justify-center group-hover:border-[#3ecf8e] transition-colors">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-[#3ecf8e]"
               >
-                <ArrowLeft size={18} />
-              </button>
-            )}
-            <div className="flex min-w-0 items-center">
-              <a
-                href="#"
-                onClick={handleHomeClick}
-                className="flex min-w-0 items-center gap-2 group"
-              >
-              <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-neon-green to-neon-emerald flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(74,222,128,0.6)] transition-shadow">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-black"
-                >
-                  <path
-                    d="M12 2L2 7L12 12L22 7L12 2Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2 17L12 22L22 17"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2 12L12 17L22 12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <span className="truncate text-sm min-[360px]:text-base sm:text-xl font-bold tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-neon-green transition-all">
-                Dheeraj Rathod Consult
+                <path
+                  d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium tracking-[-0.007em] text-[#fafafa]">
+                JonHunter
               </span>
-            </a>
-          </div>
+              <span className="text-[11px] font-normal text-[#898989] font-mono tracking-tight">
+                / DRC
+              </span>
+            </div>
+          </a>
         </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {/* Program Dropdown (hover) */}
-            <div className="relative group py-2">
-              <button
-                className={`text-sm font-normal uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 focus:outline-none ${
-                  currentView === 'bapo' || currentView === 'ai-course'
-                    ? 'text-neon-green'
-                    : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                <span>Program</span>
-                <ChevronDown size={14} className="transform transition-transform group-hover:rotate-180" />
-              </button>
+        {/* Center: Nav links in #b4b4b4, Circular 400, 14px */}
+        <div className="hidden md:flex items-center space-x-7">
+          <a
+            href="#"
+            onClick={handleHomeClick}
+            className={`text-sm tracking-[-0.007em] transition-colors ${
+              currentView === 'home' || !currentView ? 'text-[#fafafa] font-medium' : 'text-[#b4b4b4] hover:text-[#fafafa]'
+            }`}
+          >
+            Platform
+          </a>
 
-              {/* Dropdown – wider to fit "AI Mastery Program" on one line */}
-              <div className="absolute left-0 top-full pt-2 w-56 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
-                <div className="bg-white border border-gray-100 p-2 shadow-2xl rounded-xl flex flex-col gap-1">
-                  <a
-                    href={getProgramUrl('bapo')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block px-4 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg text-gray-800 hover:bg-neon-green hover:text-black transition-all whitespace-nowrap"
-                  >
-                    BA/PO Transition
-                  </a>
-                  <a
-                    href={getProgramUrl('ai-course')}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block px-4 py-2.5 text-xs font-black uppercase tracking-widest rounded-lg text-gray-800 hover:bg-neon-green hover:text-black transition-all whitespace-nowrap"
-                  >
-                    AI Mastery Program
-                  </a>
-                </div>
+          {/* Program Dropdown */}
+          <div className="relative group py-2">
+            <button
+              className={`text-sm tracking-[-0.007em] transition-colors flex items-center gap-1 focus:outline-none ${
+                currentView === 'bapo' || currentView === 'ai-course'
+                  ? 'text-[#3ecf8e] font-medium'
+                  : 'text-[#b4b4b4] hover:text-[#fafafa]'
+              }`}
+            >
+              <span>Programs</span>
+              <ChevronDown size={13} className="text-[#898989] transition-transform group-hover:rotate-180" />
+            </button>
+
+            <div className="absolute left-0 top-full pt-1.5 w-52 opacity-0 translate-y-1 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
+              <div className="bg-[#121212] border border-[#2e2e2e] p-1.5 rounded-xl shadow-none flex flex-col gap-0.5">
+                <a
+                  href={getProgramUrl('bapo')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 text-xs rounded-lg text-[#b4b4b4] hover:text-[#fafafa] hover:bg-[#242424] transition-colors"
+                >
+                  BA/PO Transition
+                </a>
+                <a
+                  href={getProgramUrl('ai-course')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 text-xs rounded-lg text-[#b4b4b4] hover:text-[#fafafa] hover:bg-[#242424] transition-colors"
+                >
+                  AI Mastery Program
+                </a>
               </div>
             </div>
-
-            {/* 🔍 Discover Jobs with Floating Circular Motion Style */}
-            <div className="relative discover-jobs-floating-pill group">
-              {/* Rotating Circular Neon Halo Glow */}
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#00C896] via-[#4ade80] to-[#2dd4bf] opacity-40 blur-sm discover-jobs-halo group-hover:opacity-80 transition-opacity" />
-              
-              <a
-                href="/discover"
-                onClick={handleDiscoverClick}
-                className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/90 border-2 ${
-                  currentView === 'discover'
-                    ? 'border-[#00E5AA] text-white shadow-[#00C896]/50'
-                    : 'border-[#00C896]/70 text-[#00C896] hover:text-white hover:border-[#00E5AA]'
-                } text-xs font-black uppercase tracking-widest hover:bg-black shadow-lg shadow-[#00C896]/25 transition-all duration-300`}
-              >
-                {/* Pulsing Live Beacon */}
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C896]"></span>
-                </span>
-                <span>🔍 Discover Jobs</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#00C896]/20 text-[#4ade80] font-mono font-bold border border-[#00C896]/40">
-                  LIVE
-                </span>
-              </a>
-
-              {/* Floating Circular Motion Underline Indicator as requested in user diagram */}
-              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-4/5 h-[3px] rounded-full bg-gradient-to-r from-transparent via-[#00C896] to-transparent discover-jobs-underline-glow shadow-[0_0_10px_#00C896]" />
-            </div>
-
-            <a
-              href="#login"
-              onClick={handleLoginClick}
-              className={linkClass('login')}
-            >
-              Sign In
-            </a>
-
-            <Button
-              onClick={handleBookCall}
-              variant="glow"
-              size="sm"
-              className="uppercase text-xs font-black tracking-widest px-6 shadow-neon-green/20"
-            >
-              Book 1:1 Call
-            </Button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden shrink-0">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white p-2 rounded-lg touch-manipulation"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          {/* Pricing link */}
+          <a
+            href="#pricing"
+            onClick={handlePricingClick}
+            className={`text-sm tracking-[-0.007em] transition-colors ${
+              currentView === 'pricing' ? 'text-[#3ecf8e] font-medium' : 'text-[#b4b4b4] hover:text-[#fafafa]'
+            }`}
+          >
+            Pricing
+          </a>
+
+          {/* 🔍 Discover Jobs Terminal Pill */}
+          <a
+            href="/discover"
+            onClick={handleDiscoverClick}
+            className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium tracking-[-0.007em] border transition-colors ${
+              currentView === 'discover'
+                ? 'bg-[#242424] border-[#3ecf8e] text-[#fafafa]'
+                : 'bg-[#181818] border-[#2e2e2e] text-[#b4b4b4] hover:border-[#4d4d4d] hover:text-[#fafafa]'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]" />
+            <span>Discover Jobs</span>
+            <span className="text-[10px] px-1 py-0.2 rounded bg-[#242424] text-[#3ecf8e] font-mono border border-[#2e2e2e]">
+              LIVE
+            </span>
+          </a>
+
+          {/* 🏢 859+ Career Boards ATS Pill */}
+          <a
+            href="/discover#career-pages"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.hash = '#career-pages';
+              navigateTo('discover');
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium tracking-[-0.007em] border border-[#2e2e2e] bg-[#141414] text-[#b4b4b4] hover:border-[#3ecf8e]/50 hover:text-[#fafafa] transition-colors"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]" />
+            <span>Career Pages</span>
+            <span className="text-[10px] px-1 py-0.2 rounded bg-[#1e2722] text-[#3ecf8e] font-mono border border-[#3ecf8e]/30">
+              859 ATS
+            </span>
+          </a>
+        </div>
+
+        {/* Right Actions */}
+        <div className="hidden md:flex items-center space-x-3">
+          {/* Sign In Pill Ghost Button */}
+          <a
+            href="#login"
+            onClick={handleLoginClick}
+            className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs tracking-[-0.007em] font-normal text-[#fafafa] border border-[#393939] hover:border-[#4d4d4d] hover:bg-white/[0.04] transition-colors"
+          >
+            Sign In
+          </a>
+
+          {/* Primary Action: Phosphor Green Pill */}
+          <button
+            type="button"
+            onClick={handleBookCall}
+            className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs tracking-[-0.007em] font-medium text-[#121212] bg-[#3ecf8e] hover:bg-[#00c573] border border-[#3ecf8e] hover:border-[#1f4b37] transition-colors cursor-pointer"
+          >
+            Book 1:1 Call
+          </button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center gap-2">
+          <a
+            href="/discover"
+            onClick={handleDiscoverClick}
+            className="px-2.5 py-1 rounded-full text-xs border border-[#2e2e2e] bg-[#181818] text-[#fafafa] flex items-center gap-1.5"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3ecf8e]" />
+            <span>Jobs</span>
+          </a>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-[#fafafa] p-1.5 rounded-md border border-[#2e2e2e] bg-[#181818]"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0f172a] border-t border-gray-800 absolute inset-x-0 w-full max-h-[calc(100dvh-4rem)] overflow-y-auto px-4 py-5 shadow-xl flex flex-col space-y-4 animate-in slide-in-from-top-5">
+        <div className="md:hidden bg-[#121212] border-b border-[#2e2e2e] px-4 py-4 flex flex-col space-y-3">
           <a
             href="#"
             onClick={handleHomeClick}
-            className={`text-lg font-medium transition-colors px-2 ${
-              currentView === 'home' ? 'text-neon-green' : 'text-gray-400 hover:text-white'
+            className={`text-sm px-2 py-1.5 rounded ${
+              currentView === 'home' ? 'text-[#3ecf8e]' : 'text-[#b4b4b4] hover:text-[#fafafa]'
             }`}
           >
-            Home
+            Platform
           </a>
-
-          {/* Mobile Program List */}
-          <div className="space-y-2 px-2">
-            <span className="text-xs uppercase font-extrabold tracking-widest text-gray-500 block py-1 border-b border-white/5">
-              Programs
-            </span>
-            <a
-              href={getProgramUrl('bapo')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block text-lg font-medium pl-2 transition-colors ${
-                currentView === 'bapo' ? 'text-neon-green' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              — BA/PO Transition
-            </a>
-            <a
-              href={getProgramUrl('ai-course')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block text-lg font-medium pl-2 transition-colors ${
-                currentView === 'ai-course' ? 'text-neon-green' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              — AI Course
-            </a>
-          </div>
-
-          {/* Mobile Discover Jobs Glow Card */}
-          <div className="px-2 py-1">
-            <a
-              href="/discover"
-              onClick={handleDiscoverClick}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl bg-black border-2 ${
-                currentView === 'discover' ? 'border-[#00E5AA] shadow-[#00C896]/40' : 'border-[#00C896]'
-              } text-white font-black text-sm uppercase tracking-wider shadow-lg shadow-[#00C896]/20 transition-all active:scale-95`}
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00C896]"></span>
-                </span>
-                <span className="text-[#00C896]">🔍 Discover Jobs</span>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00C896]/20 text-[#4ade80] font-mono font-bold border border-[#00C896]/40">
-                LIVE MARKET
-              </span>
-            </a>
-          </div>
-
           <a
-            href="#login"
-            onClick={handleLoginClick}
-            className={`text-lg font-medium transition-colors px-2 ${
-              currentView === 'login' ? 'text-neon-green' : 'text-gray-400 hover:text-white'
+            href="/discover"
+            onClick={handleDiscoverClick}
+            className={`text-sm px-2 py-1.5 rounded flex items-center justify-between border ${
+              currentView === 'discover'
+                ? 'border-[#3ecf8e] text-[#fafafa] bg-[#242424]'
+                : 'border-[#2e2e2e] text-[#b4b4b4]'
             }`}
           >
-            Sign In
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#3ecf8e]" />
+              <span>Discover Jobs Engine</span>
+            </span>
+            <span className="text-[10px] font-mono text-[#3ecf8e]">LIVE</span>
           </a>
-
-          <Button
-            onClick={handleBookCall}
-            variant="glow"
-            fullWidth
-            className="uppercase font-bold tracking-widest"
+          <a
+            href="/discover#career-pages"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.hash = '#career-pages';
+              navigateTo('discover');
+            }}
+            className="text-sm px-2 py-1.5 rounded flex items-center justify-between border border-[#2e2e2e] text-[#b4b4b4]"
           >
-            Book 1:1 Call
-          </Button>
+            <span className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#3ecf8e]" />
+              <span>859+ Corporate Career Boards</span>
+            </span>
+            <span className="text-[10px] font-mono text-[#3ecf8e]">859 ATS</span>
+          </a>
+          <a
+            href="#pricing"
+            onClick={handlePricingClick}
+            className={`text-sm px-2 py-1.5 rounded ${
+              currentView === 'pricing' ? 'text-[#3ecf8e]' : 'text-[#b4b4b4] hover:text-[#fafafa]'
+            }`}
+          >
+            Pricing
+          </a>
+          <div className="pt-2 border-t border-[#2e2e2e] flex flex-col gap-2">
+            <a
+              href="#login"
+              onClick={handleLoginClick}
+              className="text-center py-2 text-xs rounded-full border border-[#393939] text-[#fafafa]"
+            >
+              Sign In
+            </a>
+            <button
+              type="button"
+              onClick={handleBookCall}
+              className="w-full text-center py-2 text-xs font-medium rounded-full bg-[#3ecf8e] text-[#121212]"
+            >
+              Book 1:1 Call
+            </button>
+          </div>
         </div>
       )}
-      </nav>
-    </>
+    </nav>
   );
 };

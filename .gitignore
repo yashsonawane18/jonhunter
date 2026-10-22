@@ -20,6 +20,7 @@ venv/
 ENV/
 .venv/
 temp_uploads/
+temp_resumes/
 
 # SQLite files
 *.db
