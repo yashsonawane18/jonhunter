@@ -42,8 +42,6 @@ export function getJobEngineCandidates(): string[] {
     // Hosted Cloud Engine & Vercel Same-Origin Reverse Proxy
     candidates.push('https://jonhunter-9pkh.onrender.com');
     candidates.push('');
-    candidates.push('https://jonhunter-9pkh.onrender.com');
-    candidates.push('http://127.0.0.1:5055');
   }
   return Array.from(new Set(candidates));
 }
@@ -100,6 +98,23 @@ export interface DiscoveredJobItem {
   archetype?: string;
   match_reasons?: string[];
   ats_provider?: string;
+  posted_time?: string;
+}
+
+export interface CareerCompanyInfo {
+  name: string;
+  ats: string;
+  slug: string;
+  hub: string;
+  domain: string;
+  careers_url: string;
+}
+
+export interface CareerPageStats {
+  total_companies_tracked: number;
+  ats_breakdown: Record<string, number>;
+  direct_link_guarantee: string;
+  supported_archetypes: string[];
 }
 
 export interface DiscoveredBatch {
@@ -506,327 +521,91 @@ export async function updateJobStatus(
   throw lastError || new Error('Failed to update job status');
 }
 
-export interface CareerPageStats {
-  total_registered_employers: number;
-  ats_provider_distribution: {
-    Greenhouse: number;
-    Ashby: number;
-    Lever: number;
-    SmartRecruiters: number;
-  };
-  worldwide_remote_hiring: {
-    count: number;
-    percentage: string;
-    scope: string;
-  };
-  india_metro_gcc_hiring: {
-    count: number;
-    percentage: string;
-    scope: string;
-  };
-  live_indexing_throughput: string;
-  persistent_sqlite_storage: string;
-  query_latency_sla: {
-    ram_cache: string;
-    sqlite_wal: string;
-    guarantee: string;
-  };
-  direct_ats_guarantee: string;
-  supported_archetypes: string[];
-}
-
-export interface CareerCompany {
-  company: string;
-  ats_provider: 'greenhouse' | 'lever' | 'ashby' | 'smartrecruiters' | string;
-  board_token: string;
-  careers_url: string;
-  category?: string;
-  scope?: string;
-}
-
-export interface CareerPagesSearchParams {
-  query?: string;
-  location?: string;
-  ats_provider?: 'all' | 'greenhouse' | 'lever' | 'ashby' | 'smartrecruiters';
-  archetype?: string;
-  min_grade?: 'all' | 'A' | 'B' | 'C';
-  scope?: 'all' | 'india_gcc' | 'remote';
-  limit?: number;
-  candidate?: CandidateSearchPayload | null;
-}
-
 /**
- * Fetches verified Career Pages capability stats from the Job Engine.
+ * Fetches the verified 140+ corporate employer catalog tracked on direct ATS portals.
  */
-export async function fetchCareerPageStats(): Promise<CareerPageStats> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/career-pages/stats`);
-  let lastError: Error | null = null;
-
-  for (const url of endpoints) {
+export async function fetchCareerPagesCompanies(): Promise<CareerCompanyInfo[]> {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/companies` : '/api/career-pages/companies';
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.stats) return data.stats;
-      }
-    } catch (e: any) {
-      lastError = e;
-    }
-  }
-
-  // Graceful fallback matching verified engine specification if offline
-  return {
-    total_registered_employers: 859,
-    ats_provider_distribution: {
-      Greenhouse: 545,
-      Ashby: 165,
-      Lever: 108,
-      SmartRecruiters: 41,
-    },
-    worldwide_remote_hiring: {
-      count: 667,
-      percentage: '77.6%',
-      scope: 'Cross-border, Americas remote, EMEA remote, and global anywhere-in-the-world',
-    },
-    india_metro_gcc_hiring: {
-      count: 246,
-      percentage: '28.6%',
-      scope: 'Dedicated tech giants, unicorn startups, and multinational capability centers',
-    },
-    live_indexing_throughput: '8,500 – 11,200+ Jobs per warmup cycle (~60s concurrent AsyncIO crawler)',
-    persistent_sqlite_storage: '1,787+ Verified Jobs across 791 Employers (SQLite WAL mode drc_job_discovery.db with SHA-256 deduplication)',
-    query_latency_sla: {
-      ram_cache: '11.79 ms',
-      sqlite_wal: '1.65 ms',
-      guarantee: 'Sub-20ms SLA guarantee for instant keyword search',
-    },
-    direct_ats_guarantee: '100% Real ATS Requisitions (No 3rd-party aggregators)',
-    supported_archetypes: [
-      'Agentic & AI Automation',
-      'AI & Machine Learning',
-      'AI Forward Deployed & Solutions',
-      'AI Platform & LLMOps',
-      'Backend & Distributed Systems',
-      'Full Stack Engineering',
-      'Frontend & UI Engineering',
-      'Data Platform & Analytics',
-      'Cloud & DevOps / SRE',
-      'Technical Product & Architecture',
-    ],
-  };
-}
-
-/**
- * Fetches verified 859-employer list with ATS details.
- */
-export async function fetchCareerCompanies(): Promise<CareerCompany[]> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/career-pages/companies`);
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.companies && Array.isArray(data.companies)) {
-          return data.companies;
-        }
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (response.ok) {
+        const data = await response.json();
+        setCachedWorkingEngineUrl(base);
+        return data.companies || [];
       }
     } catch {
-      continue;
+      // try next
     }
   }
   return [];
 }
 
 /**
- * Searches real-time ATS job requisitions across 859 employers with fit grading.
+ * Fetches live coverage statistics for Corporate ATS portals.
  */
-export async function searchCareerPages(
-  params: CareerPagesSearchParams
-): Promise<{ success: boolean; count: number; jobs: DiscoveredJobItem[] }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/career-pages/search`);
+export async function fetchCareerPagesStats(): Promise<CareerPageStats | null> {
+  const candidates = getJobEngineCandidates();
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/stats` : '/api/career-pages/stats';
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (response.ok) {
+        const data = await response.json();
+        setCachedWorkingEngineUrl(base);
+        return data.stats || null;
+      }
+    } catch {
+      // try next
+    }
+  }
+  return null;
+}
+
+/**
+ * Searches real-time corporate ATS portals directly with Archetype and Grade filters.
+ */
+export async function searchCareerPages(params: {
+  query?: string;
+  location?: string;
+  ats_provider?: string;
+  archetype?: string;
+  min_grade?: string;
+  limit?: number;
+  candidate?: CandidateSearchPayload | null;
+}): Promise<{ success: boolean; count: number; jobs: DiscoveredJobItem[] }> {
+  const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
     query: params.query || 'Software Engineer',
-    location: params.location || 'Remote',
+    location: params.location || 'All India (Remote & Nationwide)',
     ats_provider: params.ats_provider || 'all',
     archetype: params.archetype || 'all',
     min_grade: params.min_grade || 'all',
-    scope: params.scope || 'all',
     limit: params.limit || 15,
     candidate: params.candidate || null,
   };
 
-  for (const url of endpoints) {
+  for (const base of candidates) {
+    const url = base ? `${base}/api/career-pages/search` : '/api/career-pages/search';
     try {
-      const res = await fetch(url, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(12000),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        return data;
-      }
-      const errText = await res.text();
-      lastError = new Error(`Career search failed: ${errText || res.statusText}`);
-    } catch (e: any) {
-      lastError = e;
-    }
-  }
-
-  throw lastError || new Error('Career pages search failed: Unable to reach Job Discovery Engine.');
-}
-
-export interface CandidateDataPlan {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  location: string;
-  linkedin_url?: string;
-  github_url?: string;
-  portfolio_url?: string;
-  other_website_url?: string;
-  work_authorization: boolean;
-  requires_sponsorship: boolean;
-  notice_period: string;
-  earliest_start_date?: string;
-  open_to_relocation: boolean;
-  expected_salary?: string;
-  current_salary?: string;
-  currency?: string;
-  eeo_gender?: string;
-  eeo_race?: string;
-  eeo_veteran?: string;
-  eeo_disability?: string;
-  custom_answers?: Record<string, string>;
-  summary_note?: string;
-}
-
-export interface AutoApplyJobResult {
-  job_id: string;
-  company: string;
-  job_title: string;
-  status: 'SUCCESS' | 'FALLBACK_REQUIRED' | 'FAILED' | 'ALREADY_APPLIED';
-  mode: 'DIRECT_ATS_API' | 'STEALTH_BROWSER' | 'SKIP' | 'HYBRID';
-  message: string;
-  confirmation_id?: string;
-  applied_at: string;
-  duration_ms: number;
-  proof_screenshot_url?: string;
-  fields_filled?: string[];
-  proof_timestamp?: string;
-  target_url?: string;
-  page_title?: string;
-}
-
-export interface AutoApplyBatchStatus {
-  batch_id: string;
-  total: number;
-  completed: number;
-  successful: number;
-  failed: number;
-  status: 'PROCESSING' | 'COMPLETED' | 'ERROR';
-  results: AutoApplyJobResult[];
-  started_at: string;
-  finished_at?: string;
-}
-
-/**
- * Submits automated job application batch to Career Pages (Greenhouse, Lever, Ashby, etc.)
- */
-export async function submitCareerAutoApplyBatch(
-  candidate: CandidateDataPlan,
-  targets: {
-    id: string;
-    job_title: string;
-    company: string;
-    application_url: string;
-    ats_provider?: string;
-    location?: string;
-  }[],
-  resumeFile?: File
-): Promise<{ success: boolean; batch_id: string; total: number; message: string }> {
-  const endpoints = getJobEngineCandidates().map((base) => `${base}/api/career-pages/auto-apply`);
-  let lastError: Error | null = null;
-
-  const formData = new FormData();
-  formData.append('candidate_data', JSON.stringify(candidate));
-  formData.append('targets', JSON.stringify(targets));
-  if (resumeFile) {
-    formData.append('resume', resumeFile);
-  }
-
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        signal: AbortSignal.timeout(15000),
-      });
-
-      if (res.ok) {
-        return await res.json();
-      }
-      const errText = await res.text();
-      lastError = new Error(`Auto-apply submission failed: ${errText || res.statusText}`);
-    } catch (e: any) {
-      lastError = e;
-    }
-  }
-
-  throw lastError || new Error('Auto-apply failed: Unable to connect to application worker.');
-}
-
-/**
- * Polls live execution status of an active Auto-Apply batch.
- */
-export async function fetchCareerAutoApplyStatus(batchId: string): Promise<AutoApplyBatchStatus> {
-  const endpoints = getJobEngineCandidates().map(
-    (base) => `${base}/api/career-pages/auto-apply/status/${encodeURIComponent(batchId)}`
-  );
-  let lastError: Error | null = null;
-
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.batch) return data.batch;
+      if (response.ok) {
+        setCachedWorkingEngineUrl(base);
+        return await response.json();
       }
     } catch (e: any) {
       lastError = e;
     }
   }
 
-  throw lastError || new Error(`Failed to load auto-apply status for ${batchId}`);
+  throw lastError || new Error('Corporate Career Pages search failed');
 }
-
-/**
- * Fetches the full list of applied jobs with proof screenshots and audit metadata.
- */
-export async function fetchCandidateApplicationProofs(candidateEmail: string): Promise<any[]> {
-  const endpoints = getJobEngineCandidates().map(
-    (base) => `${base}/api/career-pages/proofs/candidate/${encodeURIComponent(candidateEmail)}`
-  );
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.applications && Array.isArray(data.applications)) {
-          return data.applications;
-        }
-      }
-    } catch {
-      continue;
-    }
-  }
-  return [];
-}
-
-
-

@@ -1,84 +1,136 @@
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, ShieldCheck, Zap } from 'lucide-react';
 
 export const ComparisonTable: React.FC = () => {
   const rows = [
-    { name: "Direct ATS Ingestion (Greenhouse, Lever, Ashby)", solo: false, ai: false, consult: false, us: true },
     { name: "Accuracy & Attention to Detail", solo: true, ai: false, consult: false, us: true },
-    { name: "Fully Managed Job Submissions", solo: false, ai: false, consult: false, us: true },
-    { name: "Consistent & Reliable Execution", solo: false, ai: false, consult: false, us: true },
-    { name: "Shorter Time-to-Offer Window", solo: false, ai: false, consult: false, us: true },
-    { name: "Transparent Proof & Tracking Log", solo: false, ai: false, consult: false, us: true },
-    { name: "Zero Cost Keyword Scraping Architecture", solo: false, ai: true, consult: false, us: true },
-    { name: "Dedicated Human Career Specialist", solo: false, ai: false, consult: true, us: true },
+    { name: "Fully Managed Job Applications", solo: false, ai: false, consult: false, us: true },
+    { name: "Consistent & Reliable Everyday", solo: false, ai: false, consult: false, us: true },
+    { name: "Better Use of Your Time", solo: false, ai: true, consult: false, us: true },
+    { name: "Shorter Time to Land a Job", solo: false, ai: false, consult: false, us: true },
+    { name: "Proof of Job Application", solo: false, ai: false, consult: false, us: true },
+    { name: "Transparent & Affordable Pricing", solo: false, ai: true, consult: false, us: true },
+    { name: "Dedicated Support", solo: false, ai: false, consult: false, us: true },
   ];
 
-  return (
-    <section className="bg-[#121212] py-20 border-b border-[#2e2e2e]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16 max-w-2xl mx-auto">
-          <div className="text-xs uppercase tracking-[0.1em] text-[#3ecf8e] font-mono mb-3">
-            BENCHMARK
+  const renderIcon = (isTrue: boolean, isUs: boolean) => {
+    if (isTrue) {
+      if (isUs) {
+        return (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-400 dark:from-neon-green dark:to-neon-emerald flex items-center justify-center shadow-[0_0_10px_rgba(74,222,128,0.4)] mx-auto">
+            <Check size={18} className="text-white dark:text-black stroke-[3]" />
           </div>
-          <h2 className="text-3xl sm:text-4xl font-normal text-[#fafafa] tracking-[-0.007em] mb-4">
-            How JonHunter compares.
+        );
+      }
+      return (
+        <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-green-500/20 flex items-center justify-center mx-auto border border-emerald-200 dark:border-green-500/30">
+          <Check size={14} className="text-emerald-600 dark:text-green-400" />
+        </div>
+      );
+    }
+    return (
+      <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center mx-auto border border-red-200 dark:border-red-500/20">
+        <X size={14} className="text-red-500 dark:text-red-400/70" />
+      </div>
+    );
+  };
+
+  return (
+    <section className="bg-white dark:bg-black py-24 border-t border-gray-200 dark:border-white/5 relative transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="text-center mb-16 max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
+            More Strategic Than AI. More Effective Than Doing It Alone.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 dark:from-neon-green dark:to-neon-emerald">
+              And 10x More Real Than “Career Gurus”.
+            </span>
           </h2>
-          <p className="text-sm sm:text-base font-normal text-[#b4b4b4] leading-relaxed tracking-[-0.007em]">
-            Compare our deterministic engineering approach against solo searching, AI spam tools, and old-school agencies.
+          <p className="text-lg text-gray-500 dark:text-gray-400">
+            See why DRC outperforms solo job hunting, AI tools, and traditional consultancies
           </p>
         </div>
 
-        {/* Table Container: 16px radius, border 1px solid #2e2e2e, #121212 background */}
-        <div className="rounded-[16px] border border-[#2e2e2e] bg-[#121212] overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-[#2e2e2e] text-xs font-mono text-[#898989]">
-                <th className="p-4 sm:p-5 font-normal tracking-[-0.007em] text-[#fafafa]">CAPABILITY</th>
-                <th className="p-4 sm:p-5 font-normal text-center">SOLO SEARCH</th>
-                <th className="p-4 sm:p-5 font-normal text-center">AI EXTENSIONS</th>
-                <th className="p-4 sm:p-5 font-normal text-center">AGENCIES</th>
-                <th className="p-4 sm:p-5 font-medium text-center bg-[#242424] text-[#3ecf8e] border-l border-r border-[#2e2e2e]">
-                  JONHUNTER / DRC
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#2e2e2e]">
-              {rows.map((row, idx) => (
-                <tr key={idx} className="hover:bg-[#181818] transition-colors">
-                  <td className="p-4 sm:p-5 text-[#fafafa] font-normal tracking-[-0.007em]">
-                    {row.name}
+        {/* Table Container */}
+        <div className="bg-slate-50 dark:bg-[#0f172a] rounded-[2rem] border border-gray-200 dark:border-white/10 overflow-hidden shadow-xl dark:shadow-2xl relative">
+          
+          {/* Decorative Glow */}
+          <div className="absolute top-0 right-0 w-[500px] h-full bg-gradient-to-l from-emerald-50 to-transparent dark:from-neon-green/5 dark:to-transparent pointer-events-none"></div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px]">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-white/10">
+                  <th className="py-8 px-6 text-left text-lg font-bold text-slate-900 dark:text-white w-1/4">What You Get</th>
+                  <th className="py-8 px-6 text-center text-gray-500 dark:text-gray-400 font-medium w-1/6">Solo</th>
+                  <th className="py-8 px-6 text-center text-gray-500 dark:text-gray-400 font-medium w-1/6">AI Auto Apply</th>
+                  <th className="py-8 px-6 text-center text-gray-500 dark:text-gray-400 font-medium w-1/6">Consultancies</th>
+                  <th className="py-8 px-6 text-center w-1/4 bg-white dark:bg-white/5 relative">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-400 dark:from-neon-green dark:to-neon-emerald flex items-center justify-center">
+                        <Zap size={18} className="text-white dark:text-black fill-white dark:fill-black" />
+                      </div>
+                      <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 dark:from-neon-green dark:to-neon-emerald">
+                        DRC
+                      </span>
+                    </div>
+                    {/* Top highlight bar */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-green-400 dark:from-neon-green dark:to-neon-emerald"></div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, idx) => (
+                  <tr key={idx} className="border-b border-gray-200 dark:border-white/5 hover:bg-white dark:hover:bg-white/5 transition-colors group">
+                    <td className="py-6 px-6 text-slate-700 dark:text-gray-300 font-medium border-r border-gray-200 dark:border-white/5 group-hover:text-black dark:group-hover:text-white transition-colors">
+                      {row.name}
+                    </td>
+                    <td className="py-6 px-6 text-center border-r border-gray-200 dark:border-white/5">
+                      {renderIcon(row.solo, false)}
+                    </td>
+                    <td className="py-6 px-6 text-center border-r border-gray-200 dark:border-white/5">
+                      {renderIcon(row.ai, false)}
+                    </td>
+                    <td className="py-6 px-6 text-center border-r border-gray-200 dark:border-white/5">
+                      {renderIcon(row.consult, false)}
+                    </td>
+                    <td className="py-6 px-6 text-center bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-neon-green/5 dark:to-neon-emerald/5 relative">
+                      {renderIcon(row.us, true)}
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Summary Footer Row */}
+                <tr className="h-24">
+                  <td className="py-6 px-6 text-lg font-bold text-slate-900 dark:text-white border-r border-gray-200 dark:border-white/5 border-t border-gray-200 dark:border-white/10">
+                    In Summary
                   </td>
-                  <td className="p-4 sm:p-5 text-center">
-                    {row.solo ? (
-                      <Check className="w-4 h-4 text-[#898989] mx-auto" />
-                    ) : (
-                      <X className="w-4 h-4 text-[#4d4d4d] mx-auto" />
-                    )}
-                  </td>
-                  <td className="p-4 sm:p-5 text-center">
-                    {row.ai ? (
-                      <Check className="w-4 h-4 text-[#898989] mx-auto" />
-                    ) : (
-                      <X className="w-4 h-4 text-[#4d4d4d] mx-auto" />
-                    )}
-                  </td>
-                  <td className="p-4 sm:p-5 text-center">
-                    {row.consult ? (
-                      <Check className="w-4 h-4 text-[#898989] mx-auto" />
-                    ) : (
-                      <X className="w-4 h-4 text-[#4d4d4d] mx-auto" />
-                    )}
-                  </td>
-                  <td className="p-4 sm:p-5 text-center bg-[#242424] border-l border-r border-[#2e2e2e]">
-                    <div className="w-5 h-5 rounded-full bg-[#121212] border border-[#3ecf8e] flex items-center justify-center mx-auto">
-                      <Check className="w-3 h-3 text-[#3ecf8e]" />
+                  <td className="py-6 px-6 text-center bg-red-50 dark:bg-red-900/10 border-r border-gray-200 dark:border-white/5 border-t border-gray-200 dark:border-white/10">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-sm font-bold text-red-600 dark:text-red-300">Soul Crushing 😵</span>
                     </div>
                   </td>
+                  <td className="py-6 px-6 text-center bg-gray-100 dark:bg-gray-900/50 border-r border-gray-200 dark:border-white/5 border-t border-gray-200 dark:border-white/10">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-sm font-bold text-gray-500 dark:text-gray-400">Snake Oil</span>
+                    </div>
+                  </td>
+                  <td className="py-6 px-6 text-center bg-red-50 dark:bg-red-900/10 border-r border-gray-200 dark:border-white/5 border-t border-gray-200 dark:border-white/10">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-sm font-bold text-red-600 dark:text-red-300">20% Salary gone 💀</span>
+                      <span className="text-[10px] text-red-500 dark:text-red-400/70">for nothing</span>
+                    </div>
+                  </td>
+                  <td className="py-6 px-6 text-center bg-gradient-to-r from-emerald-100/50 to-green-100/50 dark:from-neon-green/20 dark:to-neon-emerald/20 border-t border-emerald-300 dark:border-neon-green/30 relative">
+                     <div className="flex flex-col items-center gap-1">
+                       <span className="text-base font-bold text-emerald-800 dark:text-white drop-shadow-sm dark:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">Your True WingMan 🤝</span>
+                     </div>
+                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

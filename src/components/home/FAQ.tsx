@@ -10,49 +10,38 @@ export const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="bg-[#121212] py-20 border-b border-[#2e2e2e]">
-      <div className="max-w-[800px] mx-auto px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <div className="text-xs uppercase tracking-[0.1em] text-[#3ecf8e] font-mono mb-3">
-            FREQUENTLY ASKED QUESTIONS
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-normal text-[#fafafa] tracking-[-0.007em] mb-4">
-            Everything you need to know.
-          </h2>
-          <p className="text-sm sm:text-base font-normal text-[#b4b4b4] leading-relaxed tracking-[-0.007em]">
-            Transparent answers on our discovery engine, application workflow, and consulting guarantees.
-          </p>
-        </div>
+    <section className="bg-mint-50 dark:bg-[#050505] py-24 transition-colors duration-300">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-12 text-center">
+          Have more questions? <span className="text-emerald-600 dark:text-neon-green">Let's chat!</span>
+        </h2>
+        
+        <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+           We understand that you might have questions specific to your situation. Schedule a call with our founder – we're here to help you succeed!
+        </p>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {FAQS.map((faq, idx) => (
-            <div
-              key={idx}
-              className={`rounded-[16px] p-5 border transition-colors ${
-                openIndex === idx
-                  ? 'bg-[#181818] border-[#3ecf8e]'
-                  : 'bg-[#121212] border-[#2e2e2e] hover:border-[#4d4d4d]'
-              }`}
-            >
+            <div key={idx} className={`rounded-2xl p-6 border transition-all duration-200 shadow-sm ${openIndex === idx ? 'bg-white dark:bg-white/10 border-emerald-500 dark:border-neon-green/50' : 'bg-white dark:bg-white/5 border-transparent dark:border-white/5 hover:bg-white dark:hover:bg-white/10'}`}>
               <button 
                 onClick={() => toggle(idx)}
-                className="w-full flex justify-between items-center text-left focus:outline-none cursor-pointer"
+                className="w-full flex justify-between items-center text-left focus:outline-none"
               >
-                <span className="font-medium text-sm sm:text-base text-[#fafafa] pr-4 tracking-[-0.007em]">
+                <span className="font-bold text-sm md:text-base text-slate-800 dark:text-gray-200 pr-4">
                   {faq.question}
                 </span>
-                <span className="text-[#898989] flex-shrink-0">
+                <span className={`p-2 rounded-full transition-colors ${openIndex === idx ? 'bg-emerald-500 dark:bg-neon-green text-white dark:text-black' : 'bg-gray-100 dark:bg-white/10 text-gray-400'}`}>
                   {openIndex === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </span>
               </button>
               
-              {openIndex === idx && (
-                <div className="mt-3 pt-3 border-t border-[#2e2e2e]">
-                  <p className="text-sm font-normal text-[#b4b4b4] leading-relaxed tracking-[-0.007em]">
-                    {faq.answer}
-                  </p>
-                </div>
-              )}
+              <div 
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === idx ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+              >
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed pb-2">
+                  {faq.answer}
+                </p>
+              </div>
             </div>
           ))}
         </div>

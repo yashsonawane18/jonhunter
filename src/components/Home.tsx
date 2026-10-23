@@ -7,45 +7,39 @@ import { VideoTestimonials } from './home/VideoTestimonials';
 import { ComparisonTable } from './home/ComparisonTable';
 import { FAQ } from './home/FAQ';
 import { InstagramStories } from './home/InstagramStories';
+import { SuccessStoriesSection } from './home/SuccessStoriesSection';
 
 interface HomeProps {
   onGetStarted?: () => void;           // navigates to signup/login
   onNavigateToQAtoBA?: () => void;     // navigates to qa-to-ba page
   onNavigateToPricing?: () => void;    // navigates to pricing page
-  onNavigateToDiscover?: () => void;   // navigates to discover page
 }
 
 const Home: React.FC<HomeProps> = ({
   onGetStarted,
   onNavigateToQAtoBA,
   onNavigateToPricing,
-  onNavigateToDiscover,
 }) => {
   const handleNavigateToQAtoBA = () => {
     onNavigateToQAtoBA?.();
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#fafafa] selection:bg-[#3ecf8e] selection:text-[#121212]">
+    <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white selection:bg-neon-green selection:text-black transition-colors duration-300">
       <main>
         <SiteIntegration
           onNavigateToSignup={onGetStarted}
           onNavigateToQAtoBA={handleNavigateToQAtoBA}
-          onNavigateToDiscover={onNavigateToDiscover}
         />
-
-        <ProofSection />
-        
-        <SmarterWay />
-
-        <ComparisonTable />
 
         <VideoTestimonials />
         
+        <SmarterWay />
+        <ProofSection />
         <Testimonials />
-        
         <InstagramStories />
-        
+        {/* <SuccessStoriesSection /> */}
+        <ComparisonTable />
         <FAQ />
       </main>
     </div>
