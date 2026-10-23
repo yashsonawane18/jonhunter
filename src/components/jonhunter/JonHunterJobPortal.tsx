@@ -35,7 +35,6 @@ import { JonHunterHero } from './JonHunterHero';
 import { RecommendedJobsSection } from './RecommendedJobsSection';
 import { JobCardNaukri } from './JobCardNaukri';
 import { JobCardErrorBoundary } from './JobCardErrorBoundary';
-import { FiltersSidebar } from './FiltersSidebar';
 import { ResumeAtsBanner } from './ResumeAtsBanner';
 import { SavedJobsView } from './SavedJobsView';
 import { DiscoveredArchiveView } from './DiscoveredArchiveView';
@@ -1002,46 +1001,14 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
             </div>
           )}
 
-          {/* Main Discovery Results & Filters Grid */}
+          {/* Main Discovery Results Feed */}
           <div id="search-results-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Filters Sidebar */}
-              <div className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-20">
-                <FiltersSidebar
-                  selectedChannel={selectedChannel}
-                  onChannelChange={handleChannelChange}
-                  selectedSeniority={selectedSeniority}
-                  onSeniorityChange={handleSenioritySelect}
-                  selectedWorkMode={selectedWorkMode}
-                  onWorkModeChange={handleWorkModeChange}
-                  minAtsScoreFilter={minAtsScoreFilter}
-                  onMinAtsScoreChange={handleMinAtsScoreChange}
-                  selectedSkills={selectedSkills}
-                  suggestedSkills={suggestedSkills}
-                  onToggleSkill={handleToggleSkill}
-                  onResetFilters={handleResetFilters}
-                  totalFilteredCount={displayedJobsList.length}
-                  totalDiscoveredCount={allCombinedJobs.length > 0 ? allCombinedJobs.length : 1500}
-                  savedCount={savedJobIds.length}
-                  appliedCount={appliedCount}
-                  showOnlySaved={showOnlySaved}
-                  hasResume={!!resumeProfile}
-                  onToggleShowSaved={() => setShowOnlySaved((prev) => !prev)}
-                  onShowAllJobs={() => {
-                    setShowOnlySaved(false);
-                    setSelectedChannel('all');
-                  }}
-                  onNavigateTracker={() => setActiveNavTab('tracker')}
-                />
-              </div>
-
-              {/* Right Column: Search Results Feed (Middle Section) */}
-              <div
-                className={`lg:col-span-8 xl:col-span-9 space-y-5 relative transition-all duration-200 ${
-                  isSearchProcessing ? 'cursor-wait select-none' : ''
-                }`}
-                style={isSearchProcessing ? { cursor: 'wait' } : undefined}
-              >
+            <div
+              className={`space-y-5 relative transition-all duration-200 ${
+                isSearchProcessing ? 'cursor-wait select-none' : ''
+              }`}
+              style={isSearchProcessing ? { cursor: 'wait' } : undefined}
+            >
                 {/* Resume ATS Scanner Banner */}
                 <ResumeAtsBanner
                   resumeProfile={resumeProfile}
@@ -1528,7 +1495,6 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                 )}
               </div>
             </div>
-          </div>
         </main>
       )}
 
