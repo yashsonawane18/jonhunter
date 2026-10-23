@@ -64,7 +64,7 @@ const ARCHETYPES = [
 ];
 
 const ATS_PROVIDERS = [
-  { id: 'all', label: 'All ATS Platforms', count: 141 },
+  { id: 'all', label: 'All ATS Platforms', count: 859 },
   { id: 'greenhouse', label: 'Greenhouse', color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' },
   { id: 'ashby', label: 'Ashby', color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' },
   { id: 'lever', label: 'Lever', color: 'text-blue-400 border-blue-500/30 bg-blue-500/10' },
@@ -154,9 +154,19 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
         min_grade: selectedMinGrade,
         limit: 25,
         candidate: candidateProfile ? {
-          skills: candidateProfile.skills || [],
-          experience_years: candidateProfile.experience_years || 3,
-          current_role: candidateProfile.current_role || '',
+          name: candidateProfile.name || 'Candidate',
+          email: candidateProfile.email || 'candidate@drc.com',
+          phone: candidateProfile.phone || '',
+          location: candidateProfile.location || selectedLocation,
+          total_experience_years: candidateProfile.total_experience_years || (candidateProfile as any).experience_years || 3,
+          primary_domain: candidateProfile.primary_domain || candidateProfile.reference_role || '',
+          target_roles: candidateProfile.target_roles || [],
+          top_skills: candidateProfile.top_skills || candidateProfile.skills || [],
+          raw_resume_text: candidateProfile.raw_resume_text || '',
+          work_mode: candidateProfile.work_mode || 'remote_included',
+          open_to_relocation: candidateProfile.open_to_relocation ?? true,
+          notice_period: candidateProfile.notice_period || 'Immediate',
+          skills: candidateProfile.skills || candidateProfile.top_skills || [],
         } : null,
       });
 
@@ -207,7 +217,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
     setSelectedMinGrade('all');
     setSelectedLocation('All Locations (Remote & Global)');
     setCompanySearchFilter('');
-    toast.success('Career page filters reset to all 141+ employers.');
+    toast.success('Career page filters reset to all 859+ employers.');
   };
 
   // Filtered Company Pills
@@ -215,7 +225,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
     if (!companySearchFilter.trim()) return POPULAR_COMPANIES;
     const q = companySearchFilter.toLowerCase().trim();
     return companies
-      .filter((c) => c.name.toLowerCase().includes(q) || c.ats_provider.toLowerCase().includes(q))
+      .filter((c) => (c.name || '').toLowerCase().includes(q) || (c.ats_provider || c.ats || '').toLowerCase().includes(q))
       .slice(0, 20)
       .map((c) => c.name);
   }, [companySearchFilter, companies]);
@@ -249,7 +259,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
               <Zap className="w-3.5 h-3.5" />
-              141+ Verified Tech Employers
+              859+ Verified Tech Employers
             </span>
           </div>
 
@@ -282,15 +292,15 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
             <div className={`p-3.5 rounded-2xl ${theme.innerBoxClass} border ${theme.innerBoxBorderClass}`}>
               <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Verified Companies</div>
               <div className="text-xl sm:text-2xl font-black text-white mt-0.5">
-                {stats?.total_companies || companies.length || 141}
+                {stats?.total_registered_employers || (stats as any)?.total_companies || companies.length || 859}
               </div>
-              <div className="text-[10px] text-[#00C896] mt-0.5 font-medium">Greenhouse, Ashby, Lever</div>
+              <div className="text-[10px] text-[#00C896] mt-0.5 font-medium">545 GH · 165 Ashby · 108 Lever</div>
             </div>
 
             <div className={`p-3.5 rounded-2xl ${theme.innerBoxClass} border ${theme.innerBoxBorderClass}`}>
               <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">ATS Platforms</div>
               <div className="text-xl sm:text-2xl font-black text-white mt-0.5">4 Systems</div>
-              <div className="text-[10px] text-zinc-400 mt-0.5 font-medium">102 GH · 27 Ashby · 9 Lever</div>
+              <div className="text-[10px] text-zinc-400 mt-0.5 font-medium">Greenhouse, Ashby, Lever, SmartRecruiters</div>
             </div>
 
             <div className={`p-3.5 rounded-2xl ${theme.innerBoxClass} border ${theme.innerBoxBorderClass}`}>
@@ -719,9 +729,9 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
                                     <span>Direct Email</span>
                                   </a>
                                 )}
-                                {c.emailOrLinkedIn && (
+                                {((c as any).emailOrLinkedIn || c.linkedin_url) && (
                                   <a
-                                    href={c.emailOrLinkedIn}
+                                    href={(c as any).emailOrLinkedIn || c.linkedin_url}
                                     target="_blank"
                                     rel="noreferrer"
                                     className={`px-2 py-1 rounded-lg ${theme.innerBoxClass} text-zinc-200 border ${theme.innerBoxBorderClass} flex items-center gap-1 text-[11px] hover:text-sky-400`}

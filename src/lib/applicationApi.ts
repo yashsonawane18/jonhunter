@@ -9,7 +9,7 @@ import { errorLogger } from './errors/errorLogger';
 
 const getEngineBaseUrl = (): string => {
   const candidates = getJobEngineCandidates();
-  return candidates[0] || 'http://127.0.0.1:5055';
+  return candidates[0] !== undefined ? candidates[0] : '';
 };
 
 export interface CandidateParsedProfile {
@@ -93,7 +93,7 @@ export async function parseCandidateResume(file: File): Promise<{
       const res = await fetch(url, {
         method: 'POST',
         body: formData,
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(30000),
       });
 
       if (res.ok) {
@@ -142,7 +142,7 @@ export async function fetchJobRecommendations(
           exclude_job_id: excludeJobId,
           limit,
         }),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (res.ok) {
@@ -173,7 +173,7 @@ export async function submitCandidateApplication(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (res.ok) {
@@ -198,7 +198,7 @@ export async function fetchCandidateApplications(limit = 50): Promise<CandidateA
   for (const base of candidates) {
     const url = base ? `${base}/api/applications?limit=${limit}` : `/api/applications?limit=${limit}`;
     try {
-      const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(4000) });
+      const res = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
         setCachedWorkingEngineUrl(base);
         const data = await res.json();
@@ -243,7 +243,7 @@ export async function calculateAtsScore(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (res.ok) {
@@ -280,7 +280,7 @@ export async function scoreDiscoveredJobsWithResume(
           candidate_resume_text: profile.raw_resume_text || '',
           jobs: jobs,
         }),
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (res.ok) {

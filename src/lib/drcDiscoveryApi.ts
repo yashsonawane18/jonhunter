@@ -5,7 +5,7 @@ import { errorLogger } from './errors/errorLogger';
 let cachedWorkingEngineUrl: string | null = safeStorage.getItem<string | null>('drc_working_engine_url', null, 'session');
 
 export function setCachedWorkingEngineUrl(url: string | null): void {
-  if (!url) return;
+  if (url === null || url === undefined) return;
   const cleanUrl = url.replace(/\/$/, '');
   cachedWorkingEngineUrl = cleanUrl;
   safeStorage.setItem('drc_working_engine_url', cleanUrl, 'session');
@@ -22,33 +22,44 @@ export function getJobEngineCandidates(): string[] {
     ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const candidates: string[] = [];
 
-  // Prioritize cached responsive URL from current session
-  if (cachedWorkingEngineUrl) {
-    candidates.push(cachedWorkingEngineUrl);
-  }
-
-  if (explicit) {
-    candidates.push(explicit.replace(/\/$/, ''));
-  }
   if (isLocal) {
+    // In local development, prioritize cached responsive URL and local microservice
+    if (cachedWorkingEngineUrl) {
+      candidates.push(cachedWorkingEngineUrl);
+    }
+    if (explicit) {
+      candidates.push(explicit.replace(/\/$/, ''));
+    }
     candidates.push('http://127.0.0.1:5055');
     candidates.push('http://localhost:5055');
+  } else {
+    // Hosted Cloud Engine & Vercel Edge Environment:
+    // 1. Same-Origin Vercel Edge Proxy ('') MUST be FIRST:
+    //    Zero CORS issues, no preflight latency, no browser tracking blockers.
+    candidates.push('');
+
+    // 2. Direct Render URL fallback
+    candidates.push('https://jonhunter-9pkh.onrender.com');
+
+    if (explicit) {
+      candidates.push(explicit.replace(/\/$/, ''));
+    }
+    if (cachedWorkingEngineUrl && cachedWorkingEngineUrl !== '') {
+      candidates.push(cachedWorkingEngineUrl);
+    }
   }
+
   const apiBase = (import.meta as any).env?.VITE_API_BASE_URL;
   if (apiBase) {
     candidates.push(apiBase.replace(/\/$/, ''));
   }
-  if (!isLocal) {
-    // Hosted Cloud Engine & Vercel Same-Origin Reverse Proxy
-    candidates.push('https://jonhunter-9pkh.onrender.com');
-    candidates.push('');
-  }
+
   return Array.from(new Set(candidates));
 }
 
 export const getEngineBaseUrl = (): string => {
   const candidates = getJobEngineCandidates();
-  return candidates[0] || 'http://127.0.0.1:5055';
+  return candidates[0] !== undefined ? candidates[0] : '';
 };
 
 const ENGINE_BASE_URL = getEngineBaseUrl();
@@ -103,18 +114,31 @@ export interface DiscoveredJobItem {
 
 export interface CareerCompanyInfo {
   name: string;
-  ats: string;
-  slug: string;
-  hub: string;
-  domain: string;
-  careers_url: string;
+  ats?: string;
+  ats_provider?: string;
+  slug?: string;
+  hub?: string;
+  default_hub?: string;
+  domain?: string;
+  careers_url?: string;
+  career_url?: string;
+  is_remote?: boolean;
+  is_india_gcc?: boolean;
 }
 
 export interface CareerPageStats {
-  total_companies_tracked: number;
-  ats_breakdown: Record<string, number>;
-  direct_link_guarantee: string;
-  supported_archetypes: string[];
+  total_registered_employers?: number;
+  total_companies_tracked?: number;
+  total_companies?: number;
+  ats_provider_distribution?: Record<string, number>;
+  ats_breakdown?: Record<string, number>;
+  worldwide_remote_hiring?: {
+    count: number;
+    percentage: string;
+    scope: string;
+  };
+  direct_link_guarantee?: string;
+  supported_archetypes?: string[];
 }
 
 export interface DiscoveredBatch {
@@ -164,7 +188,7 @@ export async function checkJobEngineHealth(): Promise<boolean> {
     try {
       const res = await fetch(url, {
         method: 'GET',
-        signal: AbortSignal.timeout(isLocalProbe ? 2500 : 4500),
+        signal: AbortSignal.timeout(isLocalProbe ? 2500 : 6000),
       });
       if (res.ok) {
         const data = await res.json().catch(() => null);
@@ -195,7 +219,7 @@ export async function fetchPanIndiaLocations(): Promise<string[]> {
   for (const base of candidates) {
     const ep = base ? `${base}/api/locations` : '/api/locations';
     try {
-      const res = await fetch(ep, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(ep, { signal: AbortSignal.timeout(4000) });
       if (res.ok) {
         const data = await res.json();
         if (data.locations && Array.isArray(data.locations)) {
@@ -288,7 +312,7 @@ export async function searchInstantJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (response.ok) {
@@ -374,7 +398,7 @@ export async function findMatchingJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (response.ok) {
@@ -435,7 +459,7 @@ export async function findTwoSourceJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (response.ok) {
@@ -467,7 +491,7 @@ export async function getDiscoveredJobsHistory(candidateEmail: string): Promise<
       ? `${base}/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`
       : `/api/discovered-jobs?candidate_email=${encodeURIComponent(candidateEmail)}`;
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
       if (response.ok) {
         setCachedWorkingEngineUrl(base);
         return await response.json();
@@ -506,7 +530,7 @@ export async function updateJobStatus(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(10000),
       });
 
       if (response.ok) {
@@ -529,7 +553,7 @@ export async function fetchCareerPagesCompanies(): Promise<CareerCompanyInfo[]> 
   for (const base of candidates) {
     const url = base ? `${base}/api/career-pages/companies` : '/api/career-pages/companies';
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
       if (response.ok) {
         const data = await response.json();
         setCachedWorkingEngineUrl(base);
@@ -550,7 +574,7 @@ export async function fetchCareerPagesStats(): Promise<CareerPageStats | null> {
   for (const base of candidates) {
     const url = base ? `${base}/api/career-pages/stats` : '/api/career-pages/stats';
     try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
       if (response.ok) {
         const data = await response.json();
         setCachedWorkingEngineUrl(base);
@@ -595,7 +619,7 @@ export async function searchCareerPages(params: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(12000),
+        signal: AbortSignal.timeout(25000),
       });
 
       if (response.ok) {
