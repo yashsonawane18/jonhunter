@@ -1124,7 +1124,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       type="button"
                       onClick={handleResetSeenHistory}
                       title="Reset seen exclusion cache"
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white bg-[#20222A] hover:bg-[#2A2D38] border border-[#343744] hover:border-[#4B4F60] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white bg-[#0E1520] hover:bg-[#141E2E] border border-[#1B2636] hover:border-[#2A3B52] transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-[#00C896]" />
                       <span className="hidden sm:inline">Reset</span>
@@ -1135,7 +1135,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       type="button"
                       onClick={() => setIsDiagnosticsOpen(true)}
                       title="Inspect engine connection & diagnostics"
-                      className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-[#20222A] hover:bg-[#2A2D38] border border-[#343744] hover:border-[#4B4F60] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white bg-[#0E1520] hover:bg-[#141E2E] border border-[#1B2636] hover:border-[#2A3B52] transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       <Activity className="w-3.5 h-3.5 text-zinc-400" />
                       <span className="hidden lg:inline text-[11px]">System Status</span>
@@ -1208,15 +1208,15 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
 
                       {/* Live scanning pill badges */}
                       <div className="flex items-center justify-center gap-2 mt-5 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#0E1520] text-zinc-200 border border-[#1B2636]">
                           <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
                           <span>Direct ATS Feeds</span>
                         </span>
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#0E1520] text-zinc-200 border border-[#1B2636]">
                           <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
                           <span>Strict Keyword Match</span>
                         </span>
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#20222A] text-zinc-200 border border-[#343744]">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#0E1520] text-zinc-200 border border-[#1B2636]">
                           <span className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
                           <span>Pan-India Executive Band</span>
                         </span>
@@ -1372,7 +1372,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                           <button
                             type="button"
                             onClick={() => setIsDiagnosticsOpen(true)}
-                            className="px-4 py-2.5 rounded-xl bg-[#20222A] hover:bg-[#2A2D38] text-white border border-[#343744] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2"
+                            className="px-4 py-2.5 rounded-xl bg-[#0E1520] hover:bg-[#141E2E] text-white border border-[#1B2636] text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2"
                           >
                             <Activity className="w-3.5 h-3.5 text-[#00C896]" />
                             <span>Check System Status</span>
@@ -1442,7 +1442,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                             key={role}
                             type="button"
                             onClick={() => handleQuickSearchSuggestion(role)}
-                            className="px-3 py-1.5 rounded-lg bg-[#20222A] hover:bg-[#2A2D38] text-xs font-semibold text-zinc-200 hover:text-[#00C896] border border-[#343744] hover:border-[#00C896]/40 transition-colors cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-[#0E1520] hover:bg-[#141E2E] text-xs font-semibold text-zinc-200 hover:text-[#00C896] border border-[#1B2636] hover:border-[#00C896]/40 transition-colors cursor-pointer"
                           >
                             {role}
                           </button>
@@ -1467,7 +1467,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
                       <button
                         type="button"
                         onClick={handleResetFilters}
-                        className="px-4 py-2.5 rounded-xl bg-[#20222A] hover:bg-[#2A2D38] text-zinc-300 hover:text-white border border-[#343744] text-xs font-medium inline-flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl bg-[#0E1520] hover:bg-[#141E2E] text-zinc-300 hover:text-white border border-[#1B2636] text-xs font-medium inline-flex items-center gap-2 cursor-pointer"
                       >
                         <span>Reset All Filters</span>
                       </button>

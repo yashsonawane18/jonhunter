@@ -14,7 +14,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="size-full min-h-screen bg-black text-white">
+    <div className="size-full min-h-screen bg-[#080B0F] text-white">
       <ErrorBoundary fallbackTitle="Job Discovery Portal Recovered">
         <JonHunterJobPortal />
       </ErrorBoundary>

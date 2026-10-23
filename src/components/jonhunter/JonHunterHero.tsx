@@ -97,20 +97,23 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Brand Pill */}
         <div className="flex items-center justify-center mb-5">
-          <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full ${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-[#00C896] text-xs font-semibold uppercase tracking-wider`}>
-            <ShieldCheck className="w-4 h-4 text-[#00C896]" />
-            <span>Dheeraj Rathod Consult &bull; Executive Job Discovery</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Direct Corporate Requisitions &bull; Zero Aggregators</span>
           </div>
         </div>
 
-        {/* Clean, Senior Typography (NO shades or gradient text) */}
+        {/* Clean, Senior Typography */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-            We Apply. You Interview. <span className="text-[#00C896]">You Get Hired.</span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
+            Direct Corporate Requisitions.{' '}
+            <span className="block mt-1 bg-gradient-to-r from-emerald-400 via-[#00C896] to-teal-300 bg-clip-text text-transparent">
+              Zero Aggregator Middlemen.
+            </span>
           </h1>
 
-          <p className="mt-3 text-sm sm:text-base text-zinc-300 max-w-2xl mx-auto leading-relaxed">
-            Dheeraj Rathod Consult applies directly to verified engineering, product, and leadership openings across top career portals. Exclusively for experienced candidates (2+ to 15+ years).
+          <p className="mt-3.5 text-sm sm:text-base text-zinc-300 max-w-2xl mx-auto leading-relaxed">
+            Real-time direct career portal feeds & verified engineering, architecture, and leadership openings across Greenhouse, Lever, Ashby & Workday. Exclusively for experienced candidates (2+ to 15+ years).
           </p>
         </div>
 
@@ -163,13 +166,13 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 </button>
 
                 {showLocationDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#1C1E24] border border-[#343744] rounded-xl shadow-2xl z-50 p-2 max-h-72 overflow-y-auto">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#0E1520] border border-[#1B2636] rounded-xl shadow-2xl z-50 p-2 max-h-72 overflow-y-auto">
                     <input
                       type="text"
                       value={locationSearchFilter}
                       onChange={(e) => setLocationSearchFilter(e.target.value)}
                       placeholder="Search metro / location..."
-                      className="w-full bg-[#141519] border border-[#2D303B] rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-[#00C896] mb-1.5"
+                      className="w-full bg-[#080B0F] border border-[#1B2636] rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-[#00C896] mb-1.5"
                     />
                     <div className="space-y-0.5">
                       {filteredLocations.map((loc, idx) => {
@@ -187,7 +190,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                             className={`w-full text-left px-2.5 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
                               selectedLocation === locName
                                 ? 'bg-[#00C896]/20 text-[#00C896] font-bold border border-[#00C896]/35'
-                                : 'text-zinc-200 hover:bg-[#252832] hover:text-white'
+                                : 'text-zinc-200 hover:bg-[#141E2E] hover:text-white'
                             }`}
                           >
                             <span className="truncate">{locName}</span>
@@ -209,7 +212,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowSeniorityDropdown(!showSeniorityDropdown)}
-                  className="w-full flex items-center justify-between bg-[#1C1E24] border border-[#2D303B] hover:border-[#3D404E] rounded-xl px-3 py-2.5 text-left text-sm transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between ${theme.innerBoxClass} border ${theme.innerBoxBorderClass} hover:border-[#00C896]/50 rounded-xl px-3.5 py-2.5 text-left text-sm transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <Briefcase className="w-4 h-4 text-[#00C896] shrink-0" />
@@ -221,7 +224,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 </button>
 
                 {showSeniorityDropdown && (
-                  <div className="absolute top-full left-0 right-0 md:w-56 mt-2 bg-[#1C1E24] border border-[#343744] rounded-xl shadow-2xl z-50 p-1.5 space-y-1">
+                  <div className="absolute top-full left-0 right-0 md:w-56 mt-2 bg-[#0E1520] border border-[#1B2636] rounded-xl shadow-2xl z-50 p-1.5 space-y-1">
                     {EXPERIENCED_SENIORITY_OPTIONS.map((opt) => (
                       <button
                         key={opt.id}
@@ -233,7 +236,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                         className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-between ${
                           selectedSeniority === opt.id
                             ? 'bg-[#00C896]/20 text-[#00C896] font-bold border border-[#00C896]/35'
-                            : 'text-zinc-200 hover:bg-[#252832] hover:text-white'
+                            : 'text-zinc-200 hover:bg-[#141E2E] hover:text-white'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -243,18 +246,18 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 )}
               </div>
 
-              {/* Primary Search Button (Solid, highly visible) */}
+              {/* Primary Search Button (Executive High-Visibility CTA) */}
               <div className="md:col-span-2">
                 <button
                   type="submit"
                   disabled={isSearching}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 shadow-sm"
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] font-extrabold text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
                 >
                   {isSearching ? (
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#05130D] border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span>Search Jobs</span>
+                      <span>Find Requisitions</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -277,7 +280,7 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                   onSearchQueryChange(term);
                   onExecuteSearch(term);
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-[#1C1E24] hover:bg-[#252832] text-zinc-200 hover:text-white border border-[#2D303B] hover:border-[#3D404E] transition-colors font-medium cursor-pointer"
+                className="text-xs px-3 py-1.5 rounded-lg bg-[#0E1520] hover:bg-[#141E2E] text-zinc-200 hover:text-white border border-[#1B2636] hover:border-[#2A3B52] transition-colors font-medium cursor-pointer"
               >
                 {term}
               </button>

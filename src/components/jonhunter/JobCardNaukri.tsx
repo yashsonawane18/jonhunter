@@ -131,13 +131,13 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
           </div>
         </div>
 
-        {/* Right: Actions (ATS Score ONLY when resume is uploaded & Bookmark) */}
+        {/* Right: Actions (ATS Score & Interactive Bookmark) */}
         <div className="flex items-center gap-2.5 shrink-0">
           {hasResume && atsScore > 0 && (
             <div
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${
                 atsScore >= 80
-                  ? 'bg-[#00C896]/15 text-[#00C896] border-[#00C896]/35'
+                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/35'
                   : atsScore >= 65
                   ? 'bg-amber-500/15 text-amber-400 border-amber-500/35'
                   : `${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-zinc-300`
@@ -149,14 +149,23 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
             </div>
           )}
 
-          {/* Automatically Saved Status Indicator */}
-          <div
-            className="px-2.5 py-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
-            title="Automatically saved to your opportunities collection"
+          {/* Interactive Bookmark Save Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleStar?.(job);
+            }}
+            className={`p-2 rounded-xl border transition-all duration-200 cursor-pointer ${
+              isSaved
+                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-sm'
+                : `${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-zinc-400 hover:text-white hover:border-zinc-500`
+            }`}
+            title={isSaved ? 'Saved in collection (click to remove)' : 'Save opportunity'}
+            aria-label={isSaved ? 'Saved in collection' : 'Save opportunity'}
           >
-            <Bookmark className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
-            <span>Auto-Saved</span>
-          </div>
+            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-amber-400 text-amber-400' : ''}`} />
+          </button>
         </div>
       </div>
 
@@ -286,14 +295,14 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
         </div>
 
         {/* Clear, High-Contrast Action Buttons */}
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
           {/* View Details - Visible Secondary Button */}
           <button
             type="button"
             onClick={() => onViewDetails?.(job)}
-            className={`px-4 py-2 rounded-xl ${theme.innerBoxClass} hover:opacity-90 text-white border ${theme.innerBoxBorderClass} text-xs font-semibold transition-colors cursor-pointer`}
+            className={`px-4 py-2.5 rounded-xl ${theme.innerBoxClass} hover:bg-white/10 text-zinc-200 hover:text-white border ${theme.innerBoxBorderClass} hover:border-zinc-500 text-xs font-semibold transition-all duration-200 cursor-pointer`}
           >
-            View Details
+            View Spec
           </button>
 
           {/* Apply Now - Solid High-Visibility Green Button */}
@@ -303,7 +312,7 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
               e.stopPropagation();
               onApplyNow?.(job);
             }}
-            className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
+            className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-[0.98]"
           >
             <span>Apply Now</span>
             <ExternalLink className="w-3.5 h-3.5" />

@@ -30,5 +30,9 @@ temp_resumes/
 
 # Temporary images & logs
 *.log
-*.png
 *.mp4
+*.png
+job_engine/proof_screenshots/
+!public/drc-logo*.png
+!public/favicon.png
+!src/assets/drc-logo*.png

@@ -63,7 +63,7 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
   };
 
   return (
-    <div className="bg-[#141519] border border-[#262830] rounded-2xl p-5 sm:p-6 shadow-xl text-white">
+    <div className="bg-gradient-to-r from-[#0C131D] via-[#0E1622] to-[#0A121A] border border-[#1E2C3D] rounded-2xl p-5 sm:p-6 shadow-2xl text-white">
       <input
         ref={fileInputRef}
         type="file"
@@ -75,13 +75,13 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
         {/* Left: Value Proposition */}
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#1C1E24] border border-[#2D303B] flex items-center justify-center text-[#00C896] shrink-0">
-            <Target className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+            <Target className="w-6 h-6 text-emerald-400" />
           </div>
 
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#00C896] bg-[#00C896]/15 px-2.5 py-0.5 rounded-md border border-[#00C896]/30">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-md border border-emerald-500/30">
                 DRC ATS Scoring Engine
               </span>
               <span className="text-xs text-zinc-400 font-mono">
@@ -112,15 +112,15 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
         {/* Right: Upload / Active File Controls */}
         <div className="flex items-center gap-3 shrink-0">
           {resumeProfile ? (
-            <div className="flex items-center gap-2.5 bg-[#1C1E24] border border-[#00C896]/50 rounded-xl px-4 py-2">
-              <CheckCircle2 className="w-4 h-4 text-[#00C896] shrink-0" />
+            <div className="flex items-center gap-2.5 bg-[#141C27] border border-emerald-500/50 rounded-xl px-4 py-2 shadow-sm">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="text-xs font-semibold text-white truncate max-w-[180px]">
                 {resumeFileName || 'Resume Loaded'}
               </span>
               <button
                 type="button"
                 onClick={onClearResume}
-                className="p-1 rounded-md hover:bg-[#252832] text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer ml-1"
+                className="p-1 rounded-md hover:bg-white/10 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer ml-1"
                 title="Remove resume"
               >
                 <X className="w-3.5 h-3.5" />
@@ -131,11 +131,11 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
               type="button"
               disabled={isParsing}
               onClick={() => fileInputRef.current?.click()}
-              className="px-5 py-2.5 rounded-xl bg-[#00C896] hover:bg-[#00E5AA] text-[#0A0A0A] font-bold text-xs shadow-sm transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-75"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] font-extrabold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 active:scale-[0.98]"
             >
               {isParsing ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-[#05130D] border-t-transparent rounded-full animate-spin" />
                   <span>Scanning Profile...</span>
                 </>
               ) : (

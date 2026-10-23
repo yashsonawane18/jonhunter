@@ -69,24 +69,30 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
   return (
     <nav className={`sticky top-0 z-30 ${theme.navClass} border-b text-white`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
-          {/* Sub-Header Branding / Context */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#18191E] border border-[#262830] flex items-center justify-center text-[#00C896] shrink-0">
-              <Compass className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
-                <span>Dheeraj Rathod Consult</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30 font-mono font-bold">
-                  PORTAL
-                </span>
+        <div className="flex items-center justify-between h-16">
+          {/* Official Brand Logo */}
+          <div className="flex items-center gap-3">
+            <a
+              href="/discover"
+              onClick={(e) => {
+                e.preventDefault();
+                onTabChange('discover');
+              }}
+              className="flex items-center gap-2 group cursor-pointer focus:outline-none"
+            >
+              <img
+                src="/drc-logo-white.png"
+                alt="Dheeraj Rathod Consult"
+                className="h-8 sm:h-9 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
+              />
+              <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                Executive Portal
               </span>
-            </div>
+            </a>
           </div>
 
           {/* Center: 4 Navigation Tabs (High Visibility Buttons) */}
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl bg-[#0C121A]/80 border border-[#1B2636] shadow-inner">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -96,14 +102,14 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onTabChange(item.id)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer border ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-2 cursor-pointer border ${
                     isActive
                       ? isSavedTab
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                        : 'bg-[#00C896]/15 text-[#00C896] border-[#00C896]/35 shadow-sm'
+                        : 'bg-[#00C896] text-[#05130D] font-extrabold border-[#00C896] shadow-md shadow-[#00C896]/20'
                       : isSavedTab
-                      ? `${theme.innerBoxClass} hover:opacity-90 text-amber-300/90 hover:text-amber-200 border ${theme.innerBoxBorderClass} hover:border-amber-500/30`
-                      : `${theme.innerBoxClass} hover:opacity-90 text-zinc-300 hover:text-white border ${theme.innerBoxBorderClass} hover:border-[#00C896]/30`
+                      ? `${theme.innerBoxClass} hover:opacity-90 text-amber-300/90 hover:text-amber-200 border-transparent hover:border-amber-500/30`
+                      : 'text-zinc-300 hover:text-white border-transparent hover:bg-white/5'
                   }`}
                 >
                   <Icon
@@ -113,14 +119,14 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
                           ? 'text-amber-300 fill-amber-300'
                           : 'text-amber-400'
                         : isActive
-                        ? 'text-[#00C896]'
+                        ? 'text-[#05130D]'
                         : 'text-zinc-400'
                     }`}
                   />
                   <span>{item.label}</span>
 
                   {item.badge && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#00C896]/20 text-[#00C896]">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-black/20 text-[#05130D]' : 'bg-[#00C896]/15 text-[#00C896]'}`}>
                       {item.badge}
                     </span>
                   )}
@@ -133,7 +139,7 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
                             ? 'bg-amber-400 text-black'
                             : 'bg-amber-500/25 text-amber-300 border border-amber-500/30'
                           : isActive
-                          ? 'bg-[#00C896] text-[#0A0A0A]'
+                          ? 'bg-black/20 text-[#05130D]'
                           : 'bg-[#252832] text-zinc-200'
                       }`}
                     >
@@ -145,11 +151,14 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
             })}
           </div>
 
-          {/* Right: Live Verified Count */}
+          {/* Right: Live Radar Status Indicator */}
           <div className="hidden sm:flex items-center gap-3">
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-xs text-zinc-300`}>
-              <span className="inline-block w-2 h-2 rounded-full bg-[#00C896]" />
-              <span className="font-mono font-medium text-white">9,295+ Openings Live</span>
+            <div className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full ${theme.innerBoxClass} border ${theme.innerBoxBorderClass} text-xs text-zinc-300 shadow-sm`}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="font-mono font-semibold text-white tracking-tight">9,295+ Openings Live</span>
             </div>
           </div>
 
@@ -188,8 +197,8 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
                       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                       : 'bg-[#00C896]/15 text-[#00C896] border-[#00C896]/35'
                     : isSavedTab
-                    ? 'bg-[#18191E] text-amber-300 border-[#262830]'
-                    : 'bg-[#18191E] text-zinc-200 border-[#262830]'
+                    ? `${theme.innerBoxClass} text-amber-300 ${theme.innerBoxBorderClass}`
+                    : `${theme.innerBoxClass} text-zinc-200 ${theme.innerBoxBorderClass}`
                 }`}
               >
                 <div className="flex items-center gap-2">
