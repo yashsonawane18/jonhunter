@@ -280,16 +280,21 @@ def _fetch_sr(info: Dict[str, str]) -> List[Dict[str, Any]]:
 
 def warm_ats_cache():
     """
-    Background cache warmer: Queries all ATS targets concurrently and updates the in-memory index.
+    Lightweight background cache warmer: Only syncs top tier employers to keep memory <150MB and CPU idle.
     """
     global _INDEXED_JOBS, _LAST_SYNC_TIME
-    print("[ATSCacheWarmer] Initiating Pan-India ATS background sync...")
+    if len(_INDEXED_JOBS) >= 300:
+        return
+    print("[ATSCacheWarmer] Initiating lightweight ATS background sync...")
     start_t = time.time()
     all_fetched = []
 
-    with ThreadPoolExecutor(max_workers=5) as pool:
+    # Limit to top 15 key employers on startup to prevent Render 512MB RAM exhaustion
+    targets = EXPANDED_ATS_REGISTRY[:15] if len(EXPANDED_ATS_REGISTRY) > 15 else EXPANDED_ATS_REGISTRY
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
         futures = []
-        for info in EXPANDED_ATS_REGISTRY:
+        for info in targets:
             ats = info["ats"]
             if ats == "greenhouse":
                 futures.append(pool.submit(_fetch_gh, info))
