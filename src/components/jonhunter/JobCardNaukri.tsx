@@ -312,10 +312,11 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
               e.stopPropagation();
               onApplyNow?.(job);
             }}
-            className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-[0.98]"
+            style={{ backgroundColor: '#00C896', color: '#05130D' }}
+            className="btn-drc-primary flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-[#05130D] text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-[#00C896]/30 active:scale-[0.98]"
           >
-            <span>Apply Now</span>
-            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="font-extrabold text-[#05130D]">Apply Now</span>
+            <ExternalLink className="w-3.5 h-3.5 text-[#05130D] stroke-[2.5]" />
           </button>
         </div>
       </div>

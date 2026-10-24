@@ -131,17 +131,18 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
               type="button"
               disabled={isParsing}
               onClick={() => fileInputRef.current?.click()}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] font-extrabold text-xs shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 active:scale-[0.98]"
+              style={{ backgroundColor: '#00C896', color: '#05130D' }}
+              className="btn-drc-primary px-5 py-2.5 rounded-xl text-[#05130D] font-extrabold text-xs shadow-md shadow-[#00C896]/30 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-75 active:scale-[0.98]"
             >
               {isParsing ? (
                 <>
                   <div className="w-4 h-4 border-2 border-[#05130D] border-t-transparent rounded-full animate-spin" />
-                  <span>Scanning Profile...</span>
+                  <span className="font-extrabold text-[#05130D]">Scanning Profile...</span>
                 </>
               ) : (
                 <>
-                  <Upload className="w-4 h-4" />
-                  <span>Upload Resume (PDF / DOCX)</span>
+                  <Upload className="w-4 h-4 text-[#05130D] stroke-[2.5]" />
+                  <span className="font-extrabold text-[#05130D]">Upload Resume (PDF / DOCX)</span>
                 </>
               )}
             </button>

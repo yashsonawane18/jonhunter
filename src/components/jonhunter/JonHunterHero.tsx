@@ -98,17 +98,17 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
         {/* Brand Pill */}
         <div className="flex items-center justify-center mb-5">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Direct Corporate Requisitions &bull; Zero Aggregators</span>
+            <ShieldCheck className="w-4 h-4 text-[#00C896]" />
+            <span>Direct Corporate Applications &bull; 100% Verified Requisitions</span>
           </div>
         </div>
 
         {/* Clean, Senior Typography */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
-            Direct Corporate Requisitions.{' '}
-            <span className="block mt-1 bg-gradient-to-r from-emerald-400 via-[#00C896] to-teal-300 bg-clip-text text-transparent">
-              Zero Aggregator Middlemen.
+            We Apply. You Interview.{' '}
+            <span className="block sm:inline bg-gradient-to-r from-emerald-400 via-[#00C896] to-teal-300 bg-clip-text text-transparent">
+              You Get Hired.
             </span>
           </h1>
 
@@ -251,14 +251,15 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
                 <button
                   type="submit"
                   disabled={isSearching}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-[#00C896] hover:from-emerald-400 hover:to-[#00E5AA] text-[#05130D] font-extrabold text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
+                  style={{ backgroundColor: '#00C896', color: '#05130D' }}
+                  className="btn-drc-primary w-full py-2.5 px-4 rounded-xl text-[#05130D] font-extrabold text-sm transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-75 shadow-lg active:scale-[0.98]"
                 >
                   {isSearching ? (
                     <div className="w-5 h-5 border-2 border-[#05130D] border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span>Find Requisitions</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span className="font-extrabold text-[#05130D]">Find Requisitions</span>
+                      <ArrowRight className="w-4 h-4 text-[#05130D] stroke-[2.5]" />
                     </>
                   )}
                 </button>

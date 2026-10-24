@@ -38,7 +38,6 @@ import { JobCardErrorBoundary } from './JobCardErrorBoundary';
 import { ResumeAtsBanner } from './ResumeAtsBanner';
 import { SavedJobsView } from './SavedJobsView';
 import { DiscoveredArchiveView } from './DiscoveredArchiveView';
-import { ApplicationTrackerView } from './ApplicationTrackerView';
 import { CareerPagesView } from './CareerPagesView';
 import { DiagnosticsModal } from '../common/DiagnosticsModal';
 import { safeStorage } from '../../lib/storage/safeStorage';
@@ -1536,7 +1535,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
       )}
 
       {/* 4. Discovered Jobs Repository View (All 1000+ Jobs Latest to Old) */}
-      {(activeNavTab === 'archive' || activeNavTab === 'saved') && (
+      {activeNavTab === 'archive' && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <DiscoveredArchiveView
             allJobs={allCombinedJobs}
@@ -1552,19 +1551,18 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         </main>
       )}
 
-      {/* 5. Application Tracker View */}
-      {activeNavTab === 'tracker' && (
+      {/* 5. Dedicated Saved Jobs View */}
+      {activeNavTab === 'saved' && (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ApplicationTrackerView
+          <SavedJobsView
             allJobs={allCombinedJobs}
             savedJobIds={savedJobIds}
             onToggleStar={handleToggleStar}
             onViewDetails={handleViewDetail}
+            onApplyNow={handleApplyNow}
             onToggleStatus={handleToggleStatus}
             onSaveRemark={(j, r) => handleSaveRemark(j, r)}
             onExploreJobs={() => setActiveNavTab('discover')}
-            onOpenFullTracker={onNavigateTracker}
-            isAuthenticated={!!user}
           />
         </main>
       )}
