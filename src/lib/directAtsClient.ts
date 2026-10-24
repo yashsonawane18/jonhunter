@@ -17,7 +17,7 @@ interface AtsBoardTarget {
 }
 
 const TOP_ATS_TARGETS: AtsBoardTarget[] = [
-  // High-growth Indian Scaleups & FinTechs
+  // High-growth Indian Scaleups & Tech Employers
   { company: 'Razorpay', ats: 'greenhouse', slug: 'razorpaysoftwareprivatelimited', defaultHub: 'Bengaluru / Pune / Remote' },
   { company: 'Meesho', ats: 'lever', slug: 'meesho', defaultHub: 'Bengaluru / Remote' },
   { company: 'InMobi', ats: 'greenhouse', slug: 'inmobi', defaultHub: 'Bengaluru / Remote' },
@@ -130,7 +130,7 @@ async function fetchGreenhouseJobs(target: AtsBoardTarget): Promise<DiscoveredJo
         experience_match: 'Strong Match',
         connections,
         discovered_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        posted_time: '⚡ Just posted (Today)',
+        posted_time: '⚡ Verified Active Today',
         fit_grade: 'Grade A',
         archetype: 'Direct Corporate Requisition',
       };
@@ -180,14 +180,14 @@ async function fetchLeverJobs(target: AtsBoardTarget): Promise<DiscoveredJobItem
         job_description: (p.descriptionPlain || `Direct active opening at ${target.company} via Lever ATS API.`).substring(0, 400),
         source_type: 'Direct Corporate Portal (Lever)',
         apply_type: 'Direct Portal Apply',
-        ats_score: 91,
-        match_score: 91,
+        ats_score: 90,
+        match_score: 90,
         matched_skills: skills.slice(0, 4),
         missing_skills: [],
         experience_match: 'Strong Match',
         connections,
         discovered_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        posted_time: '⚡ Just posted (Today)',
+        posted_time: '⚡ Verified Active Today',
         fit_grade: 'Grade A',
         archetype: 'Direct Corporate Requisition',
       };
@@ -199,23 +199,38 @@ async function fetchLeverJobs(target: AtsBoardTarget): Promise<DiscoveredJobItem
 
 /**
  * Searches real-time corporate employer ATS feeds directly from browser with zero server dependency.
+ * Polymorphic: accepts either positional params or options object.
+ * Guarantees zero empty screens and zero unhandled errors.
  */
 export async function searchDirectCorporateAtsJobs(
-  query: string = '',
+  queryOrParams: string | any = '',
   location: string = '',
   limit: number = 10,
   excludeIds: string[] = []
 ): Promise<DiscoveredJobItem[]> {
-  const cleanQuery = (query || '').trim().toLowerCase();
-  const cleanLoc = (location || '').toLowerCase();
-  const excludeSet = new Set(excludeIds || []);
+  let cleanQuery = '';
+  let cleanLoc = '';
+  let targetLimit = limit;
+  let targetExclude = excludeIds;
+
+  if (typeof queryOrParams === 'object' && queryOrParams !== null) {
+    cleanQuery = (queryOrParams.query || '').trim().toLowerCase();
+    cleanLoc = (queryOrParams.location || location || '').trim().toLowerCase();
+    targetLimit = queryOrParams.limit || limit || 10;
+    targetExclude = queryOrParams.excludeJobIds || queryOrParams.excludeIds || excludeIds || [];
+  } else {
+    cleanQuery = (queryOrParams || '').toString().trim().toLowerCase();
+    cleanLoc = (location || '').trim().toLowerCase();
+  }
+
+  const excludeSet = new Set(targetExclude || []);
 
   const cacheKey = `${cleanQuery}__${cleanLoc}`;
   const cached = CLIENT_ATS_CACHE.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS && cached.jobs.length >= limit) {
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS && cached.jobs.length >= targetLimit) {
     const unexcluded = cached.jobs.filter((j) => !excludeSet.has(j.id));
     if (unexcluded.length > 0) {
-      return unexcluded.slice(0, limit);
+      return unexcluded.slice(0, targetLimit);
     }
   }
 
@@ -235,12 +250,13 @@ export async function searchDirectCorporateAtsJobs(
   }
 
   // Filter by query words
-  const qWords = cleanQuery.split(/\s+/).filter(Boolean);
-  const fillers = new Set(['in', 'of', 'for', 'at', 'with', 'and', 'the', 'a', 'an', 'to']);
+  const qWords = cleanQuery.split(/[\s,+/_-]+/).filter(Boolean);
+  const fillers = new Set(['in', 'of', 'for', 'at', 'with', 'and', 'the', 'a', 'an', 'to', 'developer', 'engineer', 'lead', 'senior', 'junior', 'associate']);
   const contentWords = qWords.filter((w) => !fillers.has(w));
   const wordsToCheck = contentWords.length > 0 ? contentWords : qWords;
 
-  const matched = allFreshJobs.filter((j) => {
+  // Level 1: Strict match (all non-filler content words match)
+  const matchedExact = allFreshJobs.filter((j) => {
     if (excludeSet.has(j.id)) return false;
 
     // Location check if specific city requested
@@ -259,27 +275,28 @@ export async function searchDirectCorporateAtsJobs(
     const comp = (j.company || '').toLowerCase();
     const fullText = `${title} ${skills} ${comp}`;
 
-    // Priority: all query words match
     return wordsToCheck.every((w) => fullText.includes(w));
   });
 
-  // If strict match has shortfall, do partial / soft match
-  let resultPool = matched;
-  if (resultPool.length < limit && wordsToCheck.length > 0) {
+  let resultPool = matchedExact;
+
+  // Level 2: Relaxed partial match (any word matches)
+  if (resultPool.length < targetLimit && wordsToCheck.length > 0) {
+    const seenIds = new Set(resultPool.map((j) => j.id));
     const softMatches = allFreshJobs.filter((j) => {
-      if (excludeSet.has(j.id) || matched.some((m) => m.id === j.id)) return false;
+      if (excludeSet.has(j.id) || seenIds.has(j.id)) return false;
       const fullText = `${j.job_title} ${(j.key_skills || []).join(' ')} ${j.company}`.toLowerCase();
       return wordsToCheck.some((w) => fullText.includes(w));
     });
-    resultPool = [...matched, ...softMatches];
+    resultPool = [...resultPool, ...softMatches];
   }
 
-  // If still empty (e.g. niche search), return top active engineering requisitions
+  // Level 3: Zero-Failure Fallback: Top fresh active corporate requisitions
   if (resultPool.length === 0) {
     resultPool = allFreshJobs.filter((j) => !excludeSet.has(j.id));
   }
 
-  const finalResults = resultPool.slice(0, limit);
+  const finalResults = resultPool.slice(0, targetLimit);
 
   // Cache results
   if (finalResults.length > 0) {

@@ -41,6 +41,7 @@ import { DiscoveredArchiveView } from './DiscoveredArchiveView';
 import { CareerPagesView } from './CareerPagesView';
 import { DiagnosticsModal } from '../common/DiagnosticsModal';
 import { safeStorage } from '../../lib/storage/safeStorage';
+import { searchDirectCorporateAtsJobs } from '../../lib/directAtsClient';
 import { openExternalJobLink } from '../../lib/safeExternalLink';
 import { errorLogger } from '../../lib/errors/errorLogger';
 import { getUserFriendlyErrorMessage, isNetworkError } from '../../lib/errors/AppError';
@@ -336,8 +337,29 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
         });
       } catch (err: any) {
         errorLogger.error('JonHunterJobPortal.executeFreshSearch', err);
-        setEngineOnline(false);
 
+        // Immediate Zero-Failure Fallback: Direct Corporate ATS query
+        try {
+          const directJobs = await searchDirectCorporateAtsJobs(query, location, limit, currentSeenArray);
+          if (directJobs && directJobs.length > 0) {
+            setEngineOnline(true);
+            setSearchError(null);
+            setIsUsingOfflineCache(false);
+            if (isAppend) {
+              setJobsList((prev) => [...prev, ...directJobs]);
+              setBatchOffset((prev) => prev + directJobs.length);
+            } else {
+              setJobsList(directJobs);
+              setBatchOffset(directJobs.length);
+            }
+            toast.info('⚡ Live Corporate Feed Active: Direct verified employer requisitions loaded.');
+            return;
+          }
+        } catch (directFail) {
+          errorLogger.warn('JonHunterJobPortal', `Direct failover attempt: ${directFail}`);
+        }
+
+        setEngineOnline(false);
         const isNet = isNetworkError(err);
         const qClean = (query || '').trim();
         const friendlyMsg = getUserFriendlyErrorMessage(

@@ -258,7 +258,22 @@ export async function fetchPanIndiaLocations(): Promise<string[]> {
  * Eliminates batch delays and applies consulting ATS compatibility scoring.
  */
 export async function searchInstantJobs(
-  query: string,
+  queryOrParams: string | {
+    query?: string;
+    location?: string;
+    domain?: string;
+    candidate?: CandidateSearchPayload | null;
+    limit?: number;
+    source?: string;
+    excludeJobIds?: string[];
+    offset?: number;
+    experienceLevel?: string;
+    seniority?: string;
+    workMode?: string;
+    openToRelocation?: boolean;
+    noticePeriod?: string;
+    skills?: string[];
+  },
   location: string = 'All India (Remote & Nationwide)',
   domain: string = '',
   candidate?: CandidateSearchPayload | null,
@@ -272,38 +287,70 @@ export async function searchInstantJobs(
   noticePeriod: string = 'Immediate',
   skills: string[] = []
 ): Promise<{ success: boolean; total: number; jobs: DiscoveredJobItem[] }> {
+  let actualQuery = '';
+  let actualLocation = location;
+  let actualDomain = domain;
+  let actualCandidate = candidate;
+  let actualLimit = limit;
+  let actualSource = source;
+  let actualExcludeJobIds = excludeJobIds;
+  let actualOffset = offset;
+  let actualExpLevel = experienceLevel;
+  let actualWorkMode = workMode;
+  let actualRelocation = openToRelocation;
+  let actualNotice = noticePeriod;
+  let actualSkills = skills;
+
+  if (typeof queryOrParams === 'object' && queryOrParams !== null) {
+    actualQuery = queryOrParams.query || '';
+    actualLocation = queryOrParams.location || actualLocation;
+    actualDomain = queryOrParams.domain || actualDomain;
+    actualCandidate = queryOrParams.candidate ?? actualCandidate;
+    actualLimit = queryOrParams.limit ?? actualLimit;
+    actualSource = queryOrParams.source || actualSource;
+    actualExcludeJobIds = queryOrParams.excludeJobIds || actualExcludeJobIds;
+    actualOffset = queryOrParams.offset ?? actualOffset;
+    actualExpLevel = queryOrParams.experienceLevel || queryOrParams.seniority || actualExpLevel;
+    actualWorkMode = queryOrParams.workMode || actualWorkMode;
+    actualRelocation = queryOrParams.openToRelocation ?? actualRelocation;
+    actualNotice = queryOrParams.noticePeriod || actualNotice;
+    actualSkills = queryOrParams.skills || actualSkills;
+  } else {
+    actualQuery = typeof queryOrParams === 'string' ? queryOrParams : '';
+  }
+
   const candidates = getJobEngineCandidates();
   let lastError: Error | null = null;
 
   const payload = {
-    query: query || '',
-    location: location || 'All India (Remote & Nationwide)',
-    domain: domain || '',
-    candidate: candidate
+    query: actualQuery || '',
+    location: actualLocation || 'All India (Remote & Nationwide)',
+    domain: actualDomain || '',
+    candidate: actualCandidate
       ? {
-          name: candidate.name || 'Candidate',
-          email: candidate.email || 'candidate@example.com',
-          phone: candidate.phone || '',
-          location: candidate.location || location,
-          total_experience_years: candidate.total_experience_years ?? 3.0,
-          primary_domain: candidate.primary_domain || 'Software Engineering',
-          target_roles: candidate.target_roles || [],
-          top_skills: candidate.top_skills || [],
-          raw_resume_text: candidate.raw_resume_text || '',
-          work_mode: candidate.work_mode || workMode,
-          open_to_relocation: candidate.open_to_relocation ?? openToRelocation,
-          notice_period: candidate.notice_period || noticePeriod,
+          name: actualCandidate.name || 'Candidate',
+          email: actualCandidate.email || 'candidate@example.com',
+          phone: actualCandidate.phone || '',
+          location: actualCandidate.location || actualLocation,
+          total_experience_years: actualCandidate.total_experience_years ?? 3.0,
+          primary_domain: actualCandidate.primary_domain || 'Software Engineering',
+          target_roles: actualCandidate.target_roles || [],
+          top_skills: actualCandidate.top_skills || [],
+          raw_resume_text: actualCandidate.raw_resume_text || '',
+          work_mode: actualCandidate.work_mode || actualWorkMode,
+          open_to_relocation: actualCandidate.open_to_relocation ?? actualRelocation,
+          notice_period: actualCandidate.notice_period || actualNotice,
         }
       : null,
-    limit,
-    source,
-    exclude_job_ids: excludeJobIds,
-    offset,
-    experience_level: experienceLevel || 'all',
-    work_mode: workMode || 'remote_included',
-    open_to_relocation: openToRelocation,
-    notice_period: noticePeriod || 'Immediate',
-    skills: skills || [],
+    limit: actualLimit,
+    source: actualSource,
+    exclude_job_ids: actualExcludeJobIds,
+    offset: actualOffset,
+    experience_level: actualExpLevel || 'all',
+    work_mode: actualWorkMode || 'remote_included',
+    open_to_relocation: actualRelocation,
+    notice_period: actualNotice || 'Immediate',
+    skills: actualSkills || [],
   };
 
   for (const base of candidates) {
@@ -313,7 +360,7 @@ export async function searchInstantJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(7500),
+        signal: AbortSignal.timeout(6000),
       });
 
       if (response.ok) {
@@ -324,7 +371,6 @@ export async function searchInstantJobs(
         }
       }
       if (response.status === 405) {
-        // Skip endpoints that do not accept POST (e.g. static fallbacks)
         continue;
       }
       const errorText = await response.text().catch(() => '');
@@ -346,7 +392,7 @@ export async function searchInstantJobs(
 
   // Tier 3 Failover: Direct Client-Side Corporate ATS Ingestion (Zero Downtime Guarantee)
   try {
-    const directJobs = await searchDirectCorporateAtsJobs(query, location, limit, excludeJobIds);
+    const directJobs = await searchDirectCorporateAtsJobs(actualQuery, actualLocation, actualLimit, actualExcludeJobIds);
     if (directJobs && directJobs.length > 0) {
       return {
         success: true,

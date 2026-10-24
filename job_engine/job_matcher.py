@@ -870,7 +870,7 @@ def _fetch_single_linkedin_query(
         "Accept-Language": "en-US,en;q=0.9",
     }
     try:
-        resp = _HTTP_SESSION.get(url, headers=headers, timeout=2.5)
+        resp = _HTTP_SESSION.get(url, headers=headers, timeout=1.8)
         if resp.status_code == 200 and resp.text:
             return CARD_PATTERN.findall(resp.text)
     except Exception:
@@ -1026,27 +1026,39 @@ def fetch_live_linkedin_jobs_for_role(
     
     primary_loc = primary_locations[0] if primary_locations else "India"
     
-    # 1. Primary Live Search Query (24h window)
-    matches_24h = _fetch_single_linkedin_query(role_keyword, primary_loc, "r86400", 0, False)
-    _process_matches(matches_24h, tier_24h_results, "⚡ Posted < 24h", "On-Site Apply")
-
-    # If skills are provided, query role + primary skill to fetch targeted postings
-    if skills and len(tier_24h_results) < limit:
-        primary_sk = skills[0].strip()
-        sk_query = f"{role_keyword} {primary_sk}"
-        matches_sk = _fetch_single_linkedin_query(sk_query, primary_loc, "r86400", 0, False)
-        _process_matches(matches_sk, tier_24h_results, "⚡ Posted < 24h", "On-Site Apply")
-    
-    # Early exit if we already have sufficient fresh postings
-    if len(tier_24h_results) < limit:
-        matches_7d = _fetch_single_linkedin_query(role_keyword, primary_loc, "r604800", 0, False)
-        _process_matches(matches_7d, tier_7d_results, "📅 Posted < 7d", "On-Site Apply")
-
-    total_live = len(tier_24h_results) + len(tier_48h_results) + len(tier_7d_results)
-    if total_live < limit and len(primary_locations) > 1:
+    search_tasks = [
+        ("24h", role_keyword, primary_loc, "r86400"),
+        ("7d", role_keyword, primary_loc, "r604800"),
+    ]
+    if skills and len(skills) > 0 and skills[0]:
+        sk_query = f"{role_keyword} {skills[0].strip()}"
+        search_tasks.append(("skill", sk_query, primary_loc, "r86400"))
+    if len(primary_locations) > 1:
         sec_loc = primary_locations[1]
-        matches_sec = _fetch_single_linkedin_query(role_keyword, sec_loc, "r604800", 0, False)
-        _process_matches(matches_sec, tier_48h_results, "🕒 Posted < 48h", "On-Site Apply")
+        search_tasks.append(("sec_loc", role_keyword, sec_loc, "r604800"))
+
+    # Execute all LinkedIn probes concurrently with strict 2.2s deadline
+    try:
+        with ThreadPoolExecutor(max_workers=min(len(search_tasks), 3)) as pool:
+            futures = {
+                pool.submit(_fetch_single_linkedin_query, task[1], task[2], task[3], 0, False): task
+                for task in search_tasks
+            }
+            for fut in as_completed(futures, timeout=2.2):
+                try:
+                    task = futures[fut]
+                    matches = fut.result()
+                    if matches:
+                        if task[0] in ("24h", "skill"):
+                            _process_matches(matches, tier_24h_results, "⚡ Posted < 24h", "On-Site Apply")
+                        elif task[0] == "sec_loc":
+                            _process_matches(matches, tier_48h_results, "🕒 Posted < 48h", "On-Site Apply")
+                        else:
+                            _process_matches(matches, tier_7d_results, "📅 Posted < 7d", "On-Site Apply")
+                except Exception:
+                    pass
+    except Exception:
+        pass
 
     # Instant Fallback: If live LinkedIn is rate-limiting or returning zero, pull verified LinkedIn jobs from DB
     total_found = len(tier_24h_results) + len(tier_48h_results) + len(tier_7d_results)
@@ -1235,8 +1247,10 @@ def find_matching_jobs(
                     continue
 
                 exact_jd = extra_jd_map.get(job_id, "").strip()
-                if not exact_jd or len(exact_jd) < 80:
-                    exact_jd = fetch_exact_linkedin_jd(job_id).strip()
+                if not exact_jd or len(exact_jd) < 50:
+                    cached_jd = db_get_cached_jd(job_id)
+                    if cached_jd and len(cached_jd) >= 40:
+                        exact_jd = cached_jd
                 if not exact_jd or len(exact_jd) < 50:
                     exact_jd = f"{clean_title}\nCompany: {clean_company}\nLocation: {clean_loc}\n\n[Full Job Description is live on LinkedIn: {apply_url}]"
 

@@ -979,7 +979,8 @@ def db_get_verified_linkedin_jobs(
                    experience_match, connections, batch_number, discovered_at
             FROM discovered_jobs
             WHERE application_url IS NOT NULL AND application_url != ''
-            ORDER BY batch_number DESC, id DESC
+              AND (discovered_at IS NOT NULL AND discovered_at >= datetime('now', '-7 days'))
+            ORDER BY discovered_at DESC, batch_number DESC, id DESC
         """)
         rows = cursor.fetchall()
         if not rows:

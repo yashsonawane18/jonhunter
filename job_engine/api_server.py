@@ -327,7 +327,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=5.5
+            timeout=4.0
         )
         task_linkedin = asyncio.wait_for(
             asyncio.to_thread(
@@ -343,7 +343,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=5.5
+            timeout=3.0
         )
 
         c_res, l_res = await asyncio.gather(task_career, task_linkedin, return_exceptions=True)
