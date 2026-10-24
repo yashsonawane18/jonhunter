@@ -317,8 +317,11 @@ export async function searchInstantJobs(
       });
 
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
       if (response.status === 405) {
         // Skip endpoints that do not accept POST (e.g. static fallbacks)
@@ -417,8 +420,11 @@ export async function findMatchingJobs(
       });
 
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
       if (response.status === 405) {
         continue;
@@ -478,8 +484,11 @@ export async function findTwoSourceJobs(
       });
 
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
       if (response.status === 405) {
         continue;
@@ -508,8 +517,11 @@ export async function getDiscoveredJobsHistory(candidateEmail: string): Promise<
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
     } catch (e: any) {
       lastError = e;
@@ -549,8 +561,11 @@ export async function updateJobStatus(
       });
 
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
     } catch (e: any) {
       lastError = e;
@@ -638,8 +653,11 @@ export async function searchCareerPages(params: {
       });
 
       if (response.ok) {
-        setCachedWorkingEngineUrl(base);
-        return await response.json();
+        const data = await response.json();
+        if (data && Array.isArray(data.jobs) && data.jobs.length > 0) {
+          setCachedWorkingEngineUrl(base);
+          return data;
+        }
       }
     } catch (e: any) {
       lastError = e;
