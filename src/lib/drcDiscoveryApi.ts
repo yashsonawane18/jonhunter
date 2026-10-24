@@ -1,3 +1,4 @@
+import { searchDirectCorporateAtsJobs } from './directAtsClient';
 import { safeStorage } from './storage/safeStorage';
 import { ApiError } from './errors/AppError';
 import { errorLogger } from './errors/errorLogger';
@@ -312,7 +313,7 @@ export async function searchInstantJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(7500),
       });
 
       if (response.ok) {
@@ -338,6 +339,20 @@ export async function searchInstantJobs(
         userMessage: 'Unable to contact live search server. Falling back to verified archive...',
       });
     }
+  }
+
+  // Tier 3 Failover: Direct Client-Side Corporate ATS Ingestion (Zero Downtime Guarantee)
+  try {
+    const directJobs = await searchDirectCorporateAtsJobs(query, location, limit, excludeJobIds);
+    if (directJobs && directJobs.length > 0) {
+      return {
+        success: true,
+        total: directJobs.length,
+        jobs: directJobs,
+      };
+    }
+  } catch (directErr) {
+    errorLogger.warn('drcDiscoveryApi', `Direct ATS failover notice: ${directErr}`);
   }
 
   throw lastError || new ApiError('Unable to reach Job Discovery Engine.', { category: 'NETWORK_OFFLINE' });
@@ -398,7 +413,7 @@ export async function findMatchingJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(7500),
       });
 
       if (response.ok) {
@@ -459,7 +474,7 @@ export async function findTwoSourceJobs(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(7500),
       });
 
       if (response.ok) {
@@ -619,7 +634,7 @@ export async function searchCareerPages(params: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(25000),
+        signal: AbortSignal.timeout(7500),
       });
 
       if (response.ok) {

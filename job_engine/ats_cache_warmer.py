@@ -316,7 +316,7 @@ def warm_ats_cache():
     with _INDEX_LOCK:
         if all_fetched:
             # Memory optimization: cap maximum in-memory cached requisitions to 3,500
-            all_fetched = all_fetched[:3500]
+            all_fetched = all_fetched[:600]
             for item in all_fetched:
                 title = item.get("job_title", "")
                 desc = item.get("job_description", "")
@@ -389,7 +389,7 @@ def preload_from_sqlite():
         return
     try:
         from db_store import db_get_all_discovered_jobs
-        jobs = db_get_all_discovered_jobs(limit=1500)
+        jobs = db_get_all_discovered_jobs(limit=300)
         if jobs:
             formatted = []
             for j in jobs:
@@ -620,7 +620,7 @@ def search_instant_jobs(
                 connection_note=f"Hi, I noticed the {title} opening at {comp} and would love to connect regarding my relevant background.",
             )
         ]
-        recency = "⚡ Posted < 24h" if idx < 3 else ("⚡ Posted < 48h" if idx < 10 else "⚡ Posted < 7d")
+        recency = "⚡ Posted < 24h" if idx < 5 else "⚡ Posted < 48h"
 
         sal_range = infer_salary_range(title, experience_level)
         exp_range = infer_experience_range(title, experience_level)

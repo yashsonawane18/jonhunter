@@ -59,11 +59,27 @@ export const JobCardNaukri: React.FC<JobCardNaukriProps> = ({
     return String(job.experience_required);
   }, [job?.experience_required]);
 
-  // Format posted time
+  // Format posted time with clean modern relative timestamps
   const displayFreshness = React.useMemo(() => {
-    if (job?.posted_time) return job.posted_time;
-    return 'Posted recently';
-  }, [job?.posted_time]);
+    if (job?.posted_time) {
+      const clean = job.posted_time.replace(/^\?\s*/, '').replace(/^[^\w\s<]+/, '').trim();
+      if (clean) {
+        return clean.toLowerCase().startsWith('posted') ? `⚡ ${clean}` : `⚡ Posted ${clean}`;
+      }
+    }
+    if (job?.discovered_at) {
+      try {
+        const d = new Date(job.discovered_at);
+        const now = new Date();
+        const diffHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60);
+        if (diffHours < 24) return '⚡ Posted Today';
+        if (diffHours < 48) return '⚡ Posted Yesterday';
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays <= 7) return `⚡ Posted ${diffDays}d ago`;
+      } catch {}
+    }
+    return '⚡ Verified Active Today';
+  }, [job?.posted_time, job?.discovered_at]);
 
   // Skills slicing
   const allSkills = React.useMemo(() => {

@@ -69,7 +69,7 @@ init_db()
 
 def _run_periodic_pruning():
     """Runs data retention pruning once at startup and every 24 hours thereafter."""
-    retention_days = int(os.getenv("DATA_RETENTION_DAYS", "15"))
+    retention_days = int(os.getenv("DATA_RETENTION_DAYS", "7"))
     while True:
         try:
             print(f"[Maintenance] Running automatic data retention prune ({retention_days} days)...")
@@ -327,7 +327,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=3.5
+            timeout=5.5
         )
         task_linkedin = asyncio.wait_for(
             asyncio.to_thread(
@@ -343,7 +343,7 @@ async def execute_fresh_batch_discovery(
                 open_to_relocation=open_to_relocation,
                 skills=merged_skills,
             ),
-            timeout=3.5
+            timeout=5.5
         )
 
         c_res, l_res = await asyncio.gather(task_career, task_linkedin, return_exceptions=True)
@@ -364,7 +364,28 @@ async def execute_fresh_batch_discovery(
 
         final_jobs = selected_career + selected_linkedin
 
-    # High-Reliability Fallback Guarantee: if final_jobs has shortfall, fill from SQLite verified pool
+    # High-Reliability Fallback Guarantee: if final_jobs has shortfall, fill from fresh live Career Page Jobs FIRST
+    if len(final_jobs) < target_count:
+        needed = target_count - len(final_jobs)
+        existing_ids = {j.id for j in final_jobs}
+        try:
+            live_career_extra = await asyncio.to_thread(
+                fetch_career_page_jobs,
+                query=query or domain or "Software Engineer",
+                location_preference=location,
+                max_jobs=needed + 3,
+                candidate=cand,
+            )
+            for j in live_career_extra:
+                if len(final_jobs) >= target_count:
+                    break
+                if j.id not in existing_ids and j.application_url not in {x.application_url for x in final_jobs}:
+                    final_jobs.append(j)
+                    existing_ids.add(j.id)
+        except Exception as live_err:
+            print(f"[api_server] Live career fallback notice: {live_err}")
+
+    # Fill remaining shortfall from SQLite verified pool
     if len(final_jobs) < target_count:
         needed = target_count - len(final_jobs)
         existing_ids = {j.id for j in final_jobs}

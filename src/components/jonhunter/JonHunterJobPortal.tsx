@@ -190,15 +190,41 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
     }
   }, []);
 
-  // Sync with Backend SQLite Discovered History on Mount (Loads all 1000+ jobs latest to oldest)
+  // Clean stale cache on boot & Sync with Backend SQLite Discovered History
   useEffect(() => {
+    // Purge any stale cache entries older than 7 days so user never sees obsolete jobs
+    try {
+      const stored = safeStorage.getItem<DiscoveredJobItem[]>('drc_discovered_all_jobs_v2', []);
+      if (Array.isArray(stored) && stored.length > 0) {
+        const now = Date.now();
+        const maxAgeMs = 7 * 24 * 60 * 60 * 1000;
+        const fresh = stored.filter((j) => {
+          if (!j || !j.discovered_at) return false;
+          const t = new Date(j.discovered_at).getTime();
+          return !isNaN(t) && (now - t) < maxAgeMs;
+        });
+        if (fresh.length !== stored.length) {
+          safeStorage.setItem('drc_discovered_all_jobs_v2', fresh);
+          setAllDiscoveredJobs(fresh);
+        }
+      }
+    } catch {}
+
     getDiscoveredJobsHistory('all')
       .then((res) => {
         if (res && res.all_jobs && res.all_jobs.length > 0) {
-          setAllDiscoveredJobs(res.all_jobs);
-          safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(res.all_jobs));
-          // Seed the initial feed with the top 20 latest verified jobs so user immediately sees opportunities
-          setJobsList((prev) => (prev.length === 0 ? res.all_jobs.slice(0, 20) : prev));
+          // Keep only jobs discovered within last 7 days
+          const now = Date.now();
+          const maxAgeMs = 7 * 24 * 60 * 60 * 1000;
+          const recentJobs = res.all_jobs.filter((j) => {
+            if (!j || !j.discovered_at) return true;
+            const t = new Date(j.discovered_at).getTime();
+            return isNaN(t) || (now - t) < maxAgeMs;
+          });
+          const poolToUse = recentJobs.length > 0 ? recentJobs : res.all_jobs;
+          setAllDiscoveredJobs(poolToUse);
+          safeStorage.setItem('drc_discovered_all_jobs_v2', sanitizeJobsForCache(poolToUse));
+          setJobsList((prev) => (prev.length === 0 ? poolToUse.slice(0, 20) : prev));
         }
       })
       .catch((err) => {
