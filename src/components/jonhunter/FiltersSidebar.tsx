@@ -396,13 +396,13 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
             <ShieldCheck className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white">JonHunter Direct Apply Concierge</h4>
-            <span className="text-[10px] text-[#00C896] font-medium">Executive Placement Guarantee</span>
+            <h4 className="text-xs font-bold text-white">JonHunter AI Copilot</h4>
+            <span className="text-[10px] text-[#00C896] font-medium">Smart Career Intelligence</span>
           </div>
         </div>
 
         <p className="text-[11px] text-zinc-300 leading-relaxed">
-          Tired of endless manual job applications? We customize your resume for ATS and apply directly to hiring decision-makers on your behalf.
+          Automate your job discovery. Match your tech stack against verified corporate career portals and tailor your resume for maximum interview callbacks.
         </p>
 
         <div className="space-y-1 pt-1 text-[10px] text-zinc-300 font-medium">

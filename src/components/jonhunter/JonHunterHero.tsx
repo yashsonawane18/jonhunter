@@ -99,21 +99,21 @@ export const JonHunterHero: React.FC<JonHunterHeroProps> = ({
         <div className="flex items-center justify-center mb-5">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
             <ShieldCheck className="w-4 h-4 text-[#00C896]" />
-            <span>Direct Corporate Applications &bull; 100% Verified Requisitions</span>
+            <span>AI Job Intelligence &bull; Direct Corporate ATS Portals</span>
           </div>
         </div>
 
         {/* Clean, Senior Typography */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
-            We Apply. You Interview.{' '}
+            Discover Direct Roles.{' '}
             <span className="block sm:inline bg-gradient-to-r from-emerald-400 via-[#00C896] to-teal-300 bg-clip-text text-transparent">
-              You Get Hired.
+              Get Hired Faster.
             </span>
           </h1>
 
           <p className="mt-3.5 text-sm sm:text-base text-zinc-300 max-w-2xl mx-auto leading-relaxed">
-            Real-time direct career portal feeds & verified engineering, architecture, and leadership openings across Greenhouse, Lever, Ashby & Workday. Exclusively for experienced candidates (2+ to 15+ years).
+            Real-time direct career portal feeds and verified engineering, architecture, and leadership requisitions. Instant ATS match scoring and intelligent career discovery for ambitious professionals.
           </p>
         </div>
 
