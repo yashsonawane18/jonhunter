@@ -64,7 +64,7 @@ export const DiagnosticsModal: React.FC<DiagnosticsModalProps> = ({ isOpen, onCl
               <Activity className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">DRC System & Error Diagnostics</h3>
+              <h3 className="text-sm font-bold text-white">JonHunter System & Diagnostics</h3>
               <p className="text-[11px] text-zinc-400">Telemetry and service connectivity inspection</p>
             </div>
           </div>

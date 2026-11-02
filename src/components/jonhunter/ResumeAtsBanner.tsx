@@ -82,7 +82,7 @@ export const ResumeAtsBanner: React.FC<ResumeAtsBannerProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-md border border-emerald-500/30">
-                DRC ATS Scoring Engine
+                JonHunter ATS Scoring Engine
               </span>
               <span className="text-xs text-zinc-400 font-mono">
                 Instant Profile Match

@@ -1,4 +1,4 @@
-# 🚀 AI Job Copilot — DRC
+# 🚀 AI Job Copilot — JonHunter
 
 > A premium React + TypeScript frontend for an AI-powered job search assistant that helps professionals land high-paying jobs with the help of a dedicated human specialist team.
 
@@ -23,7 +23,7 @@
 
 ## Overview
 
-**AI Job Copilot — DRC** is the frontend for a job search platform where users can:
+**AI Job Copilot — JonHunter** is the frontend for a job search platform where users can:
 
 - Have a **dedicated human specialist** apply to jobs on their behalf
 - **Track their applications** in a visual Kanban-style Job Tracker
@@ -33,7 +33,7 @@
 
 The platform primarily targets professionals looking for high-paying roles and those transitioning into tech (e.g., QA-to-BA, AI Engineering).
 
-**Figma Design Source:** [AI Job Copilot — DRC on Figma](https://www.figma.com/design/6YuPMYLb93dLwZxupU7Kkk/Ai-Job-Copilot---DRC)
+**Figma Design Source:** [AI Job Copilot — JonHunter on Figma](https://www.figma.com/design/6YuPMYLb93dLwZxupU7Kkk/Ai-Job-Copilot---DRC)
 
 ---
 
@@ -219,7 +219,7 @@ npm run dev
 
 The app will be available at **http://localhost:3000** and will automatically open in your browser.
 
-> **Note:** In dev mode, Vite proxies all `/api` and `/files` requests to the production backend (`https://dheerajrathodconsult.com`), so you don't need to run a local backend.
+> **Note:** In dev mode, Vite proxies all `/api` and `/files` requests to the production backend (`https://jonhunter-9pkh.onrender.com`), so you don't need to run a local backend.
 
 ### Build for Production
 
@@ -238,7 +238,7 @@ Create a `.env` file in the project root:
 ```env
 # Optional: override the API base URL for production builds
 # Leave empty to use same-origin URLs (recommended for production)
-VITE_API_BASE_URL=https://dheerajrathodconsult.com
+VITE_API_BASE_URL=https://jonhunter-9pkh.onrender.com
 ```
 
 | Variable | Default | Description |
@@ -419,8 +419,8 @@ const { user_id, isPremiumUser, isAuthenticated, isLoading, setUser, clearUser }
 
 The frontend is served from an **AWS EC2 (Ubuntu)** instance via **Nginx**. Two frontends are hosted:
 
-- **Main UI** → `/var/www/dheerajrathodconsult/`
-- **Admin UI** → `/var/www/dheerajrathodconsult/admin/`
+- **Main UI** → `/var/www/jonhunter/`
+- **Admin UI** → `/var/www/jonhunter/admin/`
 
 ### Prerequisites on EC2
 
@@ -449,7 +449,7 @@ npm install
 npm run build
 
 # 6. Copy build files to Nginx root
-sudo cp -r ~/app/frontend/build/* /var/www/dheerajrathodconsult/
+sudo cp -r ~/app/frontend/build/* /var/www/jonhunter/
 
 # 7. Restart Nginx
 sudo systemctl restart nginx
@@ -460,15 +460,15 @@ sudo systemctl restart nginx
 Same steps as above — only the copy destination changes:
 
 ```bash
-sudo cp -r ~/app/frontend/build/* /var/www/dheerajrathodconsult/admin/
+sudo cp -r ~/app/frontend/build/* /var/www/jonhunter/admin/
 ```
 
 ### Directory Structure on Server
 
 ```
 /home/ubuntu/app/frontend/          → React source code
-/var/www/dheerajrathodconsult/      → Main UI (Nginx root)
-/var/www/dheerajrathodconsult/admin → Admin UI (Nginx root)
+/var/www/jonhunter/      → Main UI (Nginx root)
+/var/www/jonhunter/admin → Admin UI (Nginx root)
 ```
 
 ---

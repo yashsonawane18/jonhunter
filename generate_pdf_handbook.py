@@ -530,7 +530,7 @@ public class JobDiscoveryService {
     print(f"Successfully generated PDF at: {output_path}")
 
 if __name__ == '__main__':
-    project_pdf = r"D:\Dheeraj Rathod consult\forntend\AiJobAssistantFrontEnd-dev\DRC_Job_Search_Engine_Technical_Handbook.pdf"
+    project_pdf = os.path.join(os.path.dirname(__file__), "DRC_Job_Search_Engine_Technical_Handbook.pdf")
     artifact_pdf = r"C:\Users\Dell\.gemini\antigravity\brain\84bace06-5358-4c85-b748-8db069ac3d85\DRC_Job_Search_Engine_Technical_Handbook.pdf"
 
     build_handbook_pdf(project_pdf)

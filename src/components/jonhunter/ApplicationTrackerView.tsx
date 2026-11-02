@@ -134,7 +134,7 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
           </div>
           <h3 className="text-lg font-bold text-white">No Applied Requisitions Tracked</h3>
           <p className="text-sm text-zinc-300 max-w-md mx-auto mt-1 mb-6 leading-relaxed">
-            When you apply to jobs via DRC or mark them as "Applied", they will appear here with real-time status and recruiter follow-ups.
+            When you apply to jobs via JonHunter or mark them as "Applied", they will appear here with real-time status and recruiter follow-ups.
           </p>
           <button
             type="button"

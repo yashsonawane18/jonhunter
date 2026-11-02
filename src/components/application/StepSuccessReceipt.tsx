@@ -82,7 +82,7 @@ export const StepSuccessReceipt: React.FC<StepSuccessReceiptProps> = ({
           </div>
 
           <p className="text-xs text-zinc-300 leading-relaxed">
-            Your application is recorded for DRC Consulting Review. You can now access the direct official requisition link:
+            Your application is recorded for JonHunter Review. You can now access the direct official requisition link:
           </p>
 
           <a

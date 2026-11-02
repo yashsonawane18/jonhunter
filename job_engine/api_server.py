@@ -53,7 +53,7 @@ from db_store import (
 )
 from ats_calculator import calculate_ats_score
 
-app = FastAPI(title="DRC Consulting Job Discovery & Matching Platform", version="2.0.0")
+app = FastAPI(title="JonHunter Job Discovery & Matching Platform", version="2.0.0")
 
 # Enable wide-open CORS so any frontend (localhost:5173, Vercel, etc.) can access it
 app.add_middleware(
@@ -93,7 +93,7 @@ async def startup_event():
 async def root_endpoint():
     return {
         "status": "ONLINE",
-        "service": "DRC Consulting Job Discovery & Matching Platform",
+        "service": "JonHunter Job Discovery & Matching Platform",
         "version": "2.0.0",
         "docs": "/docs",
         "health": "/api/health"
@@ -154,7 +154,7 @@ async def memory_stats_endpoint():
 
 @app.get("/api/health")
 async def health_endpoint():
-    return {"status": "ONLINE", "service": "DRC Job Intelligence Engine", "version": "2.0.0"}
+    return {"status": "ONLINE", "service": "JonHunter Job Intelligence Engine", "version": "2.0.0"}
 
 
 @app.get("/api/locations")
@@ -258,7 +258,7 @@ async def execute_fresh_batch_discovery(
     default_skills = merged_skills or infer_key_skills(target_domain, "")
     cand = candidate or CandidateProfile(
         name="Candidate",
-        email="candidate@drc.com",
+        email="candidate@jonhunter.com",
         primary_domain=target_domain,
         location=location or "All India (Remote & Nationwide)",
         target_roles=[query] if query else ["Software Engineer"],
@@ -732,7 +732,7 @@ async def submit_application_endpoint(application: CandidateApplication):
         return {
             "success": True,
             "application_id": app_id,
-            "message": "Application submitted successfully for DRC Consulting Review.",
+            "message": "Application submitted successfully for JonHunter Review.",
             "applied_at": app_dict.get("applied_at"),
         }
     except Exception as e:
@@ -792,7 +792,7 @@ async def get_discovered_jobs_endpoint(candidate_email: str = Query(...), limit:
     """
     all_jobs = []
     clean_email = (candidate_email or "").strip().lower()
-    if clean_email and clean_email not in ("all", "undefined", "null", "guest_consulting@drc.internal"):
+    if clean_email and clean_email not in ("all", "undefined", "null", "guest_consulting@jonhunter.internal"):
         all_jobs = db_get_candidate_discovered_jobs(clean_email)
 
     all_jobs = db_get_candidate_discovered_jobs(candidate_email)
@@ -1013,7 +1013,7 @@ def run():
     port = int(os.getenv("PORT", "5055"))
     host = os.getenv("HOST", "0.0.0.0")
     print("\n" + "=" * 70)
-    print(f"   DRC CONSULTING JOB INTELLIGENCE ENGINE RUNNING ON http://localhost:{port}")
+    print(f"   JONHUNTER JOB INTELLIGENCE ENGINE RUNNING ON http://localhost:{port}")
     print("=" * 70 + "\n")
     uvicorn.run(app, host=host, port=port, log_level="info")
 

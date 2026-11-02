@@ -47,6 +47,7 @@ import { errorLogger } from '../../lib/errors/errorLogger';
 import { getUserFriendlyErrorMessage, isNetworkError } from '../../lib/errors/AppError';
 import discoveryFiltersConfig from '../../config/discoveryFilters.json';
 import { getActiveTheme } from '../../config/themeConfig';
+import { JonHunterBrandLogo } from './JonHunterBrandLogo';
 
 export interface JonHunterJobPortalProps {
   onNavigateHome?: () => void;
@@ -167,7 +168,7 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
   const [selectedJobForApplication, setSelectedJobForApplication] = useState<DiscoveredJobItem | null>(null);
 
   // User candidate identity
-  const candidateEmail = user?.email || 'guest_consulting@drc.internal';
+  const candidateEmail = user?.email || 'guest_consulting@jonhunter.internal';
 
   // 1. Verify Engine Health & Fetch Locations
   const verifyEngine = useCallback(async () => {
@@ -1614,6 +1615,32 @@ export const JonHunterJobPortal: React.FC<JonHunterJobPortalProps> = ({
           />
         </main>
       )}
+
+      {/* JonHunter Executive Brand Footer */}
+      <footer className="mt-20 border-t border-[#182230] bg-[#070A0E] text-zinc-400 py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <JonHunterBrandLogo size="sm" />
+            <span className="hidden sm:inline text-zinc-600">|</span>
+            <p className="text-xs text-zinc-400 text-center sm:text-left">
+              Real-time Executive Job Discovery &bull; 100% Direct Corporate Portals &bull; AI Powered
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6 text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setIsDiagnosticsOpen(true)}
+              className="hover:text-emerald-400 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-400"
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <span>System Health</span>
+            </button>
+            <span className="text-zinc-600">&bull;</span>
+            <span className="text-zinc-500 font-mono text-[11px]">JonHunter v2.0 Production</span>
+          </div>
+        </div>
+      </footer>
 
       {/* Modals */}
       <ErrorBoundary fallbackTitle="Could not display job details">

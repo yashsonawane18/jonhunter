@@ -86,11 +86,6 @@ window.fetch = async function (...args) {
   }
 };
 
-if (window.location.hostname === "www.dheerajrathodconsult.com") {
-  window.location.replace(
-    `https://dheerajrathodconsult.com${window.location.pathname}${window.location.search}${window.location.hash}`
-  );
-}
 
 createRoot(document.getElementById("root")!).render(
   <UserProvider>

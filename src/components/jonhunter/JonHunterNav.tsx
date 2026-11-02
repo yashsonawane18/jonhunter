@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react';
 import { getActiveTheme } from '../../config/themeConfig';
+import { JonHunterBrandLogo } from './JonHunterBrandLogo';
 
 export type JonHunterNavTab = 'discover' | 'career_pages' | 'recommended' | 'archive' | 'saved' | 'tracker';
 
@@ -69,11 +70,7 @@ export const JonHunterNav: React.FC<JonHunterNavProps> = ({
               }}
               className="flex items-center group cursor-pointer focus:outline-none"
             >
-              <img
-                src="/drc-logo-white.png"
-                alt="Dheeraj Rathod Consult"
-                className="h-9 sm:h-10 w-auto object-contain transition-opacity duration-200 group-hover:opacity-90"
-              />
+              <JonHunterBrandLogo size="md" />
             </a>
           </div>
 

@@ -47,10 +47,10 @@ export const THEMES: Record<BackgroundThemeKey, ThemeDefinition> = {
     accentGlowSvg: true,
   },
 
-  // Option 2: Green Dark Combination from jonhunter.vercel.app (Dheeraj Rathod Consult signature aesthetic)
+  // Option 2: Green Dark Combination from jonhunter.vercel.app (JonHunter signature aesthetic)
   green: {
     key: 'green',
-    label: 'DRC Deep Emerald & Dark Green',
+    label: 'JonHunter Deep Emerald & Dark Green',
     wrapperClass: 'bg-[#03140E] text-white relative',
     wrapperStyle: {
       backgroundColor: '#03140E',

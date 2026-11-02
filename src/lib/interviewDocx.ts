@@ -236,8 +236,8 @@ function cover(kit: InterviewKit): (Paragraph | Table)[] {
     margins: { top: 340, bottom: 340, left: 300, right: 300 },
     borders: { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER },
     children: [
-      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'DRC', bold: true, size: 44, color: WHITE })] }),
-      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60 }, children: [new TextRun({ text: 'DHEERAJ RATHOD CONSULT', bold: true, size: 22, color: WHITE })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'JONHUNTER', bold: true, size: 44, color: WHITE })] }),
+      new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60 }, children: [new TextRun({ text: 'JONHUNTER CAREER COPILOT', bold: true, size: 22, color: WHITE })] }),
       new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 40 }, children: [new TextRun({ text: 'Career Strategy & Placement Consultancy', size: 18, color: 'CBD5E1' })] }),
     ],
   });
@@ -377,7 +377,7 @@ export async function buildInterviewKitDocxBlob(
                 border: { bottom: { color: BOXLINE, size: 4, style: BorderStyle.SINGLE, space: 2 } },
                 tabStops: [{ type: TabStopType.RIGHT, position: 9746 }],
                 children: [
-                  new TextRun({ text: 'DRC | Dheeraj Rathod Consult', bold: true, size: 16, color: NAVY }),
+                  new TextRun({ text: 'JonHunter | AI Career Engine', bold: true, size: 16, color: NAVY }),
                   new TextRun({ text: '\tInterview Preparation Kit', size: 16, color: '888888' }),
                 ],
               }),
@@ -390,7 +390,7 @@ export async function buildInterviewKitDocxBlob(
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun({ text: 'Dheeraj Rathod Consult  •  Career Strategy & Placement Consultancy  •  Confidential     |     Page ', size: 14, color: '888888' }),
+                  new TextRun({ text: 'JonHunter  •  Executive Career Intelligence  •  Confidential     |     Page ', size: 14, color: '888888' }),
                   new TextRun({ children: [PageNumber.CURRENT], size: 14, color: '888888' }),
                   new TextRun({ text: ' of ', size: 14, color: '888888' }),
                   new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 14, color: '888888' }),

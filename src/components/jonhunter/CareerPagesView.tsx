@@ -155,7 +155,7 @@ export const CareerPagesView: React.FC<CareerPagesViewProps> = ({
         limit: 25,
         candidate: candidateProfile ? {
           name: candidateProfile.name || 'Candidate',
-          email: candidateProfile.email || 'candidate@drc.com',
+          email: candidateProfile.email || 'candidate@jonhunter.com',
           phone: candidateProfile.phone || '',
           location: candidateProfile.location || selectedLocation,
           total_experience_years: candidateProfile.total_experience_years || (candidateProfile as any).experience_years || 3,

@@ -1,9 +1,9 @@
 @echo off
-title Dheeraj Rathod Consult (DRC)
+title JonHunter AI Executive Platform
 cd /d "%~dp0"
 
 echo ==========================================================
-echo    Starting Dheeraj Rathod Consult System
+echo    Starting JonHunter AI Job Platform
 echo ==========================================================
 
 echo [1/2] Starting DRC Job Engine & Excel Service (Port 5055)...
